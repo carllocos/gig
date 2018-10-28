@@ -1,0 +1,18 @@
+{% extends "gig/base.html" %}
+
+
+{% block body %}
+
+{% if user.is_authenticate %}
+
+<p>Hi {{user.first_name}},
+<a href="{% url 'users:logout-confirm' %}"> click here </a>
+to logout
+</p>
+
+{% else %}
+<p> You are already logged out </p>
+
+{% endif %}
+
+ {% endblock %}

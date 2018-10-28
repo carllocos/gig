@@ -1,0 +1,12 @@
+{% extends "gig/base.html" %}
+
+{% block title %} Confirm credetials {% endblock %}
+
+{% block body %}
+<form class="form-registration" action="" method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit"> Confirm </button>
+</form>
+
+{% endblock %}

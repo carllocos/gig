@@ -1,0 +1,9 @@
+.message-container {
+  margin-top: 5%;
+  width: 100%
+}
+@media (min-width: 300px) {
+  .message-container{
+    width: 60%;
+  }
+}

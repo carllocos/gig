@@ -1,0 +1,77 @@
+.div-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 5%;
+  width: 100%;
+}
+
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+   align-items: center;
+  justify-content: center;
+}
+
+
+.form-i{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.form-group {
+
+  display: flex;
+  flex-direction: column;
+}
+
+.social-container{
+
+  display: flex;
+  flex-direction: column;
+}
+
+.social-container .fb{
+  padding-right: 20px;
+}
+
+
+.fa-google-plus-square{
+  color: red;
+}
+
+
+#id_emailHelper{
+  visibility: hidden;
+}
+
+@media (min-width: 151px) {
+  .social-container{
+    flex-direction: row;
+  }
+
+}
+
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) {
+
+  .form-container {
+    width:100%;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+}
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+}

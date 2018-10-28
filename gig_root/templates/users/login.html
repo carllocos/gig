@@ -1,0 +1,79 @@
+{% extends 'gig/base.html' %}
+
+{% block title %}
+Log in
+{% endblock %}
+
+{% load static %}
+
+
+{% block link %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="{% static 'users/login.css' %}">
+{% endblock %}
+
+
+{% block body %}
+
+
+{% load user_tags %}
+
+<div class="container" id="form-container">
+  <h2 class="text-muted text-left">Login</h2>
+  <form class="form-horizontal" action=" {% url 'users:login' %}" method="post">
+
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label for="id_username">Email address</label>
+      <input  type="email" name="username" autofocus required id="id_username" class="form-control" aria-describedby="emailHelpBlock" placeholder="Enter email">
+      {% if form.errors %}
+      <small  class="form-text text-danger" id="emailHelpBlock">
+        {{ form.errors | striptags |remove_meta }}
+      </small>
+
+      {% else %}
+      <small  class="form-text text-muted" id="emailHelpBlock">
+        The email used during registration into GigForMusicians.
+      </small>
+
+      {% endif %}
+    </div>
+    <div class="form-group">
+      <label for="id_password">Password</label>
+      <input name="password" type="password" required class="form-control" id="id_password" aria-describedby="passwordHelpBlock" placeholder="Password">
+    </div>
+
+    <button type="submit" class="btn btn-warning">
+      Login
+    </button>
+  </form>
+
+  <div class="row">
+    <div class="col-12 text-left small">
+      <a href="{% url 'users:password-reset' %}">Forgot Your password?</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 text-left small">
+      <hr class="style1 text-muted">
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 text-left">
+      <h6 class = "form-text text-muted">Login with social media</h6>
+    </div>
+  </div>
+
+  <div class="row social-btn text-left">
+    <div class="col-12 col-sm-2 col-md-1 ml-0 container-btn-fb">
+      <a href="{% url 'social:begin' 'facebook'%}" class="btn btn-primary btn-lg" title="Facebook"><i class="fa fa-facebook"></i></a>
+    </div>
+    <div class="col-12 col-sm-2 col-md-1 mt-1 mt-sm-0 ml-0 ml-sm-1 contaier-btn-google">
+      <a href="{% url 'social:begin' 'google-oauth2'%}" class="btn btn-danger btn-lg" title="Google"><i class="fa fa-google"></i></a>
+    </div>
+  </div>
+</div>
+{% endblock %}

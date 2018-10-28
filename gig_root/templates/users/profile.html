@@ -1,0 +1,185 @@
+{% extends 'gig/base.html' %}
+{% load static %}
+
+.{% block title %}
+{{form.last_name.value}} {{form.first_name.value}}
+{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="{% static 'users/profile.css' %}">
+<script type="text/javascript" src="{% static 'util/utils.js' %}"> </script>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="settings-container mx-auto">
+
+
+  <div class="row">
+    <div class="col-12">
+      <h2 class="text-left text-sm-center">Manage your Profiles</h2>
+    </div>
+  </div>
+
+  <div class="gig-container">
+    <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseGig" aria-expanded="false" aria-controls="collapseGig">
+      <i class="fas fa-caret-down"></i>
+      Gig Profile
+    </button>
+
+    <div class="collapse collapse-container show mx-auto" id="collapseGig">
+      <form class="gig-form" action="" method="post">
+        {% csrf_token %}
+
+        <div class="row form-group first-name">
+          <div class="col-12 col-sm-3">
+            <label for="id_first_name">First name:</label>
+          </div>
+          <div class="col-12 col-sm-6">
+            <input class="" type="text" name="first_name" value="{{form.first_name.value}}" maxlength="30" required="" id="id_first_name">
+          </div>
+
+          <div class="col-12 col-sm-3">
+            <small id="id_first_nameHelper" class="save-helper-text text-center text-left-sm">
+              Changes Saved
+            </small>
+          </div>
+        </div>
+
+        <div class="row form-group">
+          <div class="col-12 col-sm-3">
+            <label for="id_last_name">Last name:</label>
+          </div>
+          <div class="col-12 col-sm-6">
+            <input class="" type="text" name="last_name" value="{{form.last_name.value}}" maxlength="30" required="" id="id_last_name">
+          </div>
+
+          <div class="col-12 col-sm-3">
+            <small id="id_last_nameHelper" class="save-helper-text text-center text-left-sm">
+              Changes Saved
+            </small>
+          </div>
+        </div>
+
+
+        <div class="row form-group">
+          <div class="col-12 col-sm-3">
+            <label for="id_email">Email:</label>
+          </div>
+          <div class="col-12 col-sm-6">
+            <input class="border-0" type="email" name="email" value="{{form.email.value}}" maxlength="254" required="" id="id_email" readonly>
+          </div>
+          <div class="col-12 col-sm-3">
+            <small id="id_emailHelper" class="save-helper-text text-center text-left-sm">
+              Changes Saved
+            </small>
+          </div>
+        </div>
+
+        <div class="save-btn-container">
+          <button id="save-gig-btn" type="submit" class="btn save-gig btn-warning mx-auto">
+            Save
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <div class="artist-container">
+    <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseArtist" aria-expanded="false" aria-controls="collapseArtist">
+      <i class="fas fa-caret-down"></i>
+      Artist Profile
+    </button>
+
+    <div class="collapse" id="collapseArtist">
+      {% if has_artistProfile %}
+      <p class="text-center">Here comes your artistprofile</p>
+      {% else %}
+      <p class="text-center">You don't have currently a registered artist profile.
+        <a href="{% url 'artists:register' %}">
+          Register
+        </a>
+        your profile?
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="bands-container">
+    <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseBands" aria-expanded="false" aria-controls="collapseBands">
+      <i class="fas fa-caret-down"></i>
+      Band Profiles
+    </button>
+    <div class="collapse" id="collapseBands">
+      {% if has_bands %}
+      <p class="text-center">Here comes your bands</p>
+      {% else %}
+      {% if  has_artistProfile %}
+      <p class="text-center">You currently not involved into any band</p>
+      {% else %}
+      <p class="text-center">You currently not involved into any band. You first need an artistprofile
+        <a href="{% url 'artists:register' %}">
+          register
+        </a> now.
+      </p>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="venu-container">
+    <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseVenu" aria-expanded="false" aria-controls="collapseVenu">
+      <i class="fas fa-caret-down"></i>
+      Venu Profiles
+    </button>
+    <div class="collapse" id="collapseVenu">
+      {% if has_ven %}
+      <p class="text-center">Here comes you artistprofile</p>
+      {% else %}
+      <p class="text-center">You currently not involved into any band</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+$(document).ready(function(){
+
+  $(".gig-form").submit(function(event){
+
+
+    event.preventDefault();
+    var first_name = $("#id_first_name").val();
+    var last_name = $("#id_last_name").val();
+    var email = $("#id_email").val();
+
+    $.ajax({
+      type: "POST",
+      url: window.location.pathname,
+      data: { 'first_name': first_name, 'last_name': last_name, 'email': email, csrfmiddlewaretoken: '{{ csrf_token }}'},
+      dataType: 'json',
+      success: function(data){
+
+        selectors=["#id_first_nameHelper", "#id_last_nameHelper", "#id_emailHelper"];
+        if(data.is_valid){
+          msgs=[data.success_msgs.first_name, data.success_msgs.last_name, data.success_msgs.email];
+          updateHelpMessage(selectors, "text-danger", "text-success", msgs);
+          new_name=$("#id_first_name:first").val();
+          updateNameNavBar(new_name);
+        }
+        else{
+          msgs=[data.error_msgs.first_name, data.error_msgs.last_name, data.error_msgs.email];
+          updateHelpMessage(selectors, "text-success", "text-danger", msgs);
+        }}});
+      });
+
+    });
+
+  </script>
+
+  {% endblock %}

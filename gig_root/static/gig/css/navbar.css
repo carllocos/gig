@@ -1,0 +1,18 @@
+
+.form-navbar{
+   max-width: 100%;
+   flex-grow: 2;
+ }
+
+ .form-navbar-input{
+   flex-grow: 2;
+ }
+
+
+ @media (min-width: 768px) {
+
+  .form-navbar{
+    max-width: 60%;
+   }
+
+ }

@@ -1,0 +1,142 @@
+{% extends "gig/base.html" %}
+{% load static %}
+
+{% block title %}
+Signup
+{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="{% static 'users/signup.css' %}">
+<script type="text/javascript" src="{% static 'util/utils.js' %}"> </script>
+{% endblock %}
+
+{% block body %}
+
+<div class="div-container">
+
+  <div class="form-container">
+
+    <div class="title">
+      <h2>Register</h2>
+    </div>
+
+    <form class="form-i" action="{% url 'users:signup' %}" method="post">
+      {% csrf_token %}
+
+      <div class="row form-group">
+        <div class="col-12">
+          <label for="id_first_name">First name:</label>
+        </div>
+        <div class="col-12">
+          <input type="text" name="first_name" maxlength="30" required="" id="id_first_name">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="id_last_name">Last name:</label>
+        <input type="text" name="last_name" maxlength="30" required="" id="id_last_name">
+      </div>
+
+      <div class="form-group">
+        <label for="id_email">Email:</label>
+        <input type="email" name="email" maxlength="254" required="" id="id_email">
+        <small id="id_emailHelper" class="helper-text text-center text-left-sm">
+          Changes Saved
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label for="id_password">Password:</label>
+        <input type="password" name="password" required="" id="id_password">
+      </div>
+
+      <div class="form-group">
+        <label for="id_confirm_password">Confirm password:</label>
+        <input type="password" name="confirm_password" required="" id="id_confirm_password">
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn btn-warning">
+          Register
+        </button>
+      </div>
+
+    </form>
+
+    <div class="row" >
+      <div class="col-12" id="signup_text">
+        <h6 class = "form-text text-center text-muted">Signup with social media</h6>
+      </div>
+    </div>
+
+
+    <div class="social-container">
+      <a href="{% url 'social:begin' 'facebook'%}" class="fb" title="Facebook"><i class="social-img fab fa-facebook-square fa-2x"></i></a>
+      <a href="{% url 'social:begin' 'google-oauth2'%}" class="google" title="Google"><i class="social-img fab fa-google-plus-square fa-2x"></i></a>
+    </div>
+
+  </div>
+
+
+</div>
+
+
+<script>
+
+//setup before functions
+var typingTimer;                //timer identifier
+var doneTypingInterval = 1000;  //time in ms, 5 second for example
+var $input =$("#id_email");
+
+//on keyup, start the countdown
+$input.on('keyup', function () {
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(doneTyping, doneTypingInterval);
+});
+
+//on keydown, clear the countdown
+$input.on('keydown', function () {
+  clearTimeout(typingTimer);
+});
+
+//user is "finished typing," do something
+function doneTyping () {
+  email = $input.val();
+  if(!(email.includes('@') && email.includes('.')))
+  {
+    return;
+  }
+  else{
+
+    $.ajax({
+      type: "POST",
+      url: "{% url 'users:signup-ajax' %}",
+      data: { 'email': email,
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+      dataType: 'json',
+      success: function(data){
+
+        if(data.is_taken){
+          new_cls="text-danger";
+          rem_cls="text-success"
+          msg="email is already registered";
+        }
+        else{
+          rem_cls="text-danger";
+          new_cls="text-success"
+          msg="email is available";
+        }
+
+        updateHelpMessage(["#id_emailHelper"], rem_cls, new_cls, [msg]);
+      }});
+  }
+}
+
+
+</script>
+
+
+
+{% endblock %}

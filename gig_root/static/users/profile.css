@@ -1,0 +1,96 @@
+
+.btn-container{
+  background-color: transparent;
+}
+
+.settings-container {
+  width: 100%;
+}
+
+.collapse-container{
+
+  width: 90%;
+}
+
+.save-gig{
+  width: 100%;
+}
+
+.btn-container{
+  background-color: transparent;
+  border-style: none;
+  width: 100%;
+
+}
+
+#collapseGig .first-name{
+  margin-top: 10px;
+}
+
+.gig-form input{
+  width: 80%;
+
+}
+
+
+.save-helper-text {
+
+  width: 100%;
+  visibility: hidden;
+}
+
+
+.save-btn-container{
+  display: flex;
+  justify-content: center;
+}
+
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width: 576px) {
+
+  .gig-container{
+    font-size: 2vw;
+  }
+
+  .settings-container {
+    margin-top: 3%;
+    /* background-color: blue; */
+    width: 90vw;
+  }
+
+  .save-gig{
+    width: 80%;
+  }
+
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .settings-container{
+    /* background-color: red; */
+    width: 70vw;
+  }
+
+  .gig-form input{
+    width: 100%;
+  }
+
+
+  .save-gig{
+    width: 60%;
+  }
+
+}
+
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) {
+
+  .settings-container{
+    /* background-color: blue; */
+  }
+
+  .save-gig{
+    width: 50%;
+  }
+
+}

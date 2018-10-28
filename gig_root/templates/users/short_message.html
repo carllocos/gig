@@ -1,0 +1,31 @@
+{% extends "gig/base.html" %}
+
+{% load static %}
+
+{% block title %}
+{{title_page}}
+{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" type="text/css" href="{% static 'users/message.css' %}">
+{% endblock %}
+
+ {% block body %}
+
+
+ <div class="message-container mx-auto">
+   <div class="row">
+     <div class="column-12">
+       <h2 class="{{ classes }}"> {{title_msg}} </h2>
+     </div>
+   </div>
+
+   <div class="row">
+     <div class="column-12">
+       <p> {{short_message}} </p>
+     </div>
+   </div>
+ </div>
+
+
+ {% endblock %}

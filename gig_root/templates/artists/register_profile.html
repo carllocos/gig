@@ -1,0 +1,174 @@
+{% extends "gig/base.html" %}
+{% load static  %}
+
+{% block title %}
+Register Artist Profile
+{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" href="{% static 'artists/register_profile.css' %}">
+<script type="text/javascript" src="{% static 'util/utils.js' %}"> </script>
+{% endblock %}
+
+{% block body %}
+
+<div id="id_artists-container" class="artists-container d-flex justify-content-center">
+  <div class="" id= "container-artist-form">
+    <form id="artist_form" class="rx-auto" action="{% url 'artists:register' %}" method="post">
+      {% csrf_token %}
+
+      <div class="">
+        <label for="id_first_name">First name:</label>
+        <input type="text" name="first_name" value="{{user.first_name}}" maxlength="30" required="" id="id_first_name">
+      </div>
+
+
+      <div class="">
+        <label for="id_last_name">Last name:</label>
+        <input type="text" name="last_name" value="{{user.last_name}}" maxlength="30" required="" id="id_last_name">
+      </div>
+
+      <div class="">
+        <label for="id_stage_name">Stage name:</label>
+        <input type="text" name="stage_name" id="id_stage_name">
+      </div>
+
+
+      <div class="">
+        <label for="id_biography">Biography:</label>
+        <textarea name="biography" cols="40" rows="10" id="id_biography"></textarea>
+      </div>
+
+      <div class="">
+
+        <label for="id_profile_pic">Profile pic:</label>
+        <input type="file" name="profile_pic" accept="image/*" id="id_profile_pic">
+      </div>
+
+      <div class="">
+        <label for="id_background_pic">Background pic:</label>
+        <input type="file" name="background_pic" accept="image/*" id="id_background_pic">
+      </div>
+
+      <div class="instruments-container">
+        <label for="id_instrument0">Instruments:</label>
+        <div id="id_instruments-input-container" class="instruments-input-container">
+          <input type="text" name="instrument0" id="id_instrument0" class="instrument">
+        </div>
+      </div>
+
+      <div class="genres-container">
+        <label for="id_genre0">Genres:</label>
+        <div id="id_genres-input-container" class="genres-input-container">
+          <input type="text" name="genre0" id="id_genre0" class="genre">
+        </div>
+      </div>
+
+      <div class="idols-container">
+        <label for="id_idol0">Idols:</label>
+        <div id="id_idols-input-container" class="idols-input-container">
+          <input type="text" name="idol0" id="id_idol0" class="idol">
+        </div>
+      </div>
+
+      <div class="">
+        <button type="submit" name="button"> Save profile</button>
+      </div>
+    </form>
+
+    <div class="justify-content-center">
+      <label for="id_suggestions">Results of Ajax:</label>
+      <textarea name="ajax-area" cols="40" rows="10" id="id_ajax"></textarea>
+    </div>
+  </div>
+</div>
+
+<script>
+
+//Function meant to add an input field as soos as the user types somenthing on the inputfield with selector inp_select
+function addInputField(inp_select, parent_select, name, id_prefix, class_name){
+
+  $(inp_select).on('keyup', function(){
+
+    if(!($(inp_select).next().is('input'))){
+      number= $(parent_select).children().length;
+      new_id=`${id_prefix}${number}`;
+      tag=`<input type="text" name="${name}${number}" id="${new_id}" class="${class_name}">`;
+      $(parent_select).append(tag);
+    }
+    else{
+      console.log("Has already siblings nothing needs to happen");
+    }
+  });
+}
+
+
+/**
+ajax to get suggestions for genres or instruments.
+-Key is either 'genre' or 'instrument'. Otherwise the backend will not be able to provide suggestions!!!
+-selector is the selector for the inputfield that needs suggestions
+**/
+function activeSuggestions(selector, delay_time, key){
+
+  //delay is an importend function.Takes two argument: callback and time to wait before calling the callback event 'keyup' takes place. x Time is waited before the callback is called.
+  //// TODO: maybe on key up whitout delay??
+  $(selector).keyup(function(){
+    delay(function(){
+      var val = $(selector).val();
+      if( val === ''){
+        console.log("empty not send to backend");
+        return;
+      }
+
+      $.ajax({type: "GET",
+      url: "{% url 'artists:suggest-ajax' %}",
+      data: { kind : key, value: val , csrfmiddlewaretoken: '{{csrf_token}}' },
+      dataType: 'json',
+      success: function(response){
+        if(response.suggestions){
+          //Next lines are temporary to test the suggestions results
+          console.log(`suggestions : ${response.suggestions}`);
+          $("#id_ajax").val(response.suggestions);
+        }}});
+      },//end of first argument
+      250);//the second argument for delay
+    });
+  }
+
+  //A parent element that applies 'addInputField' and 'activeSuggestions' to th newly added inputfield
+  function addListenerParent(parent_selector, first_child_selector, name, id_prefix, class_name){
+
+    $(parent_selector).bind("DOMNodeInserted",function(){
+      number= $(parent_selector).children().length - 1;
+      id_input=`#${id_prefix}${number}`;
+      addInputField(id_input, parent_selector, name, id_prefix, class_name);
+      activeSuggestions(id_input, 1000, class_name);
+    });
+
+    console.log(`class_name ${class_name}`);
+    addInputField(first_child_selector, parent_selector, name, id_prefix, class_name);
+    activeSuggestions(first_child_selector, 1000, class_name);
+
+  }
+
+  addListenerParent("#id_instruments-input-container", "#id_instrument0", "instrument", "id_instrument", "instrument");
+  addListenerParent("#id_genres-input-container", "#id_genre0", "genre", "id_genre", "genre");
+  addListenerParent("#id_idols-input-container", "#id_idol0", "idol", "id_idol", "idol");
+
+
+  //Counts the amount of genre-, idol- and instrument inputfields added dynamically
+  $("#artist_form").submit(function(event){
+    var amount_instruments= $("#id_instruments-input-container").children().length;
+    var amount_genres=$("#id_genres-input-container").children().length;
+    var amount_idols=$("#id_idols-input-container").children().length;
+    $("#artist_form").append(`<input type="hidden" name="amount_instruments" value="${amount_instruments}"/>`);
+    $("#artist_form").append(`<input type="hidden" name="amount_genres" value="${amount_genres}"/>`);
+    $("#artist_form").append(`<input type="hidden" name="amount_idols" value="${amount_idols}"/>`);
+  });
+
+
+
+</script>
+
+
+{% endblock %}
