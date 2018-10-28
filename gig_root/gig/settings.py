@@ -101,6 +101,14 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
+
+# Force https redirect
+SECURE_SSL_REDIRECT = True
+# Honor the 'X-Forwarded-Proto' header for request.is_secure()
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 #Facebook settings
 SOCIAL_AUTH_FACEBOOK_API_VERSION = '2.10'
 SOCIAL_AUTH_FACEBOOK_KEY = config('SOCIAL_AUTH_FACEBOOK_KEY')
@@ -167,8 +175,11 @@ WSGI_APPLICATION = 'gig.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': config('MY_DATABASE_ENGINE'),
+        'NAME': config('MY_DATABASE_NAME'),
+        'USER':config('MY_DATABASE_USER'),
+        'PASSWORD': config('MY_DATABASE_PASSWORD'),
+        'HOST': config('MY_DATABASE_HOST'),
     }
 }
 
