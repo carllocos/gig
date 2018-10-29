@@ -9,10 +9,10 @@ SECURE_SSL_REDIRECT = False
 ALLOWED_HOSTS += ['localhost']
 DATABASES = {
     'default': {
-        'ENGINE': config('DEV_DATABASE_ENGINE', ''),
-        'NAME': config('DEV_DATABASE_NAME', ''),
-        'USER':config('DEV_DATABASE_USER', ''),
-        'PASSWORD': config('DEV_DATABASE_PASSWORD', ''),
-        'HOST': config('DEV_DATABASE_HOST', ''),
+        'ENGINE': env_config.get('DEV_DATABASE_ENGINE', ''),
+        'NAME': env_config.get('DEV_DATABASE_NAME', ''),
+        'USER':env_config.get('DEV_DATABASE_USER', ''),
+        'PASSWORD': env_config.get('DEV_DATABASE_PASSWORD', ''),
+        'HOST': env_config.get('DEV_DATABASE_HOST', ''),
     }
 }
