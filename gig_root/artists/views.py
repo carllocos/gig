@@ -14,11 +14,7 @@ def home(request):
 @login_required #find out how to come back here after login
 def register_artist_view(request):
     if request.method =="GET":
-        user= request.user
-        initial_data= {
-            'first_name': user.first_name, 'last_name': user.last_name
-        }
-        form = CreateArtistForm(initial=initial_data)
+        form = CreateArtistForm()
 
         return render(request, "artists/register_profile.html", {'form': form, 'user': request.user})
 

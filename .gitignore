@@ -7,3 +7,4 @@ db.sqlite3
 .DS_Store
 .env
 gig_root/staticfiles/
+migrations/

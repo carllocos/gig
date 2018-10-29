@@ -10,10 +10,7 @@ class BandModel(models.Model):
 #The ArtistProfile is equivalen to a peron's C.V.
 #The artist can afterwards be involved in multiple bands and solobands
 
-#TODO first_name and last_name is redundant!!!
 class ArtistModel(models.Model):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
     stage_name = models.CharField(max_length=30, null=True) # can be null
 
     #each gig user can have at most one artistprofile
