@@ -17,7 +17,7 @@ class CreateArtistForm(forms.ModelForm):
 
     class Meta:
         model = ArtistModel
-        fields = ['first_name', 'last_name', 'stage_name', 'biography']
+        fields = ['stage_name', 'biography']
 
 
     def __init__(self, *args, **kwargs):
@@ -55,10 +55,8 @@ class CreateArtistForm(forms.ModelForm):
 
     def save(self, user):
 
-        art = ArtistModel(first_name=self.cleaned_data['first_name'],
-                          last_name=self.cleaned_data['last_name'],
-                          stage_name = self.cleaned_data['stage_name'],
-                          profile_pic = 'profile_pic', 
+        art = ArtistModel(stage_name = self.cleaned_data['stage_name'],
+                          profile_pic = 'profile_pic',
                           background_pic = 'background_pic',
                           instruments = self.cleaned_data['instruments'],
                           genres =  self.cleaned_data['genres'],
