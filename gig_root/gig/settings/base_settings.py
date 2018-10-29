@@ -12,16 +12,20 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 
-from decouple import config
+from decouple import Config, RepositoryEnv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+#Reference to the file gig_root/gig/settings/'.env'
+env_config = Config(RepositoryEnv(os.path.join(BASE_DIR, '.env')))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = env_config.get('SECRET_KEY')
 
 
 ALLOWED_HOSTS = ['gig.pythonanywhere.com']
@@ -32,10 +36,10 @@ ALLOWED_HOSTS = ['gig.pythonanywhere.com']
 AUTH_USER_MODEL = "users.User"
 
 EMAIL_USE_TLS = True
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_HOST = env_config.get('EMAIL_HOST')
+EMAIL_HOST_USER = env_config.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env_config.get('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = env_config.get('EMAIL_PORT', cast=int)
 
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
@@ -99,8 +103,8 @@ AUTHENTICATION_BACKENDS = (
 
 #Facebook settings
 SOCIAL_AUTH_FACEBOOK_API_VERSION = '2.10'
-SOCIAL_AUTH_FACEBOOK_KEY = config('SOCIAL_AUTH_FACEBOOK_KEY')
-SOCIAL_AUTH_FACEBOOK_SECRET = config('SOCIAL_AUTH_FACEBOOK_SECRET')
+SOCIAL_AUTH_FACEBOOK_KEY = env_config.get('SOCIAL_AUTH_FACEBOOK_KEY')
+SOCIAL_AUTH_FACEBOOK_SECRET = env_config.get('SOCIAL_AUTH_FACEBOOK_SECRET')
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 SOCIAL_FACEBOOK_PROFILE_EXTRA_PARAMS = {
         'fields': 'id,name,email',
@@ -112,8 +116,8 @@ SOCIAL_AUTH_FACEBOOK_AUTH_EXTRA_ARGUMENTS = {
 
 
 #Google settings
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY =config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY =env_config.get('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env_config.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
 
 LOGIN_URL = 'users:login'

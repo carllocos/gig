@@ -1,7 +1,6 @@
 from .base_settings import *
 
 
-
 DEBUG=False
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -19,10 +18,10 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DATABASES = {
     'default': {
-        'ENGINE': config('PROD_DATABASE_ENGINE'),
-        'NAME': config('PROD_DATABASE_NAME'),
-        'USER':config('PROD_DATABASE_USER'),
-        'PASSWORD': config('PROD_DATABASE_PASSWORD'),
-        'HOST': config('PROD_DATABASE_HOST'),
+        'ENGINE': env_config.get('PROD_DATABASE_ENGINE'),
+        'NAME': env_config.get('PROD_DATABASE_NAME'),
+        'USER':env_config.get('PROD_DATABASE_USER'),
+        'PASSWORD': env_config.get('PROD_DATABASE_PASSWORD'),
+        'HOST': env_config.get('PROD_DATABASE_HOST'),
     }
 }
