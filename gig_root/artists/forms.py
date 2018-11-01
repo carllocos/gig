@@ -43,13 +43,9 @@ class CreateArtistForm(forms.ModelForm):
     def is_valid(self, dict):
         if super(CreateArtistForm, self).is_valid():
 
-            amount_inst=self._get_amount('amount_instruments', dict)
-            amount_genres=self._get_amount('amount_genres', dict)
-            amount_idols=self._get_amount('amount_idols', dict)
-
-            self.cleaned_data['instruments'] = self._fetch_inputs(dict, '', 'instrument', amount_inst)
-            self.cleaned_data['genres'] = self._fetch_inputs(dict, '', 'genre', amount_genres)
-            self.cleaned_data['idols'] = self._fetch_inputs(dict, '', 'idol', amount_idols)
+            self.cleaned_data['instruments'] = self.__instruments_to_str(dict)
+            self.cleaned_data['genres'] = self.__genres_to_str(dict)
+            self.cleaned_data['idols'] = self.__idols_to_str(dict)
 
             return True
 
@@ -80,8 +76,42 @@ class CreateArtistForm(forms.ModelForm):
 
         return art
 
+    def __instruments_to_str(self, dict):
+        """
+        The various instrument input fields int `dict` are transformed into one signle string.
+        """
+        return self.__inputs_to_single_str(dict,
+                                            'instrument',
+                                            self.__get_amount_instruments(dict))
 
-    def _get_amount(self, key, dict):
+    def __genres_to_str(self, dict):
+        """
+        The various genre input fields int `dict` are transformed into one signle string.
+        """
+        return self.__inputs_to_single_str(dict,
+                                            'genre',
+                                            self.__get_amount_genres(dict))
+
+    def __idols_to_str(self, dict):
+        """
+        The various idol input fields int `dict` are transformed into one signle string.
+        """
+        return self.__inputs_to_single_str(dict,
+                                            'idol',
+                                            self.__get_amount_idols(dict))
+
+
+    def __get_amount_instruments(self, dict):
+        return self.__get_amount('amount_instruments', dict)
+
+    def __get_amount_genres(self, dict):
+        return self.__get_amount('amount_genres', dict)
+
+    def __get_amount_idols(self, dict):
+        return self.__get_amount('amount_idols', dict)
+
+
+    def __get_amount(self, key, dict):
         val = dict.get(key, '')
         if val == '':
             return 0
@@ -91,12 +121,21 @@ class CreateArtistForm(forms.ModelForm):
             except ValueError:
                 return 0
 
-    def _fetch_inputs(self, dict, key, input_prefix, amount):
+    def __remove_comma(self, s):
+        if len(s)<= 0:
+            return ''
+        if s.endswith(','):
+            return self.__remove_comma(s[:-1])
+        else:
+            return s
 
-        result=""
+    def __inputs_to_single_str(self, dict, input_prefix, amount):
+
+        single_str=''
         for i in range(amount):
             input_key = f'{input_prefix}{i}'
-            val = dict.get(input_key, None)
-            if val is not None and val != '' :
-                result += f',{val}'
-        return result
+            s = dict.get(input_key, '')
+            if s != '' :
+                single_str+= self.__remove_comma(s)
+
+        return single_str
