@@ -390,3 +390,22 @@ def suggest_genres(value):
 
 def suggest_instruments(value):
     return _find(value, _instruments)
+
+
+
+from functools import wraps
+from django.shortcuts import reverse, redirect
+
+def has_not_artist_profile(function):
+    """
+    A view function decorator that test whether the user requesting the corresponding URL has an artistprofile.
+    If the user has a profile, the user will be redirect it's artist profile page.
+    """
+    @wraps(function)
+    def wrap(request, *args, **kwargs):
+
+        if request.user.has_artistProfile():
+            return redirect('artists:artist-profile', profile_id=request.user.get_artist().pk)
+        else:
+            return function(request, *args, **kwargs)
+    return wrap
