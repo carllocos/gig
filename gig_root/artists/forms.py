@@ -43,9 +43,9 @@ class CreateArtistForm(forms.ModelForm):
     def is_valid(self, dict):
         if super(CreateArtistForm, self).is_valid():
 
-            self.cleaned_data['instruments'] = self.__instruments_to_str(dict)
-            self.cleaned_data['genres'] = self.__genres_to_str(dict)
-            self.cleaned_data['idols'] = self.__idols_to_str(dict)
+            self.cleaned_data['instruments'] = self.__instruments_to_lst(dict)
+            self.cleaned_data['genres'] = self.__genres_to_lst(dict)
+            self.cleaned_data['idols'] = self.__idols_to_lst(dict)
 
             return True
 
@@ -76,30 +76,23 @@ class CreateArtistForm(forms.ModelForm):
 
         return art
 
-    def __instruments_to_str(self, dict):
+    def __instruments_to_lst(self, dict):
         """
-        The various instrument input fields int `dict` are transformed into one signle string.
+        The various instrument input fields int `dict` are transformed into a list of strings.
         """
-        return self.__inputs_to_single_str(dict,
-                                            'instrument',
-                                            self.__get_amount_instruments(dict))
+        return self.__inputs_to_lst(dict, 'instrument', self.__get_amount_instruments(dict))
 
-    def __genres_to_str(self, dict):
+    def __genres_to_lst(self, dict):
         """
-        The various genre input fields int `dict` are transformed into one signle string.
+        The various genres input fields int `dict` are transformed into a list of strings.
         """
-        return self.__inputs_to_single_str(dict,
-                                            'genre',
-                                            self.__get_amount_genres(dict))
+        return self.__inputs_to_lst(dict, 'genre', self.__get_amount_genres(dict))
 
-    def __idols_to_str(self, dict):
+    def __idols_to_lst(self, dict):
         """
-        The various idol input fields int `dict` are transformed into one signle string.
+        The various idols input fields int `dict` are transformed into a list of strings.
         """
-        return self.__inputs_to_single_str(dict,
-                                            'idol',
-                                            self.__get_amount_idols(dict))
-
+        return self.__inputs_to_lst(dict, 'idol', self.__get_amount_idols(dict))
 
     def __get_amount_instruments(self, dict):
         return self.__get_amount('amount_instruments', dict)
@@ -121,21 +114,5 @@ class CreateArtistForm(forms.ModelForm):
             except ValueError:
                 return 0
 
-    def __remove_comma(self, s):
-        if len(s)<= 0:
-            return ''
-        if s.endswith(','):
-            return self.__remove_comma(s[:-1])
-        else:
-            return s
-
-    def __inputs_to_single_str(self, dict, input_prefix, amount):
-
-        single_str=''
-        for i in range(amount):
-            input_key = f'{input_prefix}{i}'
-            s = dict.get(input_key, '')
-            if s != '' :
-                single_str+= self.__remove_comma(s)
-
-        return single_str
+    def __inputs_to_lst(self, dict, input_prefix, amount):
+        return [dict.get(f'{input_prefix}{i}', '') for i in range(amount)]
