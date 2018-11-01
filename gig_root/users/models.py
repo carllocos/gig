@@ -56,19 +56,41 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
     def send_email(self, mail_subject, mail_message_txt):
+        """
+        `send_email` method sends an email to the corresping user with `mail_subject` as subject and `mail_message_txt` as content of the email.
+        The email account used to send the email is the default account associated with the gig web app. 
+        """
         email = EmailMessage(subject=mail_subject, body=mail_message_txt, to=[self.email])
         email.send(fail_silently=True)
 
 
     @staticmethod
     def get_user(email, default=False):
+        """
+        `get_user` is a static method that retrieves an user based on the given `email`.
+        If the user don't exists `default` is returned.
+        """
         try:
             return User.objects.get(email=email)
         except:
             return default
 
-    #Make from this method a property
+
+
+    def get_artist(self, default=False):
+        """
+        return an ArtistProfile instance associated to the user or `default` if
+        the profile don't exists.
+        """
+        if self.has_artistProfile():
+            return self.artistmodel
+        else:
+            return default
+
     def has_artistProfile(self):
+        """
+        Test wheter the user has an ArtistProfile associated to it.
+        """
         try:
             self.artistmodel
             return True
