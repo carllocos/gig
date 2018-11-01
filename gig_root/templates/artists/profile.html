@@ -1,0 +1,15 @@
+{% extends "gig/base.html" %}
+{% load cloudinary %}
+{% block title %}
+{% block body %}
+Artist profile
+
+<p>gig user {{user.first_name}} {{user.last_name}} </p>
+<p>artist name {{artist.stage_name}}</p>
+<p>is owner: {{ is_owner }}</p>
+<p>profile pic public_id: {{profile_pic_id}}</p>
+{# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
+<p>Background pic public_id: {{bg_pic_id}}</p>
+{# {% cloudinary bg_pic_id %} #}
+{% endblock %}
+{% endblock %}
