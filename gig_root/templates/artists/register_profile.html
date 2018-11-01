@@ -14,7 +14,7 @@ Register Artist Profile
 
 <div id="id_artists-container" class="artists-container d-flex justify-content-center">
   <div class="" id= "container-artist-form">
-    <form id="artist_form" class="rx-auto" action="{% url 'artists:register' %}" method="post">
+    <form id="artist_form" class="rx-auto" action="{% url 'artists:register' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
       <div class="">
