@@ -41,15 +41,19 @@ class CreateArtistForm(forms.ModelForm):
         }
 
     def is_valid(self, dict):
-        amount_inst=self._get_amount('amount_instruments', dict)
-        amount_genres=self._get_amount('amount_genres', dict)
-        amount_idols=self._get_amount('amount_idols', dict)
+        if super(CreateArtistForm, self).is_valid():
 
-        self.instruments = self._fetch_inputs(dict, '', 'instrument', amount_inst)
-        self.genres = self._fetch_inputs(dict, '', 'genre', amount_genres)
-        self.idols = self._fetch_inputs(dict, '', 'idol', amount_idols)
+            amount_inst=self._get_amount('amount_instruments', dict)
+            amount_genres=self._get_amount('amount_genres', dict)
+            amount_idols=self._get_amount('amount_idols', dict)
 
-        return super(CreateArtistForm, self).is_valid()
+            self.cleaned_data['instruments'] = self._fetch_inputs(dict, '', 'instrument', amount_inst)
+            self.cleaned_data['genres'] = self._fetch_inputs(dict, '', 'genre', amount_genres)
+            self.cleaned_data['idols'] = self._fetch_inputs(dict, '', 'idol', amount_idols)
+
+            return True
+
+        return False
 
 
     def save(self, user):
@@ -88,6 +92,7 @@ class CreateArtistForm(forms.ModelForm):
                 return 0
 
     def _fetch_inputs(self, dict, key, input_prefix, amount):
+
         result=""
         for i in range(amount):
             input_key = f'{input_prefix}{i}'
