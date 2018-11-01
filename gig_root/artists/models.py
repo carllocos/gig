@@ -25,13 +25,13 @@ class ArtistModel(models.Model):
 
     #Each artist can specify what he/she can play
     #e.g. guitar, voice,...
-    instruments = models.TextField(null=True)
+    _instruments = models.TextField(null=True, db_column="instruments")
 
     #Favorit genres
-    genres = models.TextField(null=True)
+    _genres = models.TextField(null=True, db_column="genres")
 
     #musicians that inspired the artist
-    idols =  models.TextField(null=True)
+    _idols =  models.TextField(null=True, db_column="idols")
 
     bands = models.ManyToManyField(BandModel)
 
@@ -44,6 +44,64 @@ class ArtistModel(models.Model):
             return f'{self.stage_name}'
         else:
             return f'{self.user.first_name} {self.user.last_name}'
+
+
+    @property
+    def instruments(self):
+        if isinstance(self._instruments, str):
+            self._instruments = self.__str_to_lst(self._instruments)
+
+        return self._instruments
+
+    @instruments.setter
+    def instruments(self, val):
+        """
+        `val` has to be a list of string or a string
+        """
+        if isinstance(val, list):
+            self._instruments=self.__lst_to_str(val)
+        elif isinstance(val, str):
+            self._instruments=self.__remove_comma(val)
+        else:
+            raise TypeError("input must be a String or a list of Strings")
+
+    @property
+    def genres(self):
+        if isinstance(self._genres, str):
+            self._genres = self.__str_to_lst(self._genres)
+
+        return self._genres
+
+    @genres.setter
+    def genres(self, val):
+        """
+        `val` has to be a list of string or a string
+        """
+        if isinstance(val, list):
+            self._genres=self.__lst_to_str(val)
+        elif isinstance(val, str):
+            self._genres=self.__remove_comma(val)
+        else:
+            raise TypeError("input must be a String or a list of Strings")
+
+    @property
+    def idols(self):
+        if isinstance(self._idols, str):
+            self._idols = self.__str_to_lst(self._idols)
+
+        return self._idols
+
+    @idols.setter
+    def idols(self, val):
+        """
+        `val` has to be a list of string or a string
+        """
+        if isinstance(val, list):
+            self._idols=self.__lst_to_str(val)
+        elif isinstance(val, str):
+            self._idols=self.__remove_comma(val)
+        else:
+            raise TypeError("input must be a String or a list of Strings")
 
     @staticmethod
     def get_artist(pk, default=False):
@@ -72,6 +130,41 @@ class ArtistModel(models.Model):
         `Cloudianry`
         """
         return self.backgroundpicmodel.public_id
+
+
+
+    def __remove_comma(self, s):
+        if len(s)<= 0:
+            return ''
+        if s.endswith(','):
+            return self.__remove_comma(s[:-1])
+        else:
+            return s
+
+    def __str_to_lst(self, s):
+        lst=[]
+        for e in s.split(','):
+            if e !='':
+                lst.append(e)
+        return lst
+
+    def __lst_to_str(self, lst):
+        single_str=''
+        for s in lst:
+            if not isinstance(s, str):
+                raise TypeError("List must only contain String elements")
+
+            s= self.__remove_comma(s)
+
+            if s == '':
+                continue
+            if single_str == '':
+                single_str+= s
+            else:
+                single_str+= ',' + self.__remove_comma(s)
+
+        return single_str
+
 
 import datetime
 
