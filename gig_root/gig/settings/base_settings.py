@@ -211,3 +211,11 @@ STATICFILES_DIRS = (
 )
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+import cloudinary
+
+cloudinary.config(
+  cloud_name = env_config.get('CLOUDINARY_CLOUD_NAME'),
+  api_key = env_config.get('CLOUDINARY_API_KEY'),
+  api_secret = env_config.get('CLOUDINARY_API_SECRET')
+)
