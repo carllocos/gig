@@ -1,6 +1,5 @@
-
 from django import forms
-from .models import ArtistModel
+from .models import ArtistModel, ProfilePicModel, BackGroundPicModel
 
 
 class CreateArtistForm(forms.ModelForm):
@@ -56,16 +55,27 @@ class CreateArtistForm(forms.ModelForm):
     def save(self, user):
 
         art = ArtistModel(stage_name = self.cleaned_data['stage_name'],
-                          profile_pic = 'profile_pic',
-                          background_pic = 'background_pic',
                           instruments = self.cleaned_data['instruments'],
                           genres =  self.cleaned_data['genres'],
                           idols =  self.cleaned_data['idols'],
                           biography=self.cleaned_data['biography'],
-                          user=user
-                          )
+                          user=user)
+
         art.save()
+
+        #Creating and saving the profile/ background_pic model.
+        profile_pic= self.cleaned_data.get('profile_pic', False)
+        profil_pic_name = profile_pic.name if profile_pic else  ''
+        pp_model = ProfilePicModel.createPic(artist=art, title=profil_pic_name)
+        pp_model.save(profile_pic)
+
+        bg_pic= self.cleaned_data.get('background_pic', False)
+        bg_pic_name = bg_pic.name if bg_pic else  ''
+        bp_model = BackGroundPicModel.createPic(artist=art, title=bg_pic_name)
+        bp_model.save(bg_pic)
+
         return art
+
 
     def _get_amount(self, key, dict):
         val = dict.get(key, '')
@@ -78,9 +88,6 @@ class CreateArtistForm(forms.ModelForm):
                 return 0
 
     def _fetch_inputs(self, dict, key, input_prefix, amount):
-            # if dict.get(key, None) is None:
-            #     return ""
-
         result=""
         for i in range(amount):
             input_key = f'{input_prefix}{i}'
