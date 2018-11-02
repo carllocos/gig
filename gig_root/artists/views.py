@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 
 from .forms import CreateArtistForm
 from .models import ArtistModel
-from .artist_util import has_not_artist_profile, suggest_genres, suggest_instruments
+from .artist_util import has_not_artist_profile, suggest_genres, suggest_instruments, has_artist_profile
 
 
 def home(request):
@@ -78,3 +78,227 @@ def ajax_suggestions(request):
         return JsonResponse({'suggestions': suggestions})
 
     return JsonResponse({'suggestions': False})
+
+@require_http_methods(['POST'])
+@login_required
+def direct_upload_complete(request):
+    return JsonResponse({'response': 'Got it'})
+
+
+#TODO Validation of post input.
+@has_artist_profile
+@require_http_methods(['POST'])
+@login_required
+def update_genre_idol_instrument(request):
+    """
+    Ajax update for genres, instruments or idols of an artist profile. The POST request must contain 3 differents keys;
+    1. 'to_update', which specifies what will be updated e.g. `instrument`, `genre` or `idol`
+    2. 'operation', which specifies what type of operation will be performed `remove` or `add`
+    3. 'val', which specifies the value to be removed or added
+
+    e.g. of a received json
+    {
+        'to_update': 'genre',
+        'operation': 'remove',
+        'val': 'Rock'
+    }
+
+    This function returns three different keys.
+    1. 'is_executed': a boolean that tells whether the requested operation was succesful.
+    2. 'val': the value involved in the operation
+    3. 'reason': a reason for why a request might have fail. Is empty when 'is_executed' is True
+    {
+        'is_executed': True,
+        'val': value
+    }
+    """
+    if not request.is_ajax():
+        return JsonResponse({'is_executed': False, 'reason': 'request is not ajax'})
+
+    operation = request.POST.get('operation', '')
+    if operation != 'remove' and operation!= 'add':
+        return JsonResponse({'is_executed': False, 'reason': f'operation is not remove or add. Given {operation}'})
+
+    to_update = request.POST.get('to_update', '')
+    if to_update !='instrument' and to_update != 'genre' and to_update !='idol':
+        return JsonResponse({'is_executed': False, 'reason': 'update type is wrong'})
+
+    val = request.POST.get('val', False)
+    if not val or val =='':
+        return JsonResponse({'is_executed': False, 'reason': 'no value was specified'})
+
+    art=request.user.get_artist()
+    reason=''
+    if operation == 'add':
+        if to_update == 'instrument':
+            succes=art.add_instrument(val)
+            if not succes:
+                reason=f"{val} is already saved as instrument"
+        elif to_update == 'genre':
+            succes = art.add_genre(val)
+            if not succes:
+                reason=f"{val} is already saved as genre"
+        else:
+            succes = art.add_idol(val)
+            if not succes:
+                reason=f"{val} is already saved as idol"
+    else: # the operation is remove
+        if to_update == 'instrument':
+            succes = art.remove_instrument(val)
+            if not succes:
+                reason=f"{val} is not saved as an instrument"
+        elif to_update == 'genre':
+            succes = art.remove_genre(val)
+            if not succes:
+                reason=f"{val} is not saved as genre"
+        else:
+            succes = art.remove_idol(val)
+            if not succes:
+                reason=f"{val} is not saved as an idol"
+    if succes:
+        art.save()
+
+    return JsonResponse({'is_executed': succes, 'val': val, 'reason': reason})
+
+@has_artist_profile
+@require_http_methods(['POST'])
+@login_required
+def update_stage_name(request):
+    """
+    Ajax update for stage_name of an artist profile. The POST request must contain the key `val` which specifies
+    the new stage_name of the corresponding Artist Profile.
+
+    e.g. of a received json
+    {
+        'val': 'Slash'
+    }
+
+    This function returns a json with different keys
+    1. 'is_executed' specifies whether the update request was executed succesfuly
+    2. 'val' specifies the received new stage_name
+    3. 'reason' specifies the reason for an eventual failure. Is empty when 'is_executed' is true
+    4. 'old' specifies the old stage_name name
+    {
+        'is_executed': True,
+        'val': 'Slash',
+        'old': 'El loco',
+        'reason': ''
+    }
+    """
+
+    if not request.is_ajax():
+        return JsonResponse({
+            'is_executed': False,
+            'val': '',
+            'old': '',
+            'reason': 'Request is not a Ajax post request'
+        })
+
+    new_sg = request.POST.get('val', False)
+    if new_sg == '':
+        return JsonResponse({
+            'is_executed': False,
+            'val': '',
+            'old': '',
+            'reason': 'The new stage_name is an empty string'
+        })
+    if not new_sg:
+        return JsonResponse({
+            'is_executed': False,
+            'val': '',
+            'old': '',
+            'reason': 'No value was given for key val'
+        })
+
+    art= request.user.get_artist()
+    old=art.stage_name
+    if len(new_sg)> ArtistModel.MAX_LENGTH:
+        return JsonResponse({
+            'is_executed': False,
+            'val': new_sg,
+            'old': old,
+            'reason': 'The Given stage_name is too long'
+        })
+
+    if new_sg == old:
+        return JsonResponse({
+            'is_executed': False,
+            'val': new_sg,
+            'old': old,
+            'reason': "The new stage name didn't change"
+        })
+
+    art.stage_name=new_sg
+    art.save()
+
+    return JsonResponse({
+        'is_executed': True,
+        'val': new_sg,
+        'old': old,
+        'reason': ''
+    })
+
+
+
+@has_artist_profile
+@require_http_methods(['POST'])
+@login_required
+def update_biography(request):
+    """
+    Ajax update for biography of an artist profile. The POST request must contain the key `val` which specifies
+    the new biography of the corresponding Artist Profile.
+
+    e.g. of a received json
+    {
+        'val': 'Hey My name is .....'
+    }
+
+    This function returns a json with different keys
+    1. 'is_executed' specifies whether the update request was executed succesfuly
+    2. 'val' specifies the received new biography
+    3. 'reason' specifies the reason for an eventual failure. Is empty when 'is_executed' is true
+    4. 'old' specifies the old biography
+    {
+        'is_executed': True,
+        'val': 'Hey My name is .....',
+        'old': 'Roses are blue ...',
+        'reason': ''
+    }
+    """
+
+    if not request.is_ajax():
+        return JsonResponse({
+            'is_executed': False,
+            'val': '',
+            'old': '',
+            'reason': 'Request is not a Ajax post request'
+        })
+
+    new_bio = request.POST.get('val', False)
+    if new_bio == '':
+        return JsonResponse({
+            'is_executed': False,
+            'val': '',
+            'old': '',
+            'reason': 'The new biography is an empty string'
+        })
+    if not new_bio:
+        return JsonResponse({
+            'is_executed': False,
+            'val': '',
+            'old': '',
+            'reason': 'No value was given for key val'
+        })
+
+    art= request.user.get_artist()
+    old=art.biography
+
+    art.biography=new_bio
+    art.save()
+
+    return JsonResponse({
+        'is_executed': True,
+        'val': new_bio,
+        'old': old,
+        'reason': ''
+    })
