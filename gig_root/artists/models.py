@@ -45,63 +45,119 @@ class ArtistModel(models.Model):
         else:
             return f'{self.user.first_name} {self.user.last_name}'
 
+    def save(self):
+        self._instruments = self.__set_to_str(self.instruments)
+        self._idols = self.__set_to_str(self.idols)
+        self._genres = self.__set_to_str(self.genres)
+        return super(ArtistModel, self).save()
 
     @property
     def instruments(self):
         if isinstance(self._instruments, str):
-            self._instruments = self.__str_to_lst(self._instruments)
+            self._instruments = self.__str_to_set(self._instruments)
 
         return self._instruments
 
     @instruments.setter
     def instruments(self, val):
         """
-        `val` has to be a list of string or a string
+        `val` has to be a list/set of string or a string
         """
         if isinstance(val, list):
-            self._instruments=self.__lst_to_str(val)
+            self._instruments=set(val)
+        elif isinstance(val, set):
+            self._instruments=val
         elif isinstance(val, str):
-            self._instruments=self.__remove_comma(val)
+            self._instruments=self.__str_to_set(self.__remove_comma(val))
         else:
-            raise TypeError("input must be a String or a list of Strings")
+            raise TypeError("input must be a String or a list/set of Strings")
+
+    def add_instrument(self, inst):
+        self.instruments.add(inst)
+
+    def remove_instrument(self, inst):
+        try:
+            self.instruments.remove(inst)
+            return True
+        except KeyError:
+            return False
+
+    def add_instruments(self, insts):
+        if isinstance(insts, list):
+            insts=set(insts)
+
+        self.instruments=self.instruments.union(insts)
+
+    def amount_instruments(self):
+        return self.instruments.len()
 
     @property
     def genres(self):
         if isinstance(self._genres, str):
-            self._genres = self.__str_to_lst(self._genres)
+            self._genres = self.__str_to_set(self._genres)
 
         return self._genres
 
     @genres.setter
     def genres(self, val):
         """
-        `val` has to be a list of string or a string
+        `val` has to be a list/set  of string or a string
         """
         if isinstance(val, list):
-            self._genres=self.__lst_to_str(val)
+            self._genres=set(val)
+        elif isinstance(val, set):
+            self._genres=val
         elif isinstance(val, str):
-            self._genres=self.__remove_comma(val)
+            self._genres=self.__str_to_set(self.__remove_comma(val))
         else:
-            raise TypeError("input must be a String or a list of Strings")
+            raise TypeError("input must be a String or a list/set of Strings")
+
+    def add_genre(self, g):
+        self.genres = self.genres.append(g)
+
+    def remove_genre(self, g):
+        self.genres = self.genres.remove(g)
+
+    def add_genres(self, genres):
+        if isinstance(genres, list):
+            genres= set(genres)
+        self.genres=self.genres.union(genres)
+
+    def amount_genres(self):
+        return self.genres.len()
 
     @property
     def idols(self):
         if isinstance(self._idols, str):
-            self._idols = self.__str_to_lst(self._idols)
+            self._idols = self.__str_to_set(self._idols)
 
         return self._idols
 
     @idols.setter
     def idols(self, val):
         """
-        `val` has to be a list of string or a string
+        `val` has to be a list/set of string or a string
         """
         if isinstance(val, list):
-            self._idols=self.__lst_to_str(val)
+            self._idols=set(val)
+        elif isinstance(val, set):
+            self._idols=val
         elif isinstance(val, str):
-            self._idols=self.__remove_comma(val)
+            self._idols=self.__str_to_set(self.__remove_comma(val))
         else:
-            raise TypeError("input must be a String or a list of Strings")
+            raise TypeError("input must be a String or a list/set of Strings")
+
+    def add_idol(self, i):
+        self.idols=self.idols.add(i)
+
+    def remove_idol(self, i):
+        self.idols=self.idols.remove(i)
+
+    def add_idols(self, idols):
+        self.idols=self.idols.union(idols)
+
+    def amount_idols(self):
+        return self.idols.len()
 
     @staticmethod
     def get_artist(pk, default=False):
@@ -141,27 +197,23 @@ class ArtistModel(models.Model):
         else:
             return s
 
-    def __str_to_lst(self, s):
-        lst=[]
+    def __str_to_set(self, s):
+        st=set()
         for e in s.split(','):
             if e !='':
-                lst.append(e)
-        return lst
+                st.add(e)
+        return st
 
-    def __lst_to_str(self, lst):
+    def __set_to_str(self, st):
         single_str=''
-        for s in lst:
+        for s in st:
             if not isinstance(s, str):
-                raise TypeError("List must only contain String elements")
+                raise TypeError("List/set must only contain String elements")
 
             s= self.__remove_comma(s)
 
-            if s == '':
-                continue
-            if single_str == '':
-                single_str+= s
-            else:
-                single_str+= ',' + self.__remove_comma(s)
+            if s != '':
+                single_str+= ',' + s
 
         return single_str
 
