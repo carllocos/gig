@@ -42,9 +42,9 @@ def view_profile(request, profile_id):
 
     return render(request, 'artists/profile.html', context=context)
 
-@has_not_artist_profile
 @require_http_methods(["GET", "POST"])
 @login_required
+@has_not_artist_profile
 def register_artist_view(request):
     """
     The view called when a user wants to register an ArtistProfile.
@@ -86,9 +86,9 @@ def direct_upload_complete(request):
 
 
 #TODO Validation of post input.
-@has_artist_profile
 @require_http_methods(['POST'])
 @login_required
+@has_artist_profile
 def update_genre_idol_instrument(request):
     """
     Ajax update for genres, instruments or idols of an artist profile. The POST request must contain 3 differents keys;
@@ -161,8 +161,8 @@ def update_genre_idol_instrument(request):
     return JsonResponse({'is_executed': succes, 'val': val, 'reason': reason})
 
 @has_artist_profile
-@require_http_methods(['POST'])
 @login_required
+@require_http_methods(['POST'])
 def update_stage_name(request):
     """
     Ajax update for stage_name of an artist profile. The POST request must contain the key `val` which specifies
@@ -240,9 +240,9 @@ def update_stage_name(request):
 
 
 
-@has_artist_profile
 @require_http_methods(['POST'])
 @login_required
+@has_artist_profile
 def update_biography(request):
     """
     Ajax update for biography of an artist profile. The POST request must contain the key `val` which specifies
