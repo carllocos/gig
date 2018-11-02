@@ -1,15 +1,351 @@
 {% extends "gig/base.html" %}
 {% load cloudinary %}
 {% block title %}
-{% block body %}
-Artist profile
-
-<p>gig user {{user.first_name}} {{user.last_name}} </p>
-<p>artist name {{artist.stage_name}}</p>
-<p>is owner: {{ is_owner }}</p>
-<p>profile pic public_id: {{profile_pic_id}}</p>
-{# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
-<p>Background pic public_id: {{bg_pic_id}}</p>
-{# {% cloudinary bg_pic_id %} #}
+{% if artist.stage_name %}
+Profile {{artist.stage_name}}
+{% else %}
+Profile {{artist.user.first_name}} {{artist.user.last_name}}
+{% endif %}
 {% endblock %}
+{% block body %}
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      Artist profile
+    </div>
+  </div>
+  <div class="row">
+
+    <div class="col-12">
+      {% if user.is_authenticated %}
+      <p>gig user requesting this artist page {{user.first_name}} {{user.last_name}} </p>
+      {% else %}
+      <p>gig user requesting this artist page is a stranger</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <p>Is the gig user the owner of this artist profile? {{ is_owner }}</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="container">
+  {# <form class="" action="index.html" method="post"> #}
+  {# {% csrf_token %} #}
+
+  <div class="row">
+    <div class="col-12">
+      <label for="id_stage_name">
+        artist name:
+      </label>
+    </div>
+    {% if is_owner %}
+    <div class="col-12">
+      <input id="id_stage_name" type="text" name="stage_name" value="{{artist.stage_name}}">
+    </div>
+    <div class="col-12">
+      <button type="button" name="button" onClick="updateStageName('id_stage_name')">Save</button>
+    </div>
+    {% else %}
+    <div class="col-12">
+      <input id="id_stage_name" type="text" name="stage_name" value="{{artist.stage_name}}" readonly>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <label for="id_biography">Biography:</label>
+    </div>
+    <div class="col-12">
+      {% if artist.biography %}
+      <textarea name="biography" cols="40" rows="10" id="id_biography">{{artist.biography}}</textarea>
+      {% else %}
+        {% if is_owner %}
+        <p>You still didn't specify your biography. Fill text area in to complete your artistprofile</p>
+        <textarea name="biography" cols="40" rows="10" id="id_biography">Tell us somenthing about you..</textarea>
+        {% else %}
+        This artist didn't specify any description
+        {% endif %}
+      {%endif%}
+    </div>
+  </div>
+  {% if is_owner %}
+  <div class="row">
+    <div class="col-12">
+      <button type="button" name="button" onClick="updateBiography('id_biography')">Save</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-12">
+      <label for="id_instruments">Instruments:</label>
+    </div>
+  </div>
+
+  {% if artist.instruments%}
+  {% for instrument in artist.instruments %}
+  <div class="row">
+    <div class="col-12">
+      <input type="text" name="instrument0" id="id_instrument0" class="instrument" value="{{instrument}}" readonly>
+      {% if is_owner %}
+      <button type="button" name="button" onClick="removeInstrument('id_instrument0')">Delete</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="row">
+    <div class="col-12">
+      {% if is_owner %}
+      <p>You didn't specify any instruments you master. Add some to complete your registration</p>
+      {% else %}
+      <p>The user didn't specify the instruments he/she can play </p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if is_owner %}
+  <div class="row">
+    <div class="col-12">
+      <input type="text" name="instrument0" id="id_add_instrument" class="instrument" value="e.g. Piano">
+      <button type="button" name="button" onClick="addInstrument('id_add_instrument')">Add</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-12">
+      <label for="id_instruments">Genres:</label>
+    </div>
+  </div>
+
+  {% if artist.genres %}
+  {% for genre in artist.genres %}
+  <div class="row">
+    <div class="col-12">
+      <input type="text" name="genre0" id="id_genre0" class="genre" value="{{genre}}" readonly>
+      {% if is_owner %}
+      <button type="button" name="button" onClick="removeGenre('id_genre0')">Delete</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="row">
+    <div class="col-12">
+      {% if is_owner %}
+      <p>You didn't specify any genres you play. Add some to complete your registration</p>
+      {% else %}
+      <p>The user didn't specify the genres he/she can play </p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% if is_owner %}
+  <div class="row">
+    <div class="col-12">
+      <input type="text" name="genre0" id="id_add_genre" class="genre" value="e.g. Blues">
+      <button type="button" name="button" onClick="addGenre('id_add_genre')">Add</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-12">
+      <label for="id_instruments">Idols:</label>
+    </div>
+  </div>
+  {% if artist.idols%}
+  {% for idol in artist.idols %}
+  <div class="row">
+    <div class="col-12">
+      <input type="text" name="genre0" id="id_idol0" class="genre" value="{{idol}}" readonly>
+      {% if is_owner %}
+      <button type="button" name="button" onClick="removeIdol('id_idol0')">Delete</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  {% if is_owner %}
+  <div class="row">
+    <div class="col-12">
+      <p>You didn't specify any idol you have.</p>
+    </div>
+  </div>
+  {% else %}
+  <p>The owner didn't add any idol</p>
+  {% endif %}
+  {% endif %}
+
+  {% if is_owner %}
+  <div class="row">
+    <div class="col-12">
+      <input type="text" name="genre0" id="id_add_idol" class="genre" value="e.g. Jimmy Hendrix">
+      <button type="button" name="button" onClick="addIdol('id_add_idol')">Add</button>
+    </div>
+  </div>
+  {% endif %}
+
+
+  {# </form> #}
+
+  <div class="row">
+    <div class="col-12">
+      <p>profile pic public_id: {{profile_pic_id}}</p>
+    </div>
+    <div class="col-12">
+      {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
+      {# {% cloudinary profile_pic_id width=100 height=150 crop="fill"%} #}
+    </div>
+    {% if  is_owner%}
+    <div class="col-12">
+      <input type="file" name="profile_pic" accept="image/*" id="id_profile_pic">
+    </div>
+    {% endif %}
+  </div>
+
+  <div id='direct_upload_background'>
+    <form class="" action="" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="row">
+        <div class="col-12">
+          <p>Background pic public_id: {{bg_pic_id}}</p>
+        </div>
+        <div class="col-12">
+          {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
+          {# {% cloudinary bg_pic_id width=500 height=300 %} #}
+        </div>
+        {% if  is_owner%}
+        <div class="col-12">
+          <input type="file" name="background_pic" accept="image/*" id="id_profile_pic">
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+
+  {# {% cloudinary bg_pic_id %} #}
+</div>
+
+<script type="text/javascript">
+
+function sendAjaxRequest(url_l, dict, valToSend){
+  if (valToSend != ''){
+    alert(`sendAjaxRequest with value ${valToSend}`);
+    $.ajax({
+      type: "POST",
+      url: url_l,
+      data: dict,
+      dataType: 'json',
+      success: function(response){
+
+        if(response.is_executed){
+          alert(`backend performed the requested operation succesfuly involving ${response.val}`)
+        }
+        else{
+          alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+        }
+
+      }});
+
+    }else {
+      alert("AjaxRequest wasn't send. The value involved in the update is an empty string ");
+    }
+  }
+
+  function updateGenreInstrumentIdol(id_selector, type, operation) {
+    var val = $(`#${id_selector}`).val();
+    var dict= { 'to_update': type,
+    'val': val,
+    'operation': operation,
+    csrfmiddlewaretoken: '{{ csrf_token }}',
+  };
+
+  sendAjaxRequest("{% url 'artists:update-genres-idols-insts' %}", dict, val);
+
+}
+
+function removeGenre(id_selector){
+  updateGenreInstrumentIdol(id_selector, "genre", "remove");
+}
+
+function addGenre(id_selector) {
+  updateGenreInstrumentIdol(id_selector , "genre", "add");
+}
+
+
+function removeIdol(id_selector){
+  updateGenreInstrumentIdol(id_selector , "idol", "remove");
+}
+
+function addIdol(id_selector) {
+  updateGenreInstrumentIdol(id_selector , "idol", "add");
+}
+
+function removeInstrument(id_selector){
+  updateGenreInstrumentIdol(id_selector , "instrument", "remove");
+}
+
+function addInstrument(id_selector) {
+  updateGenreInstrumentIdol(id_selector , "instrument", "add");
+}
+
+function updateStageName(id_selector) {
+  var val = $(`#${id_selector}`).val();
+  var dict= { 'val': val,
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+  sendAjaxRequest("{% url 'artists:update-stage-name' %}", dict, val);
+}
+
+
+function updateBiography(id_selector) {
+  var val = $(`#${id_selector}`).val();
+  var dict= { 'val': val,
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+            };
+  sendAjaxRequest("{% url 'artists:update-biography' %}", dict, val);
+}
+
+// $(function () {
+//   $('#direct_upload_background input[type="file"]')
+//   .cloudinary_fileupload({
+//     dropZone: '#direct_upload',
+//     start: function () {
+//       $('.status_value').text('Starting direct upload...');
+//     },
+//     progress: function () {
+//       $('.status_value').text('Uploading...');
+//     },
+//   })
+//   .on('cloudinarydone', function (e, data) {
+//       $('.status_value').text('Updating backend...');
+//       $.post(this.form.action, $(this.form).serialize()).always(function (result, status, jqxhr) {
+//         $('.status_value').text(result.errors ? JSON.stringify(result.errors) : status);
+//       });
+//       var info = $('<div class="uploaded_info"/>');
+//       $(info).append($('<div class="data"/>').append(prettydump(data.result)));
+//       $(info).append($('<div class="image"/>').append(
+//          $.cloudinary.image(data.result.public_id, {
+//          format: data.result.format, width: 150, height: 150, crop: "fill"
+//          })
+//       ));
+//       $('.uploaded_info_holder').append(info);
+//   });
+// });
+</script>
+
 {% endblock %}
