@@ -16,7 +16,9 @@ class ArtistModel(models.Model):
     The artist profile is equivalent to a person's C.V.
     Each instance of ArtistModel can be associated with different Band Profiles
     """
-    stage_name = models.CharField(max_length=30, null=True) # can be null
+
+    MAX_LENGTH=30
+    stage_name = models.CharField(max_length=MAX_LENGTH, null=True) # can be null
 
     #each gig user can have at most one artistprofile
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -73,7 +75,11 @@ class ArtistModel(models.Model):
             raise TypeError("input must be a String or a list/set of Strings")
 
     def add_instrument(self, inst):
-        self.instruments.add(inst)
+        if inst in self.instruments:
+            return False
+        else:
+            self.instruments.add(inst)
+            return True
 
     def remove_instrument(self, inst):
         try:
@@ -81,12 +87,6 @@ class ArtistModel(models.Model):
             return True
         except KeyError:
             return False
-
-    def add_instruments(self, insts):
-        if isinstance(insts, list):
-            insts=set(insts)
-
-        self.instruments=self.instruments.union(insts)
 
     def amount_instruments(self):
         return self.instruments.len()
@@ -113,15 +113,18 @@ class ArtistModel(models.Model):
             raise TypeError("input must be a String or a list/set of Strings")
 
     def add_genre(self, g):
-        self.genres = self.genres.append(g)
+        if g in self.genres:
+            return False
+        else:
+            self.genres.add(g)
+            return True
 
     def remove_genre(self, g):
-        self.genres = self.genres.remove(g)
-
-    def add_genres(self, genres):
-        if isinstance(genres, list):
-            genres= set(genres)
-        self.genres=self.genres.union(genres)
+        try:
+            self.genres.remove(g)
+            return True
+        except KeyError:
+            return False
 
     def amount_genres(self):
         return self.genres.len()
@@ -148,13 +151,18 @@ class ArtistModel(models.Model):
             raise TypeError("input must be a String or a list/set of Strings")
 
     def add_idol(self, i):
-        self.idols=self.idols.add(i)
+        if i in self.idols:
+            return False
+        else:
+            self.idols.add(i)
+            return True
 
     def remove_idol(self, i):
-        self.idols=self.idols.remove(i)
-
-    def add_idols(self, idols):
-        self.idols=self.idols.union(idols)
+        try:
+            self.idols.remove(i)
+            return True
+        except KeyError:
+            return False
 
     def amount_idols(self):
         return self.idols.len()
