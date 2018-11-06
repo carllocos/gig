@@ -1,5 +1,5 @@
 from django.http import HttpResponse , JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
@@ -11,7 +11,16 @@ from .artist_util import has_not_artist_profile, suggest_genres, suggest_instrum
 def home(request):
     return HttpResponse("This is home of artists")
 
-
+def no_profile(request):
+    """
+    no_profile view is meant to display a message to users that try to perform operations only meant
+    for users with an aritstprofile. The response invites the users to register their artist profile.
+    """
+    context= {'short_message': "You are trying to perform an action that requires you to dispose of an artist profile. To register your artist profile click on the following link",
+              'title_msg': "Create your artist profile",
+              'titple_page': "Bad request",
+              'link': reverse('artists:register')}
+    return render(request, 'users/short_message.html', context=context)
 
 def view_profile(request, profile_id):
     """
@@ -25,20 +34,23 @@ def view_profile(request, profile_id):
     if not artist:
         context= {'short_message': "The request artist profile does not exists.",
                   'title_msg': "Profile does not exists",
-                  'titple_page': "Bad request"}
-        return render(request, '/users/short_message.html',context=context)
+                  'title_page': "Bad request"}
+        return render(request, 'users/short_message.html',context=context)
 
     #Here we are certain that ArtistModel with private key `profile_id` exists
     user= request.user
 
     #is_owner tells wheter the user accessing artist profile with id `profile_id` is the owner of that profile
     is_owner = user.is_authenticated and user.has_artistProfile() and user.get_artist().pk == profile_id
+    linups= artist.get_active_bands()
 
     context={'user': user,
              'artist': artist,
              'is_owner': is_owner,
              'profile_pic_id': artist.get_profile_pic_id(),
-             'bg_pic_id': artist.get_background_pic_id()}
+             'bg_pic_id': artist.get_background_pic_id(),
+             'linups': linups,
+             }
 
     return render(request, 'artists/profile.html', context=context)
 
