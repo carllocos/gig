@@ -44,6 +44,7 @@ EMAIL_PORT = env_config.get('EMAIL_PORT', cast=int)
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'artists.apps.ArtistsConfig',
+    'musicians.apps.MusiciansConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
