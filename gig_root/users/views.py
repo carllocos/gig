@@ -17,7 +17,7 @@ from social_django.utils import load_strategy
 from .forms import RegistrationForm, UserProfileForm
 from .models import User
 from .tokens import account_activation_token
-
+from .util import getHTTP_Protocol
 
 
 #View for the users index
@@ -101,6 +101,7 @@ class SignupView(CreateView):
         #auth.login(request=self.request, user=user_inst, backend='django.contrib.auth.backends.ModelBackend')
         context ={
                 'user':user_inst,
+                'http_protocol': getHTTP_Protocol(),
                 'domain': get_current_site(self.request).domain,
                 'token': account_activation_token.make_token(user_inst),
                 'uid': urlsafe_base64_encode(force_bytes(user_inst.pk)).decode(),
