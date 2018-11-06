@@ -1,0 +1,31 @@
+{% extends "gig/base.html" %}
+{% load static %}
+{% block title %}
+Add other members
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>Add Other members to {{band.name}}</h1>
+    </div>
+  </div>
+
+<form class="" action="{% url 'musicians:update-line' linup_id=current_member.pk%}" method="post">
+  <div class="row">
+    <div class="col-12">
+      <h3>Role:</h3>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <input type="text" name="role" value="{{current_member.role}}">
+    </div>
+  </div>
+</form>
+
+
+</div>
+{% endblock %}
