@@ -22,7 +22,8 @@
 
    <div class="row">
      <div class="column-12">
-       <p> {{short_message}} </p>
+       <p> {{short_message}} {% if link %}<a href="{{link}}">click here</a> {% endif %}</p>
+
      </div>
    </div>
  </div>
