@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 
 from artists.artist_util import has_artist_profile
 from users.models import User
+from users.util import getHTTP_Protocol
 
 from .forms import RegisterForm
 from .models import Band, LinupMember
@@ -205,7 +206,7 @@ def add_member(request):
         l.save()
 
     #TODO create a temporary token
-    confirm_url=__getProtocol() + get_current_site(request).domain + reverse('musicians:confirm-membership', kwargs={'line_up_id': l.pk})
+    confirm_url=getHTTP_Protocol() + get_current_site(request).domain + reverse('musicians:confirm-membership', kwargs={'line_up_id': l.pk})
     mail_subject=f"Invitation to Join {band.name}"
     mail_message_txt= f"Hello {user.first_name}, you received an invitaion to join {band.name}.\nClick on the following link to confirm the invitation {confirm_url}"
     user.send_email(mail_subject=mail_subject, mail_message_txt=mail_message_txt)
