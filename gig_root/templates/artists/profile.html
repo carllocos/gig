@@ -42,7 +42,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   <div class="row">
     <div class="col-12">
       <label for="id_stage_name">
-        artist name:
+        <h2>Artist name:</h2>
       </label>
     </div>
     {% if is_owner %}
@@ -62,7 +62,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
   <div class="row">
     <div class="col-12">
-      <label for="id_biography">Biography:</label>
+      <label for="id_biography"><h2>Biography:</h2></label>
     </div>
     <div class="col-12">
       {% if artist.biography %}
@@ -87,7 +87,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
   <div class="row">
     <div class="col-12">
-      <label for="id_instruments">Instruments:</label>
+      <label for="id_instruments"><h2>Instruments:</h2></label>
     </div>
   </div>
 
@@ -125,7 +125,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
   <div class="row">
     <div class="col-12">
-      <label for="id_instruments">Genres:</label>
+      <label for="id_instruments"><h2>Genres:</h2></label>
     </div>
   </div>
 
@@ -162,7 +162,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
   <div class="row">
     <div class="col-12">
-      <label for="id_instruments">Idols:</label>
+      <label for="id_instruments"><h2>Idols:</h2></label>
     </div>
   </div>
   {% if artist.idols%}
@@ -202,11 +202,11 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
   <div class="row">
     <div class="col-12">
-      <p>profile pic public_id: {{profile_pic_id}}</p>
+      <p><h2>profile pic</h2> (public_id: {{profile_pic_id}})</p>
     </div>
     <div class="col-12">
       {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
-      {# {% cloudinary profile_pic_id width=100 height=150 crop="fill"%} #}
+      {% cloudinary profile_pic_id width=100 height=150 crop="fill"%}
     </div>
     {% if  is_owner%}
     <div class="col-12">
@@ -221,11 +221,11 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
       <div class="row">
         <div class="col-12">
-          <p>Background pic public_id: {{bg_pic_id}}</p>
+          <p><h2>Background pic</h2> public_id: {{bg_pic_id}}</p>
         </div>
         <div class="col-12">
           {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
-          {# {% cloudinary bg_pic_id width=500 height=300 %} #}
+          {% cloudinary bg_pic_id width=500 height=300 %}
         </div>
         {% if  is_owner%}
         <div class="col-12">
@@ -235,6 +235,30 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
       </div>
     </form>
   </div>
+
+  {% if linups %}
+
+  <div class="bands-container">
+    <h2>Bands</h2>
+    {% for member in linups %}
+    <div class="row">
+      <div class="col-6">
+        <h4><a href="{% url 'musicians:band-profile' profile_id=member.band.pk%}"> {{member.band.name}}</a></h4>
+        <p> band_profil_pic (public_id: {{member.band.profile_pic.public_id}})</p>
+        {% cloudinary member.band.profile_pic.public_id width=500 height=300 %}
+        <p>Role: {{member.role}}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  {% if  is_owner%}
+  <p>You are not involved in any band. <a href="{% url 'musicians:band-register' %}">You wanna register your band?</a></p>
+
+  {% else %}
+  <p>The artist is not involved in any band</p>
+  {% endif %}
+  {% endif %}
 
 
   {# {% cloudinary bg_pic_id %} #}
