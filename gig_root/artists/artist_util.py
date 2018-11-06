@@ -394,7 +394,8 @@ def suggest_instruments(value):
 
 
 from functools import wraps
-from django.shortcuts import reverse, redirect
+from django.http import JsonResponse
+from django.shortcuts import reverse, redirect, render
 from django.http import HttpResponseBadRequest
 
 def has_not_artist_profile(function):
@@ -416,7 +417,7 @@ def has_not_artist_profile(function):
 def has_artist_profile(function):
     """
     A view function decorator that test whether the user requesting the corresponding URL has an artistprofile.
-    If the user has not a profile, the user will receive bad request.
+    If the user has not an artistprofile, the user will receive bad request.
     We assume the user is authenticated.
     """
     @wraps(function)
@@ -425,5 +426,8 @@ def has_artist_profile(function):
         if request.user.has_artistProfile():
             return function(request, *args, **kwargs)
         else:
-            return HttpResponseBadRequest(content="This request can't be accesed if you don't have an artist profile")
+            if request.is_ajax():
+                return JsonResponse({})
+            else:
+                return redirect('artists:no-profile')
     return wrap
