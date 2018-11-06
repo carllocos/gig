@@ -1,14 +1,13 @@
 import os
-import cloudinary
 
+import cloudinary
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.conf import  settings
 from django.db import models
 from users.models import User
 
 __path_to_default_pics = os.path.join(settings.STATICFILES_DIRS [0], "pics")
-
-class BandModel(models.Model):
-    pass
 
 class ArtistModel(models.Model):
     """
@@ -35,23 +34,43 @@ class ArtistModel(models.Model):
     #musicians that inspired the artist
     _idols =  models.TextField(null=True, db_column="idols")
 
-    bands = models.ManyToManyField(BandModel)
-
     class Meta:
         verbose_name = 'Artist Profile'
         verbose_name_plural = 'Artist Profiles'
 
     def __str__(self):
+        return self.get_stage_name()
+
+    def get_stage_name(self):
         if self.stage_name != '':
             return f'{self.stage_name}'
         else:
             return f'{self.user.first_name} {self.user.last_name}'
+
+    def get_active_bands(self):
+        """
+        Returns a Queryset of Linups where the artist is active in that bandself.
+        The `is_active` attribute of an LineUpMember instance is set to True
+        """
+        return self.linups.filter(is_active=True)
 
     def save(self):
         self._instruments = self.__set_to_str(self.instruments)
         self._idols = self.__set_to_str(self.idols)
         self._genres = self.__set_to_str(self.genres)
         return super(ArtistModel, self).save()
+
+    def is_owner(self, other):
+        if isinstance(other, ArtistModel):
+            return self.pk == other.get_artist().pk
+        elif isinstance(other, User):
+            if other.is_authenticated and other.has_artistProfile():
+                return self.pk == other.get_artist().pk
+            else:
+                return False
+        else:
+            raise TypeError("`other` arguments needs to be of the type AritstModel or User Model")
+        is_owner = user.is_authenticated and user.has_artistProfile() and user.get_artist().pk == profile_id
 
     @property
     def instruments(self):
@@ -170,7 +189,7 @@ class ArtistModel(models.Model):
     @staticmethod
     def get_artist(pk, default=False):
         """
-        Returns an artist model based on the primate key `pk`.
+        Returns an artist model based on the primary key `pk`.
         If the instance do not exists `default` is returned.
         """
 
@@ -224,6 +243,19 @@ class ArtistModel(models.Model):
                 single_str+= ',' + s
 
         return single_str
+
+
+@receiver(pre_delete, sender=ArtistModel)
+def delete_pics(sender, instance, **kwargs):
+    """
+    This function will be called before an ArtistProfile instance is deleted. To remove pics from Cloudinary
+    """
+    pp=instance.profilepicmodel
+    bp=instance.backgroundpicmodel
+    try:
+        cloudinary.api.delete_resources([pp.public_id, bp.public_id])
+    except:
+        pass
 
 
 import datetime
