@@ -327,7 +327,10 @@ def update_pic(request):
     #TODO check for security: encapsulates common behaviour
 
     ar=request.user.get_artist()
-    pic=ar.profilepicmodel if request.POST.get('val') =='profile' else ar.backgroundpicmodel
-    pic.update(request.POST.get('public_id'), request.POST.get('original_filename'))
-
+    pic=ar.profile_pic if request.POST.get('val') =='profile' else ar.background_pic
+    pic.update_metadata(public_id=request.POST.get('public_id'),
+                        title=request.POST.get('original_filename'),
+                        width=request.POST.get('width'),
+                        height=request.POST.get('height'))
+    pic.save()
     return JsonResponse({'is_executed': True, 'val': request.POST.get('url')})
