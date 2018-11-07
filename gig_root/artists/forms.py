@@ -11,7 +11,7 @@ class DirectUploadProfilePic(forms.Form):
 
 
 class DirectUploadBackgroundPic(forms.Form):
-    background_pic = CloudinaryJsFileField()
+    background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_background_pic" })
 
 class CreateArtistForm(forms.ModelForm):
 
