@@ -1,22 +1,19 @@
 {% extends "gig/base.html" %}
 {% load static %}
 {% load cloudinary %}
-
+{% load staticfiles %}
 
 {% block title %}
 {{band.name}}
 {% endblock %}
 
+{% block link %}
+{% cloudinary_includes %}
+{% cloudinary_js_config %}
+{% endblock %}
+
 {% block body %}
 <div class="container">
-
-  <div class="row">
-    <div class="col-12">
-    </div>
-  </div>
-
-
-
 
   <div class="row">
     <div class="col-12">
@@ -35,8 +32,10 @@
     </div>
     {% if is_owner %}
     <div class="col-12">
-      <input type="file" name="profile_pic" accept="image/*" id="id_profile_pic">
-      <button type="button" name="button_update_profile_pic" onClick="updateProfilePic('id_profile_pic')">Save new Profile pic</button>
+      {{direct_pp}}
+      <div class="helper-message-container">
+        <p id="id_helper-message-band-profile-pic"></p>
+      </div>
     </div>
     {% endif %}
   </div>
@@ -50,8 +49,10 @@
     </div>
     {% if is_owner %}
     <div class="col-12">
-      <input type="file" name="backgr_pic" accept="image/*" id="id_background_pic">
-      <button type="button" name="button_update_backgroun_pic" onClick="updateBackgroundPic('id_background_pic')">Save new bg pic</button>
+      {{direct_bp}}
+      <div class="helper-message-container">
+        <p id="id_helper-message-band-background-pic"></p>
+      </div>
     </div>
     {% endif %}
   </div>
@@ -96,18 +97,18 @@
   </div>
   {% else %}
 
-    <div class="row">
-      <div class="col-12">
-        <h2>Band Genres</h2>
-        <ul>
-          {% for genre in band.genres %}
-          <li>
-            {{genre}}
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
+  <div class="row">
+    <div class="col-12">
+      <h2>Band Genres</h2>
+      <ul>
+        {% for genre in band.genres %}
+        <li>
+          {{genre}}
+        </li>
+        {% endfor %}
+      </ul>
     </div>
+  </div>
   {% endif %}
 
   {% else %}
@@ -188,9 +189,9 @@
 
 <script type="text/javascript">
 
-function sendAjaxRequest(url_l, dict, valToSend){
+function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
   if (valToSend != ''){
-    alert(`sendAjaxRequest with value ${valToSend}`);
+    // alert(`sendAjaxRequest with value ${valToSend}`);
     $.ajax({
       type: "POST",
       url: url_l,
@@ -199,10 +200,10 @@ function sendAjaxRequest(url_l, dict, valToSend){
       success: function(response){
 
         if(response.is_executed){
-          alert(`backend performed the requested operation succesfuly involving ${response.val}`)
+          success_func(response);
         }
         else{
-          alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+          failure_func(response);
         }
 
       }});
@@ -228,7 +229,20 @@ function sendAjaxRequest(url_l, dict, valToSend){
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
-    sendAjaxRequest("{% url 'musicians:update-description' %}", dict, $des.val());
+    success_func = function (response){
+      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+    };
+
+    failure_func = function (response){
+      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+    };
+
+
+    sendAjaxRequest("{% url 'musicians:update-description' %}",
+    dict,
+    $des.val(),
+    success_func,
+    failure_func);
   }
 
   function operationGenre(id_selector, operation){
@@ -240,7 +254,19 @@ function sendAjaxRequest(url_l, dict, valToSend){
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
-    sendAjaxRequest("{% url 'musicians:update-genre' %}", dict, $des.val());
+    success_func = function (response){
+      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+    };
+
+    failure_func = function (response){
+      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+    };
+
+    sendAjaxRequest("{% url 'musicians:update-genre' %}",
+    dict,
+    $des.val(),
+    success_func,
+    failure_func);
   }
 
   function addGenre(id_selector){
@@ -251,7 +277,7 @@ function sendAjaxRequest(url_l, dict, valToSend){
   }
 
 
-  function operationMember(id_selector, member_id, operation){
+  function operationMember(id_selector, member_id, operation, success_func, failure_func){
     $des=$(`#${id_selector}`);
     var dict= {
       'val': $des.val(),
@@ -261,53 +287,110 @@ function sendAjaxRequest(url_l, dict, valToSend){
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
-    sendAjaxRequest("{% url 'musicians:update-member' %}", dict, $des.val());
+    sendAjaxRequest("{% url 'musicians:update-member' %}", dict, $des.val(), success_func, failure_func);
   }
 
   function updateRole(id_selector, member_id){
-    operationMember(id_selector, member_id, 'update');
+    success_func = function (response){
+      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+    };
+
+    failure_func = function (response){
+      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+    };
+
+    operationMember(id_selector, member_id, 'update',success_func, failure_func);
   }
 
 
   function removeMember(id_selector, member_id){
-    operationMember(id_selector, member_id, 'remove');
+    success_func = function (response){
+      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+    };
+
+    failure_func = function (response){
+      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+    };
+
+    operationMember(id_selector, member_id, 'remove',success_func, failure_func);
   }
 
   function addMember(id_selector, id_help_text) {
     $des=$(`#${id_selector}`);
     var dict= {
       'val': $des.val(),
-      'url': "{% url 'musicians:add-member' %}",
       'band_id': {{band.pk}},
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
-    var valToSend=$des.val();
-    var url_l= "{% url 'musicians:add-member' %}";
+    success_func = function (response){
+      $(`#${id_help_text}`).text('An invitation was send succesfuly');
+    };
 
-    if (valToSend != ''){
-      alert(`sendAjaxRequest with value ${valToSend}`);
-      $.ajax({
-        type: "POST",
-        url: url_l,
-        data: dict,
-        dataType: 'json',
-        success: function(response){
-          $helptext=$(`#${id_help_text}`);
-          if(response.is_executed){
-            $helptext.text('An invitation was send succesfuly');
-          }
-          else{
-            alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
-            $helptext.text(response.reason);
-          }
+    failure_func = function (response){
+      $(`#${id_help_text}`).text(response.reason);
+    };
 
-        }});
-
-      }else {
-        alert("AjaxRequest wasn't send. The value involved in the update is an empty string ");
-      }
+    sendAjaxRequest("{% url 'musicians:add-member' %}", dict, $des.val(), success_func, failure_func);
   }
 
-</script>
-{% endblock %}
+  function bindPicListener(id_selector, start_func, progress_func, ready_func){
+    $(`#${id_selector}`).bind('cloudinaryprogress', progress_func)
+    $(`#${id_selector}`).cloudinary_fileupload().on('cloudinarydone', ready_func);
+  }
+
+  function bindProfileOrBgPicListener(id_selector, id_helper, operation){
+
+
+
+    success_func = function(response){
+      $helper=$(`#${id_helper}`);
+      $helper.text("Saved succesfuly");
+    };
+
+    failure_func = function(response){
+      $helper=$(`#${id_helper}`);
+      $helper.text(response.reason);
+    }
+
+    start_func=function(){
+      $helper=$(`#${id_helper}`);
+      $helper.text("Start upload");
+    };
+    progress_func=function(e, data){
+      $helper=$(`#${id_helper}`);
+      var per = Math.round((data.loaded * 100.0) / data.total) + '%';
+      $helper.text(`Uploading... ${per}`);
+    };
+    ready_func=function(e, data){
+      $helper=$(`#${id_helper}`);
+      $helper.text('Updating backend...');
+
+      dict={
+        'val': JSON.stringify(data.result),
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        'operation': operation,
+        'band_id': {{band.pk}},
+      };
+
+      sendAjaxRequest("{% url 'musicians:update-picture' %}", dict, data.result, success_func, failure_func);
+    };
+
+    bindPicListener(id_selector, start_func, progress_func, ready_func);
+  }
+
+  function bindProfilePicListener() {
+    bindProfileOrBgPicListener('id_new_band_profile_pic', 'id_helper-message-band-profile-pic', 'profile');
+  }
+
+  function bindBackgroundPicListener() {
+    bindProfileOrBgPicListener('id_new_band_background_pic', 'id_helper-message-band-background-pic', 'background');
+  }
+
+  $(document).ready(function(){
+    bindBackgroundPicListener();
+    bindProfilePicListener();
+  });
+
+  </script>
+  {% endblock %}
