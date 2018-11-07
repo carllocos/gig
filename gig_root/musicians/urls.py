@@ -12,5 +12,6 @@ urlpatterns =[
     path('update_member/', views.update_member, name='update-member'),
     path('add_member/', views.add_member, name='add-member'),
     path('confirm_member/<int:member_id>', views.confirm_member, name='confirm-membership'),
+    path('update_picture/', views.update_picture, name='update-picture'),
 
 ]
