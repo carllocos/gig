@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, JsonResponse
@@ -8,7 +10,7 @@ from artists.artist_util import has_artist_profile
 from users.models import User
 from users.util import getHTTP_Protocol
 
-from .forms import RegisterForm
+from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand
 from .models import Band, Member
 
 def test(request):
@@ -48,6 +50,8 @@ def band_profile(request, profile_id):
              'is_member': is_member,
              'line_up': band.get_active_members(),
              'band_pics': band.band_pics, ##TODO sort e.g. by date
+             'direct_pp': DirectUploadProfilePicBand(),
+             'direct_bp': DirectUploadBackgroundPicBand(),
              }
 
     return render(request, 'musicians/profile.html', context=context)
@@ -72,48 +76,51 @@ def register_band(request):
 
 
 def __contains_failure(request, keys, allowed_operations=None):
-        if not request.is_ajax():
-            context={
-                'title_page': 'Bad Request',
-                'title_msg': 'The requested operation is unauthorized',
-                'short_message': 'The requested operation is unauthorized'
-            }
-            return render(request, 'users/short_message.html', context=context)
+    """
+    Helper function that check common failure scenario's that occur during update of a band_profile
+    """
+    if not request.is_ajax():
+        context={
+            'title_page': 'Bad Request',
+            'title_msg': 'The requested operation is unauthorized',
+            'short_message': 'The requested operation is unauthorized'
+        }
+        return render(request, 'users/short_message.html', context=context)
 
-        for key in keys:
-            val= request.POST.get(key, False)
-            if not val:
-                return JsonResponse({'is_executed': False,
-                                    'reason': f'no value for key {key} was provided in the post request'})
-
-            if val == '':
-                return JsonResponse({'is_executed': False,
-                                    'reason': f'The value for key {key} cannot be an empty string'})
-
-        band_id=request.POST.get('band_id', False)
-
-        if not band_id:
+    for key in keys:
+        val= request.POST.get(key, False)
+        if not val:
             return JsonResponse({'is_executed': False,
-                                 'reason': 'No band id was provided'})
+                                'reason': f'no value for key {key} was provided in the post request'})
 
-        band= Band.get_band(band_id)
-        if not band:
+        if val == '':
             return JsonResponse({'is_executed': False,
-                                'reason': f'No band with band id {band_id} stored in the database.'})
+                                'reason': f'The value for key {key} cannot be an empty string'})
 
-        if not band.is_owner(request.user):
-            return JsonResponse({'is_executed': False,
-                                'reason': f'Unauhtorized request'})
+    band_id=request.POST.get('band_id', False)
 
-        if allowed_operations:
-            operation= request.POST.get('operation', False)
-            if not operation:
-                return JsonResponse({'is_executed': False, 'reason': 'no operation was specified'})
+    if not band_id:
+        return JsonResponse({'is_executed': False,
+                             'reason': 'No band id was provided'})
 
-            if not (operation in allowed_operations):
-                return JsonResponse({'is_executed': False, 'reason': 'An non supported operation was provided'})
+    band= Band.get_band(band_id)
+    if not band:
+        return JsonResponse({'is_executed': False,
+                            'reason': f'No band with band id {band_id} stored in the database.'})
 
-        return False
+    if not band.is_owner(request.user):
+        return JsonResponse({'is_executed': False,
+                            'reason': f'Unauhtorized request'})
+
+    if allowed_operations:
+        operation= request.POST.get('operation', False)
+        if not operation:
+            return JsonResponse({'is_executed': False, 'reason': 'no operation was specified'})
+
+        if not (operation in allowed_operations):
+            return JsonResponse({'is_executed': False, 'reason': 'A not supported operation was provided'})
+
+    return False
 
 @require_http_methods(["POST"])
 @login_required
@@ -196,14 +203,13 @@ def add_member(request):
     band=Band.get_band(request.POST.get('band_id'))
     if band.is_member(user_toAdd):#tests whether user_toAdd is already an active member
             return JsonResponse({'is_executed': False,
-                                'reason': 'Invitation not sent. The user is already member of the band'})
+                                'reason': 'The user is already member of the band'})
     artistToAdd=user_toAdd.get_artist()
     if band.is_member(user_toAdd, only_active_members=False):
         #if this is true a Member instance already exists but the artistToAdd is an inactive member
         m=band.get_member(artistToAdd)
     else:
         #in this branch a Member instance don't exists
-        print("creates a new member")
         m=band.add_member(role="Insert role specified", artist=artistToAdd, is_active=False)
 
     #TODO create a temporary token
@@ -240,3 +246,45 @@ def confirm_member(request, member_id):
         mem.save()
 
     return redirect('musicians:band-profile', profile_id=mem.get_band().pk)
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+def update_picture(request):
+    """
+    Ajax request to perform some operation on a picture belonging to the band.
+    The post request needs to contain the following keys;
+    1. `operation`: which represents the operation to perform.
+    2. `val`: the value needed to perform the operation
+    3. `band_id`: the band identifier for which the operation needs to be performed
+
+    The following operations are allowed:
+    `delete`: will delete a `band picture` of `band_id`, val corresponds with the `public_id` of the pic to be deleted
+    `add`: will add a picture to the `band_pics` of `band_id`, val corresponds with the metadata of the pic
+    `profile`: will update the profile_picture of `band_id`, `val` corresponds with the metadata of the pic
+    `background`: will update the background_picture of `band_id`, `val` corresponds with the metadata of the pic
+    """
+    failure=__contains_failure(request, keys=['val'], allowed_operations=['delete', 'add', 'profile', 'background'])
+    if failure:
+        return failure
+
+    operation=request.POST.get('operation')
+    val=request.POST.get('val')
+    band=Band.get_band(request.POST.get('band_id'))
+    if operation == 'profile' or operation =='background':
+        metadata=json.loads(request.POST.get('val'))
+        pic= band.profile_pic if operation == 'profile' else band.background_pic
+        pic.update_metadata(public_id=metadata.get('public_id'),
+                            title=metadata.get('title'),
+                            width=metadata.get('width'),
+                            height=metadata.get('height'))
+
+        pic.save()
+
+        return JsonResponse({'is_executed': True, 'val': request.POST.get('url')})
+
+    elif operation == 'delete':
+        pass
+    else:
+        print("IN THE ELSE CASE")
+        pass
