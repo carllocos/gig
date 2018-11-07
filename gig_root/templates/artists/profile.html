@@ -218,12 +218,12 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     {% if  is_owner%}
     <div class="col-12">
       {# <form action="{% url 'artists:update-profile-pic' %}" method="post" enctype="multipart/form-data"> #}
-        {# {% csrf_token %} #}
-        {{ direct_profile_pic_form }}
-        {# altenatively, could use: {% cloudinary_direct_upload_field request=request %} #}
-        <div class="helper-progress">
-          <p id="id_progress_profile"></p>
-        </div>
+      {# {% csrf_token %} #}
+      {{ direct_profile_pic_form }}
+      {# altenatively, could use: {% cloudinary_direct_upload_field request=request %} #}
+      <div class="helper-progress">
+        <p id="id_progress_profile"></p>
+      </div>
       {# </form> #}
     </div>
     {% endif %}
@@ -243,7 +243,14 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
         </div>
         {% if  is_owner%}
         <div class="col-12">
-          <input type="file" name="background_pic" accept="image/*" id="id_profile_pic">
+          {# <form action="{% url 'artists:update-profile-pic' %}" method="post" enctype="multipart/form-data"> #}
+          {# {% csrf_token %} #}
+          {{ direct_bg_pic_form }}
+          {# altenatively, could use: {% cloudinary_direct_upload_field request=request %} #}
+          <div class="helper-progress">
+            <p id="id_progress_background"></p>
+          </div>
+          {# </form> #}
         </div>
         {% endif %}
       </div>
@@ -277,9 +284,9 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
 <script type="text/javascript">
 
-function sendAjaxRequest(url_l, dict, valToSend){
+function sendAjaxRequest(url_l, dict, valToSend, succes_complete, failure_complete){
   if (valToSend != ''){
-    alert(`sendAjaxRequest with value ${valToSend}`);
+    // alert(`sendAjaxRequest with value ${valToSend}`);
     $.ajax({
       type: "POST",
       url: url_l,
@@ -288,10 +295,10 @@ function sendAjaxRequest(url_l, dict, valToSend){
       success: function(response){
 
         if(response.is_executed){
-          alert(`backend performed the requested operation succesfuly involving ${response.val}`)
+          succes_complete(response);
         }
         else{
-          alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+          failure_complete(response);
         }
 
       }});
@@ -309,7 +316,14 @@ function sendAjaxRequest(url_l, dict, valToSend){
     csrfmiddlewaretoken: '{{ csrf_token }}',
   };
 
-  sendAjaxRequest("{% url 'artists:update-genres-idols-insts' %}", dict, val);
+  succes_complete = function (response){
+    alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+  };
+  failure_complete = function (response){
+    alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+  };
+
+  sendAjaxRequest("{% url 'artists:update-genres-idols-insts' %}", dict, val, succes_complete, failure_complete);
 
 }
 
@@ -340,54 +354,89 @@ function addInstrument(id_selector) {
 
 function updateStageName(id_selector) {
   var val = $(`#${id_selector}`).val();
-  var dict= { 'val': val,
-  csrfmiddlewaretoken: '{{ csrf_token }}',
-};
-sendAjaxRequest("{% url 'artists:update-stage-name' %}", dict, val);
+  var dict= { 'val': val, csrfmiddlewaretoken: '{{ csrf_token }}',};
+
+  succes_complete = function (response){
+    alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+    var val = $(`#${id_selector}`).val(response.val);
+  };
+  failure_complete = function (response){
+    alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+  };
+
+  sendAjaxRequest("{% url 'artists:update-stage-name' %}", dict, val, succes_complete, failure_complete);
 }
 
 
 function updateBiography(id_selector) {
   var val = $(`#${id_selector}`).val();
-  var dict= { 'val': val,
-  csrfmiddlewaretoken: '{{ csrf_token }}',
-};
-sendAjaxRequest("{% url 'artists:update-biography' %}", dict, val);
+  var dict= { 'val': val, csrfmiddlewaretoken: '{{ csrf_token }}',};
+  succes_complete = function (response){
+    alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+    $(`#${id_selector}`).val(response.val);
+  };
+  failure_complete = function (response){
+    alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+  };
+  sendAjaxRequest("{% url 'artists:update-biography' %}", dict, val, succes_complete, failure_complete);
 }
 
 $(function (){
-  $('#id_new_profile_pic').bind('fileuploadstart', function(e, data){
-    console.log("start upload file2");
-  });
-
+  // $('#id_new_profile_pic').bind('fileuploadstart', function(e, data){
+  //   console.log("start upload file2");
+  // });
 
   $('#id_new_profile_pic').cloudinary_fileupload(
     {
-    // dropZone: '#direct_upload',
-    start: function () {
-      $('#id_progress_profile').text("Start upload");
-
-      console.log("start uploading picture");
-    },
-    progress: function () {
-      $('#id_progress_profile').text("Picture being upload");
-      console.log("uploading picture in progress");
-    },
-  }
-)
+      // dropZone: '#direct_upload',
+      start: function () {
+        $('#id_progress_profile').text("Start upload");
+      },
+      progress: function () {
+        $('#id_progress_profile').text("Picture being upload");
+      },
+    }
+  )
   .on('cloudinarydone', function (e, data) {
     $('#id_progress_profile').text('Updating backend...');
-    console.log(`The data is: ${data}`);
-    console.log(data);
-    console.log('result');
-    console.log(data.result);
 
     val='profile'
     dict=data.result
     dict['csrfmiddlewaretoken']= '{{ csrf_token }}'
     dict['val']=val
-    sendAjaxRequest("{% url 'artists:update-pic' %}", dict, val);
+    sendAjaxRequest("{% url 'artists:update-pic' %}",
+    dict,
+    val,
+    function(response){$('#id_progress_profile').text('Picture saved');},
+    function(response){alert(response.reason);});
   });
+
+
+  $('#id_new_background_pic').cloudinary_fileupload(
+    {
+      // dropZone: '#direct_upload',
+      start: function () {
+        $('#id_progress_background').text("Start upload");
+      },
+      progress: function () {
+        $('#id_progress_background').text("Picture being upload");
+      },
+    }
+  )
+  .on('cloudinarydone', function (e, data) {
+    $('#id_progress_background').text('Updating backend...');
+
+    val='background_pic'
+    dict=data.result
+    dict['csrfmiddlewaretoken']= '{{ csrf_token }}'
+    dict['val']=val
+    sendAjaxRequest("{% url 'artists:update-pic' %}",
+    dict,
+    val,
+    function(response){$('#id_progress_background').text('Picture saved');},
+    function(response){alert(response.reason);});
+  });
+
 });
 </script>
 
