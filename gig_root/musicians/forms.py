@@ -1,6 +1,7 @@
 from django import forms
 
-from .models import Band, Picture, defaultBandProfilePic, defaultBandBackgroundPic
+from .models import Band, LineUp, Member, DEFAULT_BAND_PROFILE_PIC, DEFAULT_BAND_BACKGROUND_PIC
+from users.sharedModels import Picture
 
 class RegisterForm(forms.ModelForm):
 
@@ -21,40 +22,29 @@ class RegisterForm(forms.ModelForm):
 
     def save(self, artist):
         """
-        Saving the associated band of this form and linking an artist to the band.
+        Creates and saves a Band instance, profile- and background Picture instances based on the cleaned_data.
+        The pictures are uploaded and saved through call to `upload_and_save` method.
+        Additionally a LineUp instance is created for this band.
         """
 
-        b=Band(name=self.cleaned_data['name'],
+        band=Band(name=self.cleaned_data['name'],
                description=self.cleaned_data['description'],
                genres=self.__genres_to_set(),
                owner=artist)
 
         #we create profile and background pic for the band instance
-        profile_pic=self.cleaned_data.get('profile_pic', False)
-        if profile_pic:
-            pp_m=Picture(title=profile_pic.name)
-            pp_m.save(profile_pic)
-            b.profile_pic=pp_m
-        else:
-            bp_m=defaultBandProfilePic()
-            bp_m.save()
-            b.profile_pic=bp_m
+        profile_pic=self.cleaned_data.get('profile_pic', None)
+        if profile_pic is None:
+            profile_pic=DEFAULT_BAND_PROFILE_PIC
+        band.profile_pic=Picture().upload_and_save(profile_pic)
 
+        background_pic=self.cleaned_data.get('background_pic', None)
+        if background_pic is None:
+            background_pic=DEFAULT_BAND_BACKGROUND_PIC
+        band.background_pic=Picture().upload_and_save(background_pic)
 
-
-        background_pic=self.cleaned_data.get('background_pic', False)
-        if background_pic:
-            bp_m=Picture(title=background_pic.name)
-            bp_m.save(background_pic)
-            b.background_pic=bp_m
-        else:
-            bp_m=defaultBandBackgroundPic()
-            bp_m.save()
-            b.background_pic=bp_m
-
-        b.save()
-
-        return b
+        band.save()
+        return band
 
 
     def __is_genres_valid(self):

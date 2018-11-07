@@ -9,8 +9,8 @@ urlpatterns =[
     path('profile/<int:profile_id>', views.band_profile, name="band-profile"),
     path('update_description/', views.update_description, name="update-description"),
     path('update_genre/', views.update_genre, name="update-genre"),
-    path('update_linup/', views.update_line_up, name='update-line-up'),
+    path('update_member/', views.update_member, name='update-member'),
     path('add_member/', views.add_member, name='add-member'),
-    path('confirm_member/<int:line_up_id>', views.confirm_member, name='confirm-membership'),
+    path('confirm_member/<int:member_id>', views.confirm_member, name='confirm-membership'),
 
 ]

@@ -95,19 +95,35 @@
     </div>
   </div>
   {% else %}
-  <div class="row">
-    <div class="col-12">
-      <h2>Band Genres</h2>
-      <ul>
-        {% for genre in band.genres %}
-        <li>
-          {{genre}}
-        </li>
-        {% endfor %}
-      </ul>
+
+    <div class="row">
+      <div class="col-12">
+        <h2>Band Genres</h2>
+        <ul>
+          {% for genre in band.genres %}
+          <li>
+            {{genre}}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
-  </div>
   {% endif %}
+
+  {% else %}
+  <div class="row">
+    <h2>Band Genres</h2>
+    {% if is_owner %}
+    <div class="genre-container">
+      <input type="text" name="new_genre0" id="id_new_genre0" value="add genre">
+      <button type="button" name="" onClick="addGenre('id_new_genre0')">Add Genre</button>
+    </div>
+    {% else %}
+    <div class="col-12">
+      Band didn't specify any genre
+    </div>
+    {% endif %}
+  </div>
   {% endif %}
 
 
@@ -141,20 +157,20 @@
     <div class="col-12">
       <h2>Linup</h2>
       <ul>
-        {% for linup in line_up_set %}
+        {% for member in line_up %}
         <li>
-          <a href="{% url 'artists:artist-profile' profile_id=linup.member.pk%}">{{linup.member.stage_name}}</a>
+          <a href="{% url 'artists:artist-profile' profile_id=member.artist.pk%}">{{member.artist.stage_name}}</a>
           <br>
           {% if is_owner%}
-          <input type="text" name="role" id="id_role0" value="{{linup.role}}">
-          <button type="button" name="" onClick="updateRole('id_role0', '{{linup.pk}}')">Update Role</button>
-          <button type="button" name="" onClick="removeMember('id_role0', '{{linup.pk}}')">Remove member</button>
+          <input type="text" name="role" id="id_role0" value="{{member.role}}">
+          <button type="button" name="" onClick="updateRole('id_role0', '{{member.pk}}')">Update Role</button>
+          <button type="button" name="" onClick="removeMember('id_role0', '{{member.pk}}')">Remove member</button>
           {% else %}
-          <p>{{linup.role}}</p>
+          <p>{{member.role}}</p>
           {% endif %}
           <br>
-          (profile public_id {{linup.member.profilepicmodel.public_id}})
-          {% cloudinary linup.member.profilepicmodel.public_id width=100 height=150 crop="fill"%}
+          (profile public_id {{member.artist.profile_pic.public_id}})
+          {% cloudinary member.artist.profile_pic.public_id width=100 height=150 crop="fill"%}
         </li>
         {% endfor %}
         {% if is_owner %}
@@ -235,26 +251,26 @@ function sendAjaxRequest(url_l, dict, valToSend){
   }
 
 
-  function operationMember(id_selector, line_up_id, operation){
+  function operationMember(id_selector, member_id, operation){
     $des=$(`#${id_selector}`);
     var dict= {
       'val': $des.val(),
       'operation': operation,
-      'line_up_id': line_up_id,
+      'member_id': member_id,
       'band_id': {{band.pk}},
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
-    sendAjaxRequest("{% url 'musicians:update-line-up' %}", dict, $des.val());
+    sendAjaxRequest("{% url 'musicians:update-member' %}", dict, $des.val());
   }
 
-  function updateRole(id_selector, line_up_id){
-    operationMember(id_selector, line_up_id, 'update');
+  function updateRole(id_selector, member_id){
+    operationMember(id_selector, member_id, 'update');
   }
 
 
-  function removeMember(id_selector, line_up_id){
-    operationMember(id_selector, line_up_id, 'remove');
+  function removeMember(id_selector, member_id){
+    operationMember(id_selector, member_id, 'remove');
   }
 
   function addMember(id_selector, id_help_text) {

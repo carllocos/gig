@@ -7,17 +7,10 @@ from django.db import models
 
 from artists.models import ArtistModel
 from users.models import User
+from users.sharedModels import Picture
 
-import cloudinary
-
-
-def defaultBandProfilePic():
-    path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_profile.png")
-    return Picture(title="profile_default_pic", default_pic=path)
-
-def defaultBandBackgroundPic():
-    path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_profile.jpg")
-    return Picture(title="background_default_pic", default_pic=path)
+DEFAULT_BAND_PROFILE_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_profile.png")
+DEFAULT_BAND_BACKGROUND_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_background.jpg")
 
 def str_to_int(s , default=False):
     try:
@@ -25,77 +18,19 @@ def str_to_int(s , default=False):
     except ValueError:
         return default
 
-class Picture(models.Model):
-    MAX_LENGTH=200
-
-    title=models.CharField(default="", max_length=MAX_LENGTH, null=False)
-    public_id=models.CharField(max_length=MAX_LENGTH, null=False)
-    width = models.PositiveIntegerField(null=False)
-    height = models.PositiveIntegerField(null=False)
-
-    def __init__(self, *args, **kwargs):
-        default_pic = kwargs.pop('default_pic', None)
-        super(Picture, self).__init__(*args, **kwargs)
-        if default_pic is not None:
-            self.__pic=default_pic
-
-    def __str__(self):
-        return self.title
-
-    def save(self, pic=None):
-        """
-        Save method will save the picture to Cloudinary
-        """
-        if not pic:
-            pic=self.__pic
-        metadata=cloudinary.uploader.upload(pic)
-        self.height=metadata.get('height')
-        self.width=metadata.get('width')
-        self.public_id=metadata.get('public_id')
-        if self.title.endswith(metadata.get('format')):
-                new_title = self.title[:-len(metadata.get('format'))]
-                self.title=new_title
-
-        super(Picture, self).save()
-
-    # def delete(self, *args, **kwargs):
-    #     try:
-    #         cloudinary.api.delete_resources([self.public_id])
-    #
-    #     except:
-    #         pass
-    #
-    #     super(Picture, self).delete(*args, **kwargs)
-
-class Video(models.Model):
-    pass
-
-class Vote(models.Model):
-    #the vote can be replaced by just an integerfield
-    #The vote can be done on a Artist and band profile but also on a comment
-    pass
-
-class Comment(models.Model):
-    pass
-    ##Comment belongs to band profile but also eventself.
-    #cotnains a field of votes
-
 
 class Band(models.Model):
 
     MAX_LENGTH=100
     name = models.CharField(null=False, max_length=MAX_LENGTH)
     description =models.TextField(null=True, db_column="description")
+    _genres =models.TextField(null=True, db_column="genres")
+    owner = models.ForeignKey(ArtistModel, db_column="owner", on_delete=models.CASCADE, related_name="owns")
+    background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_band")
+    profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_band")
+    band_pics = models.ForeignKey(Picture, db_column="Band pictures", default="", null=True, on_delete=models.SET_DEFAULT, related_name="bandpic_of")
 
     #location attribute
-
-    _genres =models.TextField(null=True, db_column="genres")
-
-    owner = models.ForeignKey(ArtistModel, db_column="owner", on_delete=models.CASCADE, related_name="owns")
-    background_pic = models.OneToOneField(Picture, db_column= "background_pic", default=None, null=True, on_delete=models.SET_DEFAULT, related_name="background_of")
-    profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default=None, null=True, on_delete=models.SET_DEFAULT, related_name="profile_of")
-
-    band_pics = models.ForeignKey(Picture, db_column="Band pictures", default=None, null=True, on_delete=models.SET_DEFAULT, related_name="bandpic_of")
     #videos=
     #social media associations:
     #main location of the band
@@ -107,6 +42,14 @@ class Band(models.Model):
     def save(self):
         self._genres = self.__set_to_str(self.genres)
         super(Band, self).save()
+
+        try:
+             self.lineup
+        except:
+            l=LineUp(band=self)
+            l.save()
+            self.lineup=l
+            super(Band, self).save()
 
         return self
 
@@ -147,49 +90,21 @@ class Band(models.Model):
         else:
             return False
 
-    def get_line_up(self, artist):
-        """
-        Returns a LineUpMember instance belonging to `artist`.
-        This method assumes that the instance exits
-        """
-        for l in self.linupmember_set.all():
-            if l.member == artist:
-                return l
+    def get_member(self, artist, only_active_members=True):
+        return self.lineup.get_member(artist, only_active_members)
 
     def get_active_members(self, default=False):
         """
-        Returns a Queryset of LinupMember instances where the attribute `is_active` is equal to True.
+        Returns a Queryset of Member instances where the attribute `is_active` is equal to True.
         """
-        return self.linupmember_set.filter(is_active=True)
+        return self.lineup.get_memberships()
 
     def is_member(self, other, only_active_members=True):
-        """
-        `is_member` method will test whether `other` is member of the band.
-        `only_active_members` set on true tests additionally whether the member is an active member (`is_active` attribute is true).
-        """
-        if isinstance(other, ArtistModel):
-            for l in self.linupmember_set.all():
-                if l.artist.pk == other.pk:
-                    if only_active_members:
-                        return l.is_active
-                    else:
-                        return True
+        return self.lineup.is_member(other, only_active_members)
 
-            return False
-        elif isinstance(other, User):
-            if other.is_authenticated and other.has_artistProfile():
-                ar=other.get_artist()
-                for l in self.linupmember_set.all():
-                    if l.member.pk == ar.pk:
-                        if only_active_members:
-                            return l.is_active
-                        else:
-                            return True
-                return False
-            else:
-                return False
-        else:
-            return False
+    def add_member(self, artist, role="No role dessigned", is_active=False):
+        return self.lineup.add_member(artist=artist, role=role, is_active=is_active)
+
     @property
     def genres(self):
         if isinstance(self._genres, str):
@@ -259,32 +174,96 @@ class Band(models.Model):
 @receiver(pre_delete, sender=Band)
 def delete_pics(sender, instance, **kwargs):
     """
-    This function will be called before a band instance is deleted. To remove pics from Cloudinary
+    This function will be called before a band instance is deleted. To remove the associated pics of the band
     """
-    pp=instance.profile_pic
-    bp=instance.background_pic
-    try:
-        cloudinary.api.delete_resources([pp.public_id, bp.public_id])
-    except:
-        pass
-
-    pp.delete()
-    bp.delete()
+    Picture.delete_pics([instance.profile_pic, instance.background_pic])
 
 
 
-
-class LinupMember(models.Model):
-    role= models.CharField(max_length=100, null=False, default="")
-    member=models.ForeignKey(ArtistModel, on_delete=models.CASCADE, default="", null=True, related_name="linups")
-    band= models.ForeignKey(Band, default="", on_delete=models.CASCADE)# related_name="linup_member")
-    is_active=models.BooleanField(default=False)
+class LineUp(models.Model):
+    """
+    LineUp model represents a line up of a `band`. All members can be accessed through `members` attribute.
+    """
+    band=models.OneToOneField(Band, default="", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.member.get_stage_name()} with role {self.role} in band {self.band.name}'
+        return f'LineUp for band {self.band.name}'
+
+    def add_member(self, artist, role, is_active):
+        return self.member_set.create(artist=artist, role=role, is_active=is_active)
+
+    def is_member(self, member, only_active_members= False):
+        """
+        This method tests whether `member` is part of this LineUp.
+        `member` can be a User, AritstModel or a Member instance.
+        """
+        if isinstance(member, Member):
+            m=self.member_set.filter(pk=member.pk)
+        elif isinstance(member, User):
+            if member.is_authenticated and member.has_artistProfile():
+                m=self.member_set.filter(artist__pk=member.get_artist().pk)
+            else:
+                return False
+        elif isinstance(member, ArtistModel):
+            m=self.member_set.filter(artist__pk=member.pk)
+        else:
+            return False
+
+        if m.exists():
+            if only_active_members:
+                return m.first().is_active
+            return True
+        else:
+            return False
+
+
+        if m.exits():
+            if only_active_members:
+                return m.is_active
+            return True
+        else:
+            return False
+
+    def get_memberships(self, only_active_members=True):
+        """
+        Returns all Member instances from the member_set where `is_active`== `only_active_members`
+        """
+        return self.member_set.filter(is_active=only_active_members)
+
+
+    def get_member(self, artist, only_active_members=True):
+        """
+        Returns a Member instance associated to artist from the member_set. If `only_active_members` is
+        set to true, the Member instance is returned only if it's active
+        """
+        try:
+            m=self.member_set.get(artist__pk=artist.pk)
+            if only_active_members and m.is_active:
+                return m
+            return m
+        except:
+            return False
+
+
+
+class Member(models.Model):
+    """
+    Member model represents the `role` of an `aritst` in a particular band. The artist can whether be
+    active or inactive depending on the value of `is_active`.
+    """
+    role= models.CharField(max_length=100, null=False, default="")
+    artist=models.ForeignKey(ArtistModel, on_delete=models.CASCADE, default="", null=True, related_name="line_ups")
+    is_active=models.BooleanField(default=False)
+    lineup=models.ForeignKey(LineUp, default="", null=False, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.artist.get_stage_name()} with role {self.role}'
+
+    def get_band(self):
+        return self.lineup.band
 
     @staticmethod
-    def get_line_up(pk, default=False):
+    def get_member(pk, default=False):
         """
         Returns a LineUpMember instance based on the primary key `pk`.
         If the instance do not exists `default` is returned.
@@ -298,6 +277,6 @@ class LinupMember(models.Model):
             if not isinstance(pk, int):
                 return default
         try:
-            return LinupMember.objects.get(pk=pk)
+            return Member.objects.get(pk=pk)
         except:
             return default

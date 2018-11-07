@@ -9,7 +9,7 @@ from users.models import User
 from users.util import getHTTP_Protocol
 
 from .forms import RegisterForm
-from .models import Band, LinupMember
+from .models import Band, Member
 
 def test(request):
     return HttpResponse("Received reuqest")
@@ -46,7 +46,7 @@ def band_profile(request, profile_id):
              'contact_email': email,  #needed to contact the band
              'is_owner': is_owner,
              'is_member': is_member,
-             'line_up_set': band.get_active_members(),
+             'line_up': band.get_active_members(),
              'band_pics': band.band_pics, ##TODO sort e.g. by date
              }
 
@@ -61,10 +61,10 @@ def register_band(request):
     if request.method == 'POST':
         f=RegisterForm(request.POST, request.FILES)
         if f.is_valid():
-            #saves the band information and profile and bg picture of the band
+
             band = f.save(request.user.get_artist())
-            lm=LinupMember(role="insert your role", member=request.user.get_artist(), band=band, is_active=True)
-            lm.save()
+            band.add_member(request.user.get_artist(), is_active=True)
+
             return redirect('musicians:band-profile', profile_id=band.pk)
 
     context={'form': f}
@@ -159,19 +159,19 @@ def update_genre(request):
 @require_http_methods(["POST"])
 @login_required
 @has_artist_profile
-def update_line_up(request):
-    failure=__contains_failure(request, keys=['val', 'line_up_id'], allowed_operations=['update', 'remove'])
+def update_member(request):
+    failure=__contains_failure(request, keys=['val', 'member_id'], allowed_operations=['update', 'remove'])
     if failure:
         return failure
 
-    line_up=LinupMember.get_line_up(request.POST.get('line_up_id'))
+    mem=Member.get_member(request.POST.get('member_id'))
     val=''
-    if request.POST.get('operation')== 'update': #update the rol of a memeber
+    if request.POST.get('operation')== 'update': #update the rol of a member
         val=request.POST.get('val')
-        line_up.role=val
-        line_up.save()
+        mem.role=val
+        mem.save()
     else: #remove a member
-        line_up.delete()
+        mem.delete()
 
     return JsonResponse({'is_executed': True, 'val': val})
 
@@ -184,34 +184,33 @@ def add_member(request):
         return failure
 
     email= request.POST.get('val')
-    user=User.get_user(email, default=False)
-    if not user:
+    user_toAdd=User.get_user(email, default=False)
+    if not user_toAdd:
         return JsonResponse({'is_executed': False,
                             'reason': 'There is no user with that email address'})
 
-    if not(user.has_artistProfile()):
+    if not user_toAdd.has_artistProfile():
         return JsonResponse({'is_executed': False,
                             'reason': 'Invitation not sent. The user has currently no artist profile'})
 
     band=Band.get_band(request.POST.get('band_id'))
-    if band.is_member(user):
+    if band.is_member(user_toAdd):#tests whether user_toAdd is already an active member
             return JsonResponse({'is_executed': False,
                                 'reason': 'Invitation not sent. The user is already member of the band'})
-    artist=user.get_artist()
-    if band.is_member(user, only_active_members=False):
-        #if this is true then an LineUpMember instance already exists for the artist.
-        l=band.get_line_up(artist)
+    artistToAdd=user_toAdd.get_artist()
+    if band.is_member(user_toAdd, only_active_members=False):
+        #if this is true a Member instance already exists but the artistToAdd is an inactive member
+        m=band.get_member(artistToAdd)
     else:
-        l=LinupMember(role="Insert role specified", member=artist, band=band, is_active=False)
-        l.save()
+        #in this branch a Member instance don't exists
+        print("creates a new member")
+        m=band.add_member(role="Insert role specified", artist=artistToAdd, is_active=False)
 
     #TODO create a temporary token
-    confirm_url=getHTTP_Protocol() + get_current_site(request).domain + reverse('musicians:confirm-membership', kwargs={'line_up_id': l.pk})
+    confirm_url=getHTTP_Protocol() + get_current_site(request).domain + reverse('musicians:confirm-membership', kwargs={'member_id': m.pk})
     mail_subject=f"Invitation to Join {band.name}"
-    mail_message_txt= f"Hello {user.first_name}, you received an invitaion to join {band.name}.\nClick on the following link to confirm the invitation {confirm_url}"
-    user.send_email(mail_subject=mail_subject, mail_message_txt=mail_message_txt)
-
-    print(mail_message_txt)
+    mail_message_txt= f"Hello {user_toAdd.first_name}, you received an invitaion to join {band.name}.\nClick on the following link to confirm the invitation {confirm_url}"
+    user_toAdd.send_email(mail_subject=mail_subject, mail_message_txt=mail_message_txt)
 
     return JsonResponse({'is_executed': True, 'reason': 'An invitation was send succesfuly'})
 
@@ -220,24 +219,24 @@ def add_member(request):
 @require_http_methods(["GET"])
 @login_required
 @has_artist_profile
-def confirm_member(request, line_up_id):
+def confirm_member(request, member_id):
     #TODO test the link towards a token
 
-    lin=LinupMember.get_line_up(line_up_id)
-    if not lin:
+    mem=Member.get_member(member_id)
+    if not mem:
         context= {'short_message': "The confirmation can't be executed because the passed identifier for the line up is incorrect .",
                   'title_msg': "The identifier of the lineup is incorrect",
                   'title_page': "Bad request"}
         return render(request, 'users/short_message.html',context=context)
 
-    if lin.member != request.user.get_artist():
+    if mem.artist != request.user.get_artist():
             context= {'short_message': "The request can't be executed because you are not allowed to request this page.",
                       'title_msg': "You tried to perform an unauthorized operation.",
                       'title_page': "Bad request"}
             return render(request, 'users/short_message.html',context=context)
 
-    if not lin.is_active:
-        lin.is_active= True
-        lin.save()
+    if not mem.is_active:
+        mem.is_active= True
+        mem.save()
 
-    return redirect('musicians:band-profile', profile_id=lin.band.pk)
+    return redirect('musicians:band-profile', profile_id=mem.get_band().pk)
