@@ -7,6 +7,12 @@ from django.db import models
 import cloudinary
 
 
+def str_to_int(s):
+    """
+    Helper method to transform strings to int
+    """
+    return int(float(s))
+
 class Comment(models.Model):
     pass
         ##Comment belongs to band profile but also eventself.
@@ -57,10 +63,10 @@ class Picture(models.Model):
         """
         metadata=cloudinary.uploader.upload(pic)
         self.is_removed=False
-        self.title=metadata.get('file_name')
-        self.height=metadata.get('height')
-        self.width=metadata.get('width')
-        self.public_id=metadata.get('public_id')
+        self.title=metadata.get('original_filename')
+        self.height= str_to_int(metadata.get('height'))
+        self.width= str_to_int(metadata.get('width'))
+        self.public_id= str_to_int(metadata.get('public_id'))
 
 
     def remove_from_cloud(self, pic):
@@ -76,7 +82,7 @@ class Picture(models.Model):
         self.width=None
         self.public_id=None
 
-    def update_metadata(self, **metadata):
+    def update_metadata(self, public_id, title, width, height):
         """
         Method is mean to be called when a picture upload to cloudinary occurs
         at the browser. The `medata` holds data of the uploaded picture.
@@ -84,15 +90,13 @@ class Picture(models.Model):
         """
         if not self.is_removed:
             #delete old reference to cloudinary
-            try:
-                cloudinary.api.delete_resources([self.public_id])
-            except:
-                pass
+            cloudinary.api.delete_resources([self.public_id])
+
         self.is_removed=False
-        self.title=metadata.get('file_name')
-        self.height=metadata.get('height')
-        self.width=metadata.get('width')
-        self.public_id=metadata.get('public_id')
+        self.title=title
+        self.height= str_to_int(height)
+        self.width= str_to_int(width)
+        self.public_id=public_id
 
     def delete(self, *args, **kwargs):
         """
