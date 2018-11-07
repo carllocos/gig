@@ -1,7 +1,16 @@
 from django import forms
+from cloudinary.forms import CloudinaryJsFileField
 
 from .models import Band, LineUp, Member, DEFAULT_BAND_PROFILE_PIC, DEFAULT_BAND_BACKGROUND_PIC
 from users.sharedModels import Picture
+
+
+class DirectUploadProfilePicBand(forms.Form):
+    profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_band_profile_pic" })
+
+class DirectUploadBackgroundPicBand(forms.Form):
+    background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_background_pic" })
+
 
 class RegisterForm(forms.ModelForm):
 
