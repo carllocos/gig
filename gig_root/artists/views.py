@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
-from .forms import CreateArtistForm
+from .forms import CreateArtistForm, DirectUploadProfilePic, DirectUploadBackgroundPic
 from .models import ArtistModel
 from .artist_util import has_not_artist_profile, suggest_genres, suggest_instruments, has_artist_profile
 
@@ -42,13 +42,17 @@ def view_profile(request, profile_id):
 
     #is_owner tells wheter the user accessing artist profile with id `profile_id` is the owner of that profile
     is_owner = user.is_authenticated and user.has_artistProfile() and user.get_artist().pk == profile_id
-    linups= artist.get_active_bands()
+    linups= artist.get_memberships()
+    direct_prof_pic_form = DirectUploadProfilePic() if is_owner else None
+    direct_bg_pic_form = DirectUploadBackgroundPic() if is_owner else None
 
     context={'user': user,
              'artist': artist,
              'is_owner': is_owner,
              'profile_pic_id': artist.get_profile_pic_id(),
+             'direct_profile_pic_form': direct_prof_pic_form,
              'bg_pic_id': artist.get_background_pic_id(),
+             'direct_bg_pic_form': direct_bg_pic_form,
              'linups': linups,
              }
 
@@ -314,3 +318,16 @@ def update_biography(request):
         'old': old,
         'reason': ''
     })
+
+
+@require_http_methods(['POST'])
+@login_required
+@has_artist_profile
+def update_pic(request):
+    #TODO check for security: encapsulates common behaviour
+
+    ar=request.user.get_artist()
+    pic=ar.profilepicmodel if request.POST.get('val') =='profile' else ar.backgroundpicmodel
+    pic.update(request.POST.get('public_id'), request.POST.get('original_filename'))
+
+    return JsonResponse({'is_executed': True, 'val': request.POST.get('url')})

@@ -1,11 +1,18 @@
 {% extends "gig/base.html" %}
 {% load cloudinary %}
+{% load staticfiles %}
+
 {% block title %}
 {% if artist.stage_name %}
 Profile {{artist.stage_name}}
 {% else %}
 Profile {{artist.user.first_name}} {{artist.user.last_name}}
 {% endif %}
+{% endblock %}
+
+{% block link %}
+{% cloudinary_includes %}
+{% cloudinary_js_config %}
 {% endblock %}
 {% block body %}
 
@@ -68,12 +75,12 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
       {% if artist.biography %}
       <textarea name="biography" cols="40" rows="10" id="id_biography">{{artist.biography}}</textarea>
       {% else %}
-        {% if is_owner %}
-        <p>You still didn't specify your biography. Fill text area in to complete your artistprofile</p>
-        <textarea name="biography" cols="40" rows="10" id="id_biography">Tell us somenthing about you..</textarea>
-        {% else %}
-        This artist didn't specify any description
-        {% endif %}
+      {% if is_owner %}
+      <p>You still didn't specify your biography. Fill text area in to complete your artistprofile</p>
+      <textarea name="biography" cols="40" rows="10" id="id_biography">Tell us somenthing about you..</textarea>
+      {% else %}
+      This artist didn't specify any description
+      {% endif %}
       {%endif%}
     </div>
   </div>
@@ -210,7 +217,14 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     </div>
     {% if  is_owner%}
     <div class="col-12">
-      <input type="file" name="profile_pic" accept="image/*" id="id_profile_pic">
+      {# <form action="{% url 'artists:update-profile-pic' %}" method="post" enctype="multipart/form-data"> #}
+        {# {% csrf_token %} #}
+        {{ direct_profile_pic_form }}
+        {# altenatively, could use: {% cloudinary_direct_upload_field request=request %} #}
+        <div class="helper-progress">
+          <p id="id_progress_profile"></p>
+        </div>
+      {# </form> #}
     </div>
     {% endif %}
   </div>
@@ -240,12 +254,12 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
   <div class="bands-container">
     <h2>Bands</h2>
-    {% for member in linups %}
+    {% for membership in linups %}
     <div class="row">
       <div class="col-6">
-        <h4><a href="{% url 'musicians:band-profile' profile_id=member.band.pk%}"> {{member.band.name}}</a></h4>
+        <h4><a href="{% url 'musicians:band-profile' profile_id=membership.lineup.band.pk%}"> {{membership.lineup.band.name}}</a></h4>
         <p> band_profil_pic (public_id: {{member.band.profile_pic.public_id}})</p>
-        {% cloudinary member.band.profile_pic.public_id width=500 height=300 %}
+        {% cloudinary membership.lineup.band.profile_pic.public_id width=500 height=300 %}
         <p>Role: {{member.role}}</p>
       </div>
     </div>
@@ -259,9 +273,6 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   <p>The artist is not involved in any band</p>
   {% endif %}
   {% endif %}
-
-
-  {# {% cloudinary bg_pic_id %} #}
 </div>
 
 <script type="text/javascript">
@@ -330,46 +341,54 @@ function addInstrument(id_selector) {
 function updateStageName(id_selector) {
   var val = $(`#${id_selector}`).val();
   var dict= { 'val': val,
-              csrfmiddlewaretoken: '{{ csrf_token }}',
-            };
-  sendAjaxRequest("{% url 'artists:update-stage-name' %}", dict, val);
+  csrfmiddlewaretoken: '{{ csrf_token }}',
+};
+sendAjaxRequest("{% url 'artists:update-stage-name' %}", dict, val);
 }
 
 
 function updateBiography(id_selector) {
   var val = $(`#${id_selector}`).val();
   var dict= { 'val': val,
-              csrfmiddlewaretoken: '{{ csrf_token }}',
-            };
-  sendAjaxRequest("{% url 'artists:update-biography' %}", dict, val);
+  csrfmiddlewaretoken: '{{ csrf_token }}',
+};
+sendAjaxRequest("{% url 'artists:update-biography' %}", dict, val);
 }
 
-// $(function () {
-//   $('#direct_upload_background input[type="file"]')
-//   .cloudinary_fileupload({
-//     dropZone: '#direct_upload',
-//     start: function () {
-//       $('.status_value').text('Starting direct upload...');
-//     },
-//     progress: function () {
-//       $('.status_value').text('Uploading...');
-//     },
-//   })
-//   .on('cloudinarydone', function (e, data) {
-//       $('.status_value').text('Updating backend...');
-//       $.post(this.form.action, $(this.form).serialize()).always(function (result, status, jqxhr) {
-//         $('.status_value').text(result.errors ? JSON.stringify(result.errors) : status);
-//       });
-//       var info = $('<div class="uploaded_info"/>');
-//       $(info).append($('<div class="data"/>').append(prettydump(data.result)));
-//       $(info).append($('<div class="image"/>').append(
-//          $.cloudinary.image(data.result.public_id, {
-//          format: data.result.format, width: 150, height: 150, crop: "fill"
-//          })
-//       ));
-//       $('.uploaded_info_holder').append(info);
-//   });
-// });
+$(function (){
+  $('#id_new_profile_pic').bind('fileuploadstart', function(e, data){
+    console.log("start upload file2");
+  });
+
+
+  $('#id_new_profile_pic').cloudinary_fileupload(
+    {
+    // dropZone: '#direct_upload',
+    start: function () {
+      $('#id_progress_profile').text("Start upload");
+
+      console.log("start uploading picture");
+    },
+    progress: function () {
+      $('#id_progress_profile').text("Picture being upload");
+      console.log("uploading picture in progress");
+    },
+  }
+)
+  .on('cloudinarydone', function (e, data) {
+    $('#id_progress_profile').text('Updating backend...');
+    console.log(`The data is: ${data}`);
+    console.log(data);
+    console.log('result');
+    console.log(data.result);
+
+    val='profile'
+    dict=data.result
+    dict['csrfmiddlewaretoken']= '{{ csrf_token }}'
+    dict['val']=val
+    sendAjaxRequest("{% url 'artists:update-pic' %}", dict, val);
+  });
+});
 </script>
 
 {% endblock %}

@@ -1,6 +1,17 @@
 from django import forms
-from .models import ArtistModel, ProfilePicModel, BackGroundPicModel
+from cloudinary.forms import CloudinaryJsFileField
 
+from .models import ArtistModel, DEFAULT_PROFILE_PIC, DEFAULT_BACKGROUND_PIC
+from users.sharedModels import Picture
+
+class DirectUploadProfilePic(forms.Form):
+    profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_profile_pic" })
+
+
+
+
+class DirectUploadBackgroundPic(forms.Form):
+    background_pic = CloudinaryJsFileField()
 
 class CreateArtistForm(forms.ModelForm):
 
@@ -61,18 +72,18 @@ class CreateArtistForm(forms.ModelForm):
                           biography=self.cleaned_data['biography'],
                           user=user)
 
-        art.save()
-
         #Creating and saving the profile/ background_pic model.
-        profile_pic= self.cleaned_data.get('profile_pic', False)
-        profil_pic_name = profile_pic.name if profile_pic else  ''
-        pp_model = ProfilePicModel.createPic(artist=art, title=profil_pic_name)
-        pp_model.save(profile_pic)
+        profile_pic= self.cleaned_data.get('profile_pic', None)
+        if profile_pic is None:
+            profile_pic = DEFAULT_PROFILE_PIC
+        art.profile_pic = Picture().upload_and_save(profile_pic)
 
-        bg_pic= self.cleaned_data.get('background_pic', False)
-        bg_pic_name = bg_pic.name if bg_pic else  ''
-        bp_model = BackGroundPicModel.createPic(artist=art, title=bg_pic_name)
-        bp_model.save(bg_pic)
+        bg_pic= self.cleaned_data.get('background_pic', None)
+        if bg_pic is None:
+            bg_pic=DEFAULT_BACKGROUND_PIC
+        art.background_pic =  Picture().upload_and_save(bg_pic)
+
+        art.save()
 
         return art
 

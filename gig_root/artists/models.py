@@ -6,8 +6,12 @@ from django.dispatch import receiver
 from django.conf import  settings
 from django.db import models
 from users.models import User
+from users.sharedModels import Picture
 
-__path_to_default_pics = os.path.join(settings.STATICFILES_DIRS [0], "pics")
+
+DEFAULT_PROFILE_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/profile_default.jpg")
+DEFAULT_BACKGROUND_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/background_default.jpg")
+
 
 class ArtistModel(models.Model):
     """
@@ -34,6 +38,9 @@ class ArtistModel(models.Model):
     #musicians that inspired the artist
     _idols =  models.TextField(null=True, db_column="idols")
 
+    profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_artist")
+    background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_artist")
+
     class Meta:
         verbose_name = 'Artist Profile'
         verbose_name_plural = 'Artist Profiles'
@@ -47,12 +54,12 @@ class ArtistModel(models.Model):
         else:
             return f'{self.user.first_name} {self.user.last_name}'
 
-    def get_active_bands(self):
+    def get_memberships(self):
         """
-        Returns a Queryset of Linups where the artist is active in that bandself.
-        The `is_active` attribute of an LineUpMember instance is set to True
+        Returns a Queryset of `Member` instances where the artist belongs to. And the aritst is currently active in that band.
+        The `is_active` attribute of an `Member` instance is set to True
         """
-        return self.linups.filter(is_active=True)
+        return self.line_ups.filter(is_active=True)
 
     def save(self):
         self._instruments = self.__set_to_str(self.instruments)
@@ -61,6 +68,9 @@ class ArtistModel(models.Model):
         return super(ArtistModel, self).save()
 
     def is_owner(self, other):
+        """
+        Method that checks whether `other` is the owner of this artist profile
+        """
         if isinstance(other, ArtistModel):
             return self.pk == other.get_artist().pk
         elif isinstance(other, User):
@@ -204,7 +214,7 @@ class ArtistModel(models.Model):
         The public_id is needed to retrieve the profile picture from the external web service
         `Cloudianry`
         """
-        return self.profilepicmodel.public_id
+        return self.profile_pic.public_id
 
     def get_background_pic_id(self):
         """
@@ -212,7 +222,7 @@ class ArtistModel(models.Model):
         The public_id is needed to retrieve the background picture from the external web service
         `Cloudianry`
         """
-        return self.backgroundpicmodel.public_id
+        return self.background_pic.public_id
 
 
 
@@ -248,151 +258,6 @@ class ArtistModel(models.Model):
 @receiver(pre_delete, sender=ArtistModel)
 def delete_pics(sender, instance, **kwargs):
     """
-    This function will be called before an ArtistProfile instance is deleted. To remove pics from Cloudinary
+    This function will be called before an ArtistProfile instance is deleted. To ensure that the associated profile and background pic get's deleted.
     """
-    pp=instance.profilepicmodel
-    bp=instance.backgroundpicmodel
-    try:
-        cloudinary.api.delete_resources([pp.public_id, bp.public_id])
-    except:
-        pass
-
-
-import datetime
-
-class Photo(models.Model):
-    """
-    Photo is a parent model for `ProfilePicModel` and `BackGroundPicModel`.
-    Photo follows the `Template method pattern`, where the detials are left over to the subclasses.
-    """
-    __MAX_LENGTH = 200
-    title = models.CharField(default="", max_length=__MAX_LENGTH, null=False)
-
-    ## Points to a Cloudinary image
-    public_id = models.CharField(default="", max_length=__MAX_LENGTH, null=False)
-
-    @staticmethod
-    def __remove_extension(img_description):
-        return os.path.splitext(img_description)[0]
-
-    @staticmethod
-    def __correct_size(str_val):
-        if len(str_val) > Photo.__MAX_LENGTH:
-            str_val= str_val[0 : Photo.__MAX_LENGTH]
-        return str_val
-
-    @staticmethod
-    def correct_img_title(title):
-        no_ext=Photo.__remove_extension(title)
-        return Photo.__correct_size(no_ext)
-
-    @staticmethod
-    def generate_random_key(description, artist):
-        time_now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        time_now2 = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        return Photo.__correct_size(str(artist.pk) + time_now + time_now2 + description)
-
-    """ Informative name for model """
-    def __unicode__(self):
-        try:
-            public_id = self.public_id
-        except AttributeError:
-            public_id = ''
-        return "Photo <%s:%s>" % (self.title, public_id)
-
-
-    def save(self, pic, pic_title, pic_path):
-        """
-        `save` method will save the `pic` into web service `Cloudinary`.
-        And save the `ProfilePicModel` or `BackGroundPicModel`.
-        If pic is false a default picture will be fetched from the `pic_path` and used instead.
-        """
-        if pic:
-            metadata=cloudinary.uploader.upload(pic)
-        else:
-            metadata=cloudinary.uploader.upload(pic_path)
-
-        if metadata.get('public_id', False):
-            self.public_id = metadata.get('public_id')
-        else:
-            self.public_id= Photo.generate_random_key(pic_title, self.artist)
-        return super(Photo, self).save()
-
-
-class ProfilePicModel(Photo):
-    """
-    ProfilePicModel represents the profile picture of an Artist.
-    A one-to-one relation is defined between both instancesself.
-    """
-    artist= models.OneToOneField(ArtistModel, on_delete=models.CASCADE, primary_key=True)
-
-    class Meta:
-        verbose_name = 'Profile Picture'
-        verbose_name_plural = 'Profile Pictures'
-
-    def __str__(self):
-        try:
-            public_id = self.public_id
-        except AttributeError:
-            public_id = ''
-
-        eq = self.artist.stage_name == ''
-        art = self.artist.user.first_name if  eq else self.artist.stage_name
-        return "Profile Picture of %s <%s:%s>" % (art, self.title, public_id)
-
-
-    def save(self, pic):
-        """
-        `save` method will save the ProfilePicModel instace through a super call and pass the given `pic` picture to it's parent class.
-        """
-        path= os.path.join(settings.STATICFILES_DIRS [0], "pics/profile_default.jpg")
-        return super(ProfilePicModel, self).save(pic, "profile_pic", path)
-
-    @staticmethod
-    def createPic(artist, title="default Profile Pic"):
-        """
-        `createPic` static method will create an instance of the `ProfilePicModel` but not save it yet.
-        """
-        if title == '':
-            title = "default Profile Pic"
-
-        return ProfilePicModel(title=title, artist=artist)
-
-class BackGroundPicModel(Photo):
-    """
-    BackGroundPicModel represents the background picture of an Artist.
-    A one-to-one relation is defined between both instancesself.
-    """
-
-    artist= models.OneToOneField(ArtistModel, on_delete=models.CASCADE, primary_key=True)
-
-    class Meta:
-        verbose_name = 'Background Picture'
-        verbose_name_plural = 'Background Pictures'
-
-    def __str__(self):
-        try:
-            public_id = self.public_id
-        except AttributeError:
-            public_id = ''
-
-        eq = self.artist.stage_name == ''
-        art = self.artist.user.first_name if  eq else self.artist.stage_name
-        return "Background Picture of %s <%s:%s>" % (art, self.title, public_id)
-
-    def save(self, pic):
-        """
-        `save` method will save the BackGroundPicModel instace through a super call and pass the given `pic` picture to it's parent class.
-        """
-        path= os.path.join(settings.STATICFILES_DIRS [0], "pics/background_default.jpg")
-        return super(BackGroundPicModel, self).save(pic, "background_pic", path)
-
-    @staticmethod
-    def createPic(artist, title="default Background Pic"):
-        """
-        `createPic` static method will create an instance of the `BackGroundPicModel` but not save it yet.
-        """
-        if title == '':
-            title = "default Background Pic"
-
-        return BackGroundPicModel(title=title, artist=artist)
+    Picture.delete_pics([instance.profile_pic, instance.background_pic])
