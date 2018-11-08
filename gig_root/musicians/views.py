@@ -285,7 +285,13 @@ def update_picture(request):
         return JsonResponse({'is_executed': True, 'val': metadata.get('url')})
 
     elif operation == 'delete':
-        pass
+        pic_pk = val
+        try:
+            BandPic.objects.get(pk=pic_pk).delete()
+            return JsonResponse({'is_executed': True, 'val': pic_pk})
+        except:
+            return JsonResponse({'is_executed': False, 'val':pic_pk, 'reason': f'No picture with pk={pic_pk}'})
+
     else: #add a new picutre case
         metadata=json.loads(request.POST.get('val'))
         pic=BandPic(band=band,
