@@ -3,8 +3,10 @@ Models shared by different apps are kept in this module. Each app makes
 small adapation to fit their needs.
 
 """
-from django.db import models
 import cloudinary
+
+from django.db import models
+from users.models import User
 
 
 def str_to_int(s):
@@ -12,6 +14,39 @@ def str_to_int(s):
     Helper method to transform strings to int
     """
     return int(float(s))
+
+class VoteAbstract(models.Model):
+    """
+    Vote represents an upvote or downvote of a comment. Additionily this model tells who voter and what was voted
+    """
+    is_upvote = models.BooleanField()
+    voter = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        abstract=True
+
+    def up_vote(self):
+        self.is_upvote=True
+    def down_vote(self):
+        self.is_upvote=False
+
+class CommentAbstract(models.Model):
+    """
+    CommentAbstract represents the basis for different types of comments.
+    Each comment is associated with a User `commentator` and the `comment` text itself.
+    """
+    MAX_LENGTH=300
+    comment = models.CharField(max_length=MAX_LENGTH, null=False, default="")
+    commentator= models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        abstract=True
+
+    def __str__(self):
+        c= self.comment if len(self.comment) < 30 else self.comment[:30]
+        return f'comment of {self.commentator}: {c}'
+
+
 
 class Comment(models.Model):
     pass
