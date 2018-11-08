@@ -334,6 +334,7 @@ class Member(models.Model):
         except:
             return default
 
+
 class BandComment(CommentAbstract):
     """
     Represents a comment associated to a band.
@@ -342,6 +343,76 @@ class BandComment(CommentAbstract):
 
     def __str__(self):
         return f'Band Comment' + super(BandComment, self).__str__()
+
+    def get_votes(self, only_up=None):
+        """
+        get_votes returns by default all votes for this comment.
+        `only_up` set to true returns only upvotes. Set to false only downvotes
+        """
+        if only_up is None:
+            return self.bandcommentvote_set.all()
+        if only_up:
+            return self.bandcommentvote_set.filter(is_upvote=True)
+        else:
+            return self.bandcommentvote_set.filter(is_upvote=False)
+
+    def amount_upVotes(self):
+        """
+        Returns the amount of upvotes for this comment
+        """
+        return self.bandcommentvote_set.filter(is_upvote=True).count()
+
+    def amount_downVotes(self):
+        """
+        Returns the amount of downvotes for this comment
+        """
+        return self.bandcommentvote_set.filter(is_upvote=False).count()
+
+    def already_voted(self, user):
+        """
+        already_voted checks whether `user` already voted this comment
+        """
+        return self.bandcommentvote_set.filter(voter=user).exits()
+
+
+    def __vote(self, user, is_upvote):
+        if self.already_voted(user):
+            return False
+        else:
+            return self.bandcommentvote_set.create(voter=user, is_upvote)
+
+    def upvote(self, user):
+        """
+        upvote will create a BandCommentVote instance with `is_upvote` set to True
+        and `voter` set to `user`.
+
+        This method calls `already_voted` first to ensure that the `user` didn't already
+        vote. If the `user` already voted False is returned otherwise the new instance is returned.
+        """
+        return self.__vote(user, is_upvote=True)
+
+    def downvote(self, user):
+        """
+        downvote will create a BandCommentVote instance with `is_upvote` set to False
+        and `voter` set to `user`.
+
+        This method calls `already_voted` first to ensure that the `user` didn't already
+        vote. If the `user` already voted False is returned otherwise the new instance is returned.
+        """
+        return self.__vote(user, is_upvote=False)
+
+    def inverse_vote(self, user):
+        """
+        inverse_vote will inverse the current vote of the `user`.
+        E.g. `is_upvote` equal to True becomes False
+
+        This method assumes that `already_voted` was called to ensure that the vote exists
+        for the voter `user`.
+        """
+        v=self.bandcommentvote_set.get(voter=user)
+        v.is_upvote = not v.is_upvote
+        v.save()
+
 
 
 class BandCommentVote(VoteAbstract):
