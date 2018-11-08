@@ -10,8 +10,8 @@ from artists.artist_util import has_artist_profile
 from users.models import User
 from users.util import getHTTP_Protocol
 
-from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand
-from .models import Band, Member
+from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic
+from .models import Band, Member, BandPic
 
 def test(request):
     return HttpResponse("Received reuqest")
@@ -52,6 +52,7 @@ def band_profile(request, profile_id):
              'band_pics': band.bandpic_set.all(), ##TODO sort e.g. by date
              'direct_pp': DirectUploadProfilePicBand(),
              'direct_bp': DirectUploadBackgroundPicBand(),
+             'direct_pic': DirectUploadBandPic(),
              }
 
     return render(request, 'musicians/profile.html', context=context)
@@ -281,10 +282,16 @@ def update_picture(request):
 
         pic.save()
 
-        return JsonResponse({'is_executed': True, 'val': request.POST.get('url')})
+        return JsonResponse({'is_executed': True, 'val': metadata.get('url')})
 
     elif operation == 'delete':
         pass
-    else:
-        print("IN THE ELSE CASE")
-        pass
+    else: #add a new picutre case
+        metadata=json.loads(request.POST.get('val'))
+        pic=BandPic(band=band,
+                    public_id=metadata.get('public_id'),
+                    title=metadata.get('title'),
+                    width=metadata.get('width'),
+                    height=metadata.get('height'))
+        pic.save()
+        return JsonResponse({'is_executed': True, 'val': metadata.get('url')})

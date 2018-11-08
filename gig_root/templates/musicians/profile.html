@@ -133,10 +133,26 @@
       <h2>
         Pictures
       </h2>
-      <p>
-        Pictures roll come here
-      </p>
     </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      {% for pic in band_pics%}
+      <div class="pic-container">
+          {% cloudinary pic.public_id width=100 height=150 crop="fill"%}
+      </div>
+      {% endfor %}
+      {% if is_owner%}
+      <div class="">
+        {{direct_pic}}
+        <div class="helper-message-container">
+          <p id="id_helper-message-band-pic"></p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
   </div>
 
 
@@ -339,7 +355,7 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     $(`#${id_selector}`).cloudinary_fileupload().on('cloudinarydone', ready_func);
   }
 
-  function bindProfileOrBgPicListener(id_selector, id_helper, operation){
+  function uploadToCloudAndSave(id_selector, id_helper, operation){
 
 
 
@@ -380,16 +396,22 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
   }
 
   function bindProfilePicListener() {
-    bindProfileOrBgPicListener('id_new_band_profile_pic', 'id_helper-message-band-profile-pic', 'profile');
+    uploadToCloudAndSave('id_new_band_profile_pic', 'id_helper-message-band-profile-pic', 'profile');
   }
 
   function bindBackgroundPicListener() {
-    bindProfileOrBgPicListener('id_new_band_background_pic', 'id_helper-message-band-background-pic', 'background');
+    uploadToCloudAndSave('id_new_band_background_pic', 'id_helper-message-band-background-pic', 'background');
   }
+
+  function bindBandPicListener(){
+    uploadToCloudAndSave('id_new_band_pic', 'id_helper-message-band-pic', 'add');
+  }
+
 
   $(document).ready(function(){
     bindBackgroundPicListener();
     bindProfilePicListener();
+    bindBandPicListener();
   });
 
   </script>
