@@ -6,12 +6,27 @@ from django.dispatch import receiver
 from django.conf import  settings
 from django.db import models
 from users.models import User
-from users.sharedModels import Picture
+from users.sharedModels import PictureAbstract
 
 
 DEFAULT_PROFILE_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/profile_default.jpg")
 DEFAULT_BACKGROUND_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/background_default.jpg")
 
+class ProfilePic(PictureAbstract):
+    def __init__(self, *args, **kwargs):
+        super(ProfilePic, self).__init__(*args, **kwargs)
+
+
+    def __str__(self):
+        return f'Profile pic of artist: {self.artistmodel.stage_name}'
+
+class BackgroundPic(PictureAbstract):
+    def __init__(self, *args, **kwargs):
+        super(BackgroundPic, self).__init__(*args, **kwargs)
+
+
+    def __str__(self):
+        return f'Background pic of artist: {self.artistmodel.stage_name}'
 
 class ArtistModel(models.Model):
     """
@@ -38,8 +53,10 @@ class ArtistModel(models.Model):
     #musicians that inspired the artist
     _idols =  models.TextField(null=True, db_column="idols")
 
-    profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_artist")
-    background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_artist")
+    profile_pic = models.OneToOneField(ProfilePic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="profile_of_artist")
+    background_pic = models.OneToOneField(BackgroundPic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="background_of_artist")
+    # profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_artist")
+    # background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_artist")
 
     class Meta:
         verbose_name = 'Artist Profile'
@@ -260,4 +277,4 @@ def delete_pics(sender, instance, **kwargs):
     """
     This function will be called before an ArtistProfile instance is deleted. To ensure that the associated profile and background pic get's deleted.
     """
-    Picture.delete_pics([instance.profile_pic, instance.background_pic])
+    ProfilePic.delete_pics([instance.profile_pic, instance.background_pic])

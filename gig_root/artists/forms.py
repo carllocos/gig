@@ -1,8 +1,7 @@
 from django import forms
 from cloudinary.forms import CloudinaryJsFileField
 
-from .models import ArtistModel, DEFAULT_PROFILE_PIC, DEFAULT_BACKGROUND_PIC
-from users.sharedModels import Picture
+from .models import ArtistModel, DEFAULT_PROFILE_PIC, DEFAULT_BACKGROUND_PIC, ProfilePic, BackgroundPic
 
 class DirectUploadProfilePic(forms.Form):
     profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_profile_pic" })
@@ -76,12 +75,12 @@ class CreateArtistForm(forms.ModelForm):
         profile_pic= self.cleaned_data.get('profile_pic', None)
         if profile_pic is None:
             profile_pic = DEFAULT_PROFILE_PIC
-        art.profile_pic = Picture().upload_and_save(profile_pic)
+        art.profile_pic = ProfilePic().upload_and_save(profile_pic)
 
         bg_pic= self.cleaned_data.get('background_pic', None)
         if bg_pic is None:
             bg_pic=DEFAULT_BACKGROUND_PIC
-        art.background_pic =  Picture().upload_and_save(bg_pic)
+        art.background_pic =  BackgroundPic().upload_and_save(bg_pic)
 
         art.save()
 
