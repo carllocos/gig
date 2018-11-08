@@ -183,6 +183,10 @@ def update_member(request):
 
     return JsonResponse({'is_executed': True, 'val': val})
 
+from users.tokens import account_activation_token
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_text
+from django.template.loader import render_to_string
 @require_http_methods(["POST"])
 @login_required
 @has_artist_profile
@@ -213,10 +217,17 @@ def add_member(request):
         #in this branch a Member instance don't exists
         m=band.add_member(role="Insert role specified", artist=artistToAdd, is_active=False)
 
-    #TODO create a temporary token
-    confirm_url=getHTTP_Protocol() + get_current_site(request).domain + reverse('musicians:confirm-membership', kwargs={'member_id': m.pk})
+    context={'user': user_toAdd,
+            'band': band,
+            'http_protocol': getHTTP_Protocol(),
+            'domain': get_current_site(request).domain,
+            'token': account_activation_token.make_token(user_toAdd),
+            'uid': urlsafe_base64_encode(force_bytes(user_toAdd.pk)).decode(),
+            'mid64': urlsafe_base64_encode(force_bytes(m.pk)).decode()
+            }
+
     mail_subject=f"Invitation to Join {band.name}"
-    mail_message_txt= f"Hello {user_toAdd.first_name}, you received an invitaion to join {band.name}.\nClick on the following link to confirm the invitation {confirm_url}"
+    mail_message_txt = render_to_string('musicians/messages/confirm_band_join.txt', context=context)
     user_toAdd.send_email(mail_subject=mail_subject, mail_message_txt=mail_message_txt)
 
     return JsonResponse({'is_executed': True, 'reason': 'An invitation was send succesfuly'})
@@ -226,27 +237,42 @@ def add_member(request):
 @require_http_methods(["GET"])
 @login_required
 @has_artist_profile
-def confirm_member(request, member_id):
-    #TODO test the link towards a token
+def confirm_member(request, uidb64, token, mid64):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+        member_id=force_text(urlsafe_base64_decode(mid64))
+        membership=Member.objects.get(pk=member_id)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user=None
+        membership=None
 
-    mem=Member.get_member(member_id)
-    if not mem:
-        context= {'short_message': "The confirmation can't be executed because the passed identifier for the line up is incorrect .",
-                  'title_msg': "The identifier of the lineup is incorrect",
+    if user is None or membership is None or not account_activation_token.check_token(user, token):
+        context= {'short_message': "You seem to have an invalid link. Check if you are logged in with a correct profile.\nIf the problem persists ask the band owner to send you another invation link.",
+                  'title_msg': "Activation link is invalid!.",
                   'title_page': "Bad request"}
         return render(request, 'users/short_message.html',context=context)
 
-    if mem.artist != request.user.get_artist():
-            context= {'short_message': "The request can't be executed because you are not allowed to request this page.",
-                      'title_msg': "You tried to perform an unauthorized operation.",
-                      'title_page': "Bad request"}
-            return render(request, 'users/short_message.html',context=context)
+    if user.pk != request.user.pk:
+        context= {'short_message': "You are trying to perform a request not meant for you. Check if you are logged in with a correct profile.",
+                  'title_msg': "Unauhtorized request",
+                  'title_page': "Bad request"}
+        return render(request, 'users/short_message.html',context=context)
 
-    if not mem.is_active:
-        mem.is_active= True
-        mem.save()
+    band=membership.get_band()
 
-    return redirect('musicians:band-profile', profile_id=mem.get_band().pk)
+    if  membership.is_active:
+        return redirect('musicians:band-profile', profile_id=band.pk)
+
+    membership.is_active= True
+    membership.save()
+    context= {'short_message': f"You are officialy registered as member of {band.name}. Take a look at your band profile ",
+              'title_msg': "Confirmation complete",
+              'title_page': f"{band.name}",
+              'link': reverse('musicians:band-profile', kwargs={'profile_id': band.pk}),
+              }
+    return render(request, 'users/short_message.html',context=context)
+
 
 @require_http_methods(["POST"])
 @login_required
