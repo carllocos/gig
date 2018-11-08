@@ -13,6 +13,8 @@ class DirectUploadBackgroundPicBand(forms.Form):
 class DirectUploadBandPic(forms.Form):
     band_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_pic" })
 
+class DirectVideoUpload(forms.Form):
+    video = CloudinaryJsFileField(attrs = { 'id': "id_new_video" })
 
 class RegisterForm(forms.ModelForm):
 

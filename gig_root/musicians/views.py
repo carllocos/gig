@@ -10,8 +10,8 @@ from artists.artist_util import has_artist_profile
 from users.models import User
 from users.util import getHTTP_Protocol
 
-from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic
-from .models import Band, Member, BandPic
+from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload
+from .models import Band, Member, BandPic, VideoBand
 
 def test(request):
     return HttpResponse("Received reuqest")
@@ -50,9 +50,11 @@ def band_profile(request, profile_id):
              'is_member': is_member,
              'line_up': band.get_active_members(),
              'band_pics': band.bandpic_set.all(), ##TODO sort e.g. by date
+             'band_videos': band.get_video_set(),
              'direct_pp': DirectUploadProfilePicBand(),
              'direct_bp': DirectUploadBackgroundPicBand(),
              'direct_pic': DirectUploadBandPic(),
+             'direct_video': DirectVideoUpload(),
              }
 
     return render(request, 'musicians/profile.html', context=context)
@@ -320,10 +322,53 @@ def update_picture(request):
 
     else: #add a new picutre case
         metadata=json.loads(request.POST.get('val'))
+        print(f"type public_id {type(metadata.get('public_id'))}")
         pic=BandPic(band=band,
                     public_id=metadata.get('public_id'),
                     title=metadata.get('original_filename'),
                     width=metadata.get('width'),
                     height=metadata.get('height'))
         pic.save()
+        return JsonResponse({'is_executed': True, 'val': metadata.get('url')})
+
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+def update_video(request):
+    """
+    Ajax request to perform an `add` or `delete` operation of a video.
+    The post request needs to contain the following keys;
+    1. `operation`: which represents the operation to perform.
+    2. `val`: the value needed to perform the operation
+    3. `band_id`: the band identifier for which the operation needs to be performed
+
+    The following operations are allowed:
+    `delete`: will delete a `band vide` of `band_id`, val corresponds with the `public_id` of the video to be deleted
+    `add`: will add a VideoBand instance for band with `band_id`, val corresponds with the metadata of the video.
+
+    """
+    failure=__contains_failure(request, keys=['val'], allowed_operations=['delete', 'add'])
+    if failure:
+        return failure
+
+    operation=request.POST.get('operation')
+    val=request.POST.get('val')
+    band=Band.get_band(request.POST.get('band_id'))
+
+    if operation == 'delete':
+        print("delete")
+        video_pk = val
+        try:
+            VideoBand.objects.get(pk=video_pk).delete()
+            return JsonResponse({'is_executed': True, 'val': video_pk})
+        except:
+            return JsonResponse({'is_executed': False, 'val':video_pk, 'reason': f'No Video with pk={video_pk}'})
+
+    else: #add a new video
+        metadata=json.loads(request.POST.get('val'))
+        print("ADD")
+        print(f"type public_id {type(metadata.get('public_id'))}")
+        vid=VideoBand(band=band, public_id=metadata.get('public_id'), title=metadata.get('original_filename'))
+        vid.save()
         return JsonResponse({'is_executed': True, 'val': metadata.get('url')})

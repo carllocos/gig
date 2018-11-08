@@ -161,15 +161,36 @@
   </div>
 
 
+
   <div class="row">
     <div class="col-12">
       <h2>
         videos
       </h2>
-      <p>
-        Video roll comes here
-      </p>
     </div>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      {% for video in band_videos%}
+      <div class="video-container">
+        <video id="demo-player"controls autoplay class="cld-video-player" data-cld-source="{{video.public_id}}"></video>
+      </div>
+      {% if is_owner %}
+      <div class="">
+        <button type="button" name="button" onClick="removeBandVideo({{video.pk}})">Delete Video</button>
+      </div>
+      {% endif %}
+      {% endfor %}
+      {% if is_owner%}
+      <div class="">
+        {{direct_video}}
+        <div class="helper-message-container">
+          <p id="id_helper-message-video"></p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
   </div>
 
 
@@ -253,6 +274,28 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
 
     sendAjaxRequest("{% url 'musicians:update-picture' %}", dict, pic_id, success_func, failure_func);
   }
+
+
+  function removeBandVideo(vid_id){
+
+    var dict= {
+      'val': vid_id,
+      'operation': 'delete',
+      'band_id': {{band.pk}},
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    success_func = function (response){
+      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+    };
+
+    failure_func = function (response){
+      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+    };
+
+    sendAjaxRequest("{% url 'musicians:update-video' %}", dict, vid_id, success_func, failure_func);
+  }
+
 
   function updateDescription(id_selector) {
     $des=$(`#${id_selector}`);
@@ -374,8 +417,6 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
 
   function uploadToCloudAndSave(id_selector, id_helper, operation){
 
-
-
     success_func = function(response){
       $helper=$(`#${id_helper}`);
       $helper.text("Saved succesfuly");
@@ -424,11 +465,54 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     uploadToCloudAndSave('id_new_band_pic', 'id_helper-message-band-pic', 'add');
   }
 
+  function uploadVideoAndSave(id_selector, id_helper, operation){
+
+    success_func = function(response){
+      $helper=$(`#${id_helper}`);
+      $helper.text("Saved succesfuly");
+    };
+
+    failure_func = function(response){
+      $helper=$(`#${id_helper}`);
+      $helper.text(response.reason);
+    }
+
+    start_func=function(){
+      $helper=$(`#${id_helper}`);
+      $helper.text("Start upload");
+    };
+    progress_func=function(e, data){
+      $helper=$(`#${id_helper}`);
+      var per = Math.round((data.loaded * 100.0) / data.total) + '%';
+      $helper.text(`Uploading... ${per}`);
+    };
+    ready_func=function(e, data){
+      $helper=$(`#${id_helper}`);
+      $helper.text('Updating backend...');
+
+      dict={
+        'val': JSON.stringify(data.result),
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+        'operation': operation,
+        'band_id': {{band.pk}},
+      };
+      console.log(data.result)
+      sendAjaxRequest("{% url 'musicians:update-video' %}", dict, data.result, success_func, failure_func);
+    };
+
+    bindPicListener(id_selector, start_func, progress_func, ready_func);
+
+  }
+
+  function bindVideoListener(){
+    uploadVideoAndSave('id_new_video', 'id_helper-message-video', 'add');
+  }
 
   $(document).ready(function(){
     bindBackgroundPicListener();
     bindProfilePicListener();
     bindBandPicListener();
+    bindVideoListener();
   });
 
   </script>

@@ -7,7 +7,7 @@ from django.db import models
 
 from artists.models import ArtistModel
 from users.models import User
-from users.sharedModels import PictureAbstract
+from users.sharedModels import PictureAbstract, VideoAbstract
 
 DEFAULT_BAND_PROFILE_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_profile.png")
 DEFAULT_BAND_BACKGROUND_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_background.jpg")
@@ -17,6 +17,7 @@ def str_to_int(s , default=False):
         return int(float(s))
     except ValueError:
         return default
+
 
 class ProfilePic(PictureAbstract):
     def __init__(self, *args, **kwargs):
@@ -158,7 +159,9 @@ class Band(models.Model):
         except KeyError:
             return False
 
-
+    def get_video_set(self):
+        return self.videoband_set.all()
+        
     def __remove_comma(self, s):
         if len(s)<= 0:
             return ''
@@ -208,6 +211,26 @@ class BandPic(PictureAbstract):
 
     def __str__(self):
         return f'Pic of band: {self.band.name}'
+
+
+
+@receiver(pre_delete, sender=Band)
+def delete_videos(sender, instance, **kwargs):
+    """
+    This function will be called before a band instance is deleted. To remove the associated videos of the band
+    """
+    VideoBand.delete_videos(instance.videoband_set.all())
+
+
+class VideoBand(VideoAbstract):
+    band=models.ForeignKey(Band, on_delete=models.CASCADE)
+
+    def __init__(self, *args, **kwargs):
+        super(VideoBand, self).__init__(*args, **kwargs)
+
+
+    def __str__(self):
+        return f'Video of band: {self.band.name}'
 
 
 class LineUp(models.Model):
