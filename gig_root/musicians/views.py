@@ -276,7 +276,7 @@ def update_picture(request):
         metadata=json.loads(request.POST.get('val'))
         pic= band.profile_pic if operation == 'profile' else band.background_pic
         pic.update_metadata(public_id=metadata.get('public_id'),
-                            title=metadata.get('title'),
+                            title=metadata.get('original_filename'),
                             width=metadata.get('width'),
                             height=metadata.get('height'))
 
@@ -290,7 +290,7 @@ def update_picture(request):
         metadata=json.loads(request.POST.get('val'))
         pic=BandPic(band=band,
                     public_id=metadata.get('public_id'),
-                    title=metadata.get('title'),
+                    title=metadata.get('original_filename'),
                     width=metadata.get('width'),
                     height=metadata.get('height'))
         pic.save()
