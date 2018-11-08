@@ -26,10 +26,10 @@ class Vote(models.Model):
         #The vote can be done on a Artist and band profile but also on a comment
         pass
 
-class Picture(models.Model):
+class PictureAbstract(models.Model): #TODO needs to become abstract and the other pics extend from here. Comment Video need to become mixins
     """
-    Picture model represents pictures in any app. All pictures are stored in
-    an extern web service called Cloudinary. Based on a `public_id` we can
+    PictureAbstract represents the base for pictures in any app. This abstract model provides api's to communicate
+    with an extern web service called Cloudinary. Based on a `public_id` we can
     fetch the corresponding pictures.
 
     `title`: attribute corresponds with the file name of the picture (without the extension).
@@ -47,12 +47,9 @@ class Picture(models.Model):
     height = models.PositiveIntegerField(null=True, default=False)
     is_removed = models.BooleanField(null=True, default=True)
 
-    def __init__(self, *args, **kwargs):
-        super(Picture, self).__init__(*args, **kwargs)
+    class Meta:
+        abstract = True
 
-
-    def __str__(self):
-        return f'self.title: {self.public_id}'
 
     def upload_to_cloud(self, pic):
         """
@@ -66,7 +63,7 @@ class Picture(models.Model):
         self.title=metadata.get('original_filename')
         self.height= str_to_int(metadata.get('height'))
         self.width= str_to_int(metadata.get('width'))
-        self.public_id= str_to_int(metadata.get('public_id'))
+        self.public_id= metadata.get('public_id')
 
 
     def remove_from_cloud(self, pic):
