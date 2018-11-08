@@ -106,7 +106,7 @@ class PictureAbstract(models.Model): #TODO needs to become abstract and the othe
         except:
             pass
 
-        super(Picture, self).delete(*args, **kwargs)
+        super(PictureAbstract, self).delete(*args, **kwargs)
 
     def upload_and_save(self, pic):
         """
