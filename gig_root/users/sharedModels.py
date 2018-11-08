@@ -18,9 +18,6 @@ class Comment(models.Model):
         ##Comment belongs to band profile but also eventself.
         #cotnains a field of votes
 
-class Video(models.Model):
-    pass
-
 class Vote(models.Model):
         #the vote can be replaced by just an integerfield
         #The vote can be done on a Artist and band profile but also on a comment
@@ -131,3 +128,73 @@ class PictureAbstract(models.Model): #TODO needs to become abstract and the othe
 
         for p in pics:
             p.delete()
+
+
+
+class VideoAbstract(models.Model):
+    """
+    VideoAbstract represents the base for videos in the muscians app. This abstract model provides api's to communicate
+    with an extern web service called Cloudinary. Based on a `public_id` we can
+    fetch the corresponding pictures.
+
+    `title`: attribute corresponds with the file name of the Video (without the extension).
+    `public_id`: the id used to store the Video in Cloudinary
+
+    """
+    MAX_LENGTH=200
+
+    title=models.CharField(max_length=MAX_LENGTH, null=True, default=False)
+    public_id=models.CharField(max_length=MAX_LENGTH, null=True, default=False)
+    is_removed = models.BooleanField(null=True, default=True)
+
+    class Meta:
+        abstract = True
+
+    def remove_from_cloud(self, pic):
+        """
+        Method will remove the video from cloudinary based on the `public_id` id.
+        And will change the local attributes of `self` video. However, a call to
+        save is needed to make changes permanent.
+        """
+        cloudinary.api.delete_resources([self.public_id])
+        self.is_removed=True
+        self.title=None
+        self.public_id=None
+
+    def update_metadata(self, public_id, title):
+        """
+        Method is mean to be called when a video upload to cloudinary occurs
+        at the browser. A call to save is required to make changes permanent.
+        """
+        if not self.is_removed:
+            #delete old reference to cloudinary
+            cloudinary.api.delete_resources([self.public_id])
+
+        self.is_removed=False
+        self.title=title
+        self.public_id=public_id
+
+    def delete(self, *args, **kwargs):
+        """
+        Whenever the video instance is removed. The corresponding video in
+        cloudinary is first removed.
+        """
+        print("Deleting")
+        print(self.public_id)
+        x=cloudinary.api.delete_resources([self.public_id],resource_type='video')
+        print(x)
+        super(VideoAbstract, self).delete(*args, **kwargs)
+
+    @staticmethod
+    def delete_videos(videos=None):
+        """
+        Removes a collections of videos from cloudinary and the DB.
+        """
+        vids=[v.public_id for v in videos]
+        try:
+            cloudinary.api.delete_resources(vids, resource_type='video')
+        except:
+            pass
+
+        for v in videos:
+            v.delete()
