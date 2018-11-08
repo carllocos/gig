@@ -7,7 +7,7 @@ from django.db import models
 
 from artists.models import ArtistModel
 from users.models import User
-from users.sharedModels import PictureAbstract, VideoAbstract
+from users.sharedModels import PictureAbstract, VideoAbstract, VoteAbstract, CommentAbstract
 
 DEFAULT_BAND_PROFILE_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_profile.png")
 DEFAULT_BAND_BACKGROUND_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_background.jpg")
@@ -161,7 +161,7 @@ class Band(models.Model):
 
     def get_video_set(self):
         return self.videoband_set.all()
-        
+
     def __remove_comma(self, s):
         if len(s)<= 0:
             return ''
@@ -333,3 +333,22 @@ class Member(models.Model):
             return Member.objects.get(pk=pk)
         except:
             return default
+
+class BandComment(CommentAbstract):
+    """
+    Represents a comment associated to a band.
+    """
+    band = models.ForeignKey(Band, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'Band Comment' + super(BandComment, self).__str__()
+
+
+class BandCommentVote(VoteAbstract):
+    """
+    Vote meant to represent the upvotes or downvotes towards one Comment of a band.
+    """
+    comment=models.ForeignKey(BandComment, on_delete=models.CASCADE)
+    def __str__(self):
+        v= 'upvote' if self.is_upvote else 'downvote'
+        return f'{v} for comment {self.comment}'
