@@ -1,0 +1,7 @@
+
+Hello {{user.first_name}},
+
+You received an invitation to join '{{band.name}}'.
+Click on the following link to confirm the invitation.
+
+{{http_protocol}}{{ domain }}{% url 'musicians:confirm-membership' uidb64=uid token=token mid64=mid64%}
