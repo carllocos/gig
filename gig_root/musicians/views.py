@@ -49,7 +49,7 @@ def band_profile(request, profile_id):
              'is_owner': is_owner,
              'is_member': is_member,
              'line_up': band.get_active_members(),
-             'band_pics': band.band_pics, ##TODO sort e.g. by date
+             'band_pics': band.bandpic_set.all(), ##TODO sort e.g. by date
              'direct_pp': DirectUploadProfilePicBand(),
              'direct_bp': DirectUploadBackgroundPicBand(),
              }

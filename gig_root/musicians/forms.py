@@ -1,8 +1,7 @@
 from django import forms
 from cloudinary.forms import CloudinaryJsFileField
 
-from .models import Band, LineUp, Member, DEFAULT_BAND_PROFILE_PIC, DEFAULT_BAND_BACKGROUND_PIC
-from users.sharedModels import Picture
+from .models import Band, LineUp, Member, DEFAULT_BAND_PROFILE_PIC, DEFAULT_BAND_BACKGROUND_PIC, ProfilePic, BackgroundPic
 
 
 class DirectUploadProfilePicBand(forms.Form):
@@ -45,12 +44,12 @@ class RegisterForm(forms.ModelForm):
         profile_pic=self.cleaned_data.get('profile_pic', None)
         if profile_pic is None:
             profile_pic=DEFAULT_BAND_PROFILE_PIC
-        band.profile_pic=Picture().upload_and_save(profile_pic)
+        band.profile_pic=ProfilePic(band=band).upload_and_save(profile_pic)
 
         background_pic=self.cleaned_data.get('background_pic', None)
         if background_pic is None:
             background_pic=DEFAULT_BAND_BACKGROUND_PIC
-        band.background_pic=Picture().upload_and_save(background_pic)
+        band.background_pic=BackgroundPic(band=band).upload_and_save(background_pic)
 
         band.save()
         return band

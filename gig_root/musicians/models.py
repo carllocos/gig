@@ -7,7 +7,7 @@ from django.db import models
 
 from artists.models import ArtistModel
 from users.models import User
-from users.sharedModels import Picture
+from users.sharedModels import PictureAbstract
 
 DEFAULT_BAND_PROFILE_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_profile.png")
 DEFAULT_BAND_BACKGROUND_PIC = path= os.path.join(settings.STATICFILES_DIRS [0], "pics/band_default_background.jpg")
@@ -18,6 +18,22 @@ def str_to_int(s , default=False):
     except ValueError:
         return default
 
+class ProfilePic(PictureAbstract):
+    def __init__(self, *args, **kwargs):
+        super(ProfilePic, self).__init__(*args, **kwargs)
+
+
+    def __str__(self):
+        return f'Profile pic of band: {self.band.name}'
+
+class BackgroundPic(PictureAbstract):
+    def __init__(self, *args, **kwargs):
+        super(BackgroundPic, self).__init__(*args, **kwargs)
+
+
+    def __str__(self):
+        return f'Background pic of band: {self.band.name}'
+
 
 class Band(models.Model):
 
@@ -26,9 +42,12 @@ class Band(models.Model):
     description =models.TextField(null=True, db_column="description")
     _genres =models.TextField(null=True, db_column="genres")
     owner = models.ForeignKey(ArtistModel, db_column="owner", on_delete=models.CASCADE, related_name="owns")
-    background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_band")
-    profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_band")
-    band_pics = models.ForeignKey(Picture, db_column="Band pictures", default="", null=True, on_delete=models.SET_DEFAULT, related_name="bandpic_of")
+    profile_pic = models.OneToOneField(ProfilePic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="background_of_band")
+    background_pic = models.OneToOneField(BackgroundPic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="profile_of_band")
+    # background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_band")
+    # profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_band")
+    # band_pics = models.ForeignKey(BandPic, db_column="Band pictures", default="", null=True, on_delete=models.SET_DEFAULT, related_name="bandpic_of")
+    # band_pics = models.ForeignKey(Picture, db_column="Band pictures", default="", null=True, on_delete=models.SET_DEFAULT, related_name="bandpic_of")
 
     #location attribute
     #videos=
@@ -176,8 +195,19 @@ def delete_pics(sender, instance, **kwargs):
     """
     This function will be called before a band instance is deleted. To remove the associated pics of the band
     """
-    Picture.delete_pics([instance.profile_pic, instance.background_pic])
+    ProfilePic.delete_pics([instance.profile_pic, instance.background_pic])
 
+
+class BandPic(PictureAbstract):
+
+    band=models.ForeignKey(Band, on_delete=models.CASCADE)
+
+    def __init__(self, *args, **kwargs):
+        super(BandPic, self).__init__(*args, **kwargs)
+
+
+    def __str__(self):
+        return f'Pic of band: {self.band.name}'
 
 
 class LineUp(models.Model):
