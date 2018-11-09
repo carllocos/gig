@@ -93,7 +93,7 @@ def __contains_failure(request, keys, allowed_operations=None, only_owner=True):
     5. IF allowed_operations is not None, a key `operation` is expected in the POST request and checks whether the associated value
     is contained in the list of allowed operations
 
-    If no failure occurs the function returns False 
+    If no failure occurs the function returns False
     """
     if not request.is_ajax():
         context={
@@ -447,3 +447,36 @@ def vote_comment(request):
                 c.inverse_vote(request.user)
 
     return JsonResponse({'is_executed': True, 'upvotes': c.upvotes, 'downvotes': c.downvotes})
+
+
+
+@require_http_methods(["POST"])
+@login_required
+def vote_band(request):
+    """
+    Ajax request to upvote or downvote a band profile.
+    The post request needs to contain the following keys;
+    1. `operation`: 'upvote' or 'downvote'
+
+    If operation was executed returns a response with following keys:
+    1.'upvotes': the new amount of total upvotes for the band
+    2.'downvotes': the new amount of total downvotes for the band
+
+    """
+    failure=__contains_failure(request, keys=[], allowed_operations=['upvote', 'downvote'], only_owner=False)
+    if failure:
+        return failure
+
+    operation=request.POST.get('operation')
+    band=Band.get_band(request.POST.get('band_id'))
+
+    if operation == 'upvote':
+        if not band.upvote(request.user): #The user already voted for this band
+            if not band.get_vote(request.user).is_upvote:
+                band.inverse_vote(request.user)
+    else: #downvote
+        if not band.downvote(request.user):
+            if band.get_vote(request.user).is_upvote:
+                band.inverse_vote(request.user)
+
+    return JsonResponse({'is_executed': True, 'upvotes': band.upvotes, 'downvotes': band.downvotes})
