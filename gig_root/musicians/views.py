@@ -55,6 +55,7 @@ def band_profile(request, profile_id):
              'direct_bp': DirectUploadBackgroundPicBand(),
              'direct_pic': DirectUploadBandPic(),
              'direct_video': DirectVideoUpload(),
+             'comments': band.get_comments(),
              }
 
     return render(request, 'musicians/profile.html', context=context)
@@ -78,9 +79,21 @@ def register_band(request):
     return render(request, 'musicians/register_band.html',context=context )
 
 
-def __contains_failure(request, keys, allowed_operations=None):
+def __contains_failure(request, keys, allowed_operations=None, only_owner=True):
     """
-    Helper function that check common failure scenario's that occur during update of a band_profile
+    Helper function that check common failure scenario's that occur during update of a band_profile through Ajax request.
+
+    This functions checks the following cases;
+    1. The request is an ajax request
+    2. Makes sure that the values for the list of `keys` were provided in the POST request
+    and that the values are not empty strings
+    3. Makes sure that the post request contains the key `band_id`, which refers to the band primary key involved in the
+    operation, and that the band exists
+    4. if only_owner is set to True, only requests coming from the owner of the band are allowed
+    5. IF allowed_operations is not None, a key `operation` is expected in the POST request and checks whether the associated value
+    is contained in the list of allowed operations
+
+    If no failure occurs the function returns False 
     """
     if not request.is_ajax():
         context={
@@ -111,9 +124,10 @@ def __contains_failure(request, keys, allowed_operations=None):
         return JsonResponse({'is_executed': False,
                             'reason': f'No band with band id {band_id} stored in the database.'})
 
-    if not band.is_owner(request.user):
-        return JsonResponse({'is_executed': False,
-                            'reason': f'Unauhtorized request'})
+    if only_owner:
+        if not band.is_owner(request.user):
+            return JsonResponse({'is_executed': False,
+                                'reason': f'Unauhtorized request'})
 
     if allowed_operations:
         operation= request.POST.get('operation', False)
@@ -372,3 +386,64 @@ def update_video(request):
         vid=VideoBand(band=band, public_id=metadata.get('public_id'), title=metadata.get('original_filename'))
         vid.save()
         return JsonResponse({'is_executed': True, 'val': metadata.get('url')})
+
+
+@require_http_methods(["POST"])
+@login_required
+def add_comment(request):
+    """
+    Ajax request to add a comment.
+    The post request needs to contain the following keys;
+    1. `val`: the comment that needs to be added
+
+    """
+    failure=__contains_failure(request, keys=['val'], only_owner=False)
+    if failure:
+        return failure
+
+    comment=request.POST.get('val')
+    band=Band.get_band(request.POST.get('band_id'))
+    c=band.add_comment(msg=comment, commentator=request.user)
+
+    return JsonResponse({'is_executed':True,
+                          'val': c.comment,
+                          'date': c.date,
+                          'first_name': c.commentator.first_name,
+                          'last_name': c.commentator.last_name,})
+
+
+@require_http_methods(["POST"])
+@login_required
+def vote_comment(request):
+    """
+    Ajax request to upvote or downvote a comment.
+    The post request needs to contain the following keys;
+    1. `val`: the comment_id that needs to be upvoted or downvoted
+    2. `operation`: 'upvote' or 'downvote'
+
+    If operation was executed returns a response with following keys:
+    1.'upvotes': the new amount of total upvotes for the comment
+    2.'downvotes': the new amount of total downvotes for the comment
+
+    """
+    failure=__contains_failure(request, keys=['val'], allowed_operations=['upvote', 'downvote'], only_owner=False)
+    if failure:
+        return failure
+
+    operation=request.POST.get('operation')
+    band=Band.get_band(request.POST.get('band_id'))
+    comment_id=request.POST.get('val')
+    c=band.get_comment(comment_id)
+    if not c:
+        return JsonResponse({'is_executed': False, 'reason': f'Comment with pk {comment_id} does not exists'})
+
+    if operation == 'upvote':
+        if not c.upvote(request.user): #The user already voted for this comment
+            if not c.get_vote(request.user).is_upvote:
+                c.inverse_vote(request.user)
+    else: #downvote
+        if not c.downvote(request.user):
+            if c.get_vote(request.user).is_upvote:
+                c.inverse_vote(request.user)
+
+    return JsonResponse({'is_executed': True, 'upvotes': c.upvotes, 'downvotes': c.downvotes})
