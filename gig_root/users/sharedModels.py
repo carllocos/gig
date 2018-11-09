@@ -35,12 +35,14 @@ class CommentAbstract(models.Model):
     CommentAbstract represents the basis for different types of comments.
     Each comment is associated with a User `commentator` and the `comment` text itself.
     """
-    MAX_LENGTH=300
+    MAX_LENGTH = 300
     comment = models.CharField(max_length=MAX_LENGTH, null=False, default="")
-    commentator= models.ForeignKey(User, on_delete=models.CASCADE)
+    commentator = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract=True
+        ordering = ['-date']
 
     def __str__(self):
         c= self.comment if len(self.comment) < 30 else self.comment[:30]
