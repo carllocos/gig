@@ -43,17 +43,8 @@ class Band(models.Model):
     description =models.TextField(null=True, db_column="description")
     _genres =models.TextField(null=True, db_column="genres")
     owner = models.ForeignKey(ArtistModel, db_column="owner", on_delete=models.CASCADE, related_name="owns")
-    profile_pic = models.OneToOneField(ProfilePic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="background_of_band")
-    background_pic = models.OneToOneField(BackgroundPic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="profile_of_band")
-    # background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_band")
-    # profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_band")
-    # band_pics = models.ForeignKey(BandPic, db_column="Band pictures", default="", null=True, on_delete=models.SET_DEFAULT, related_name="bandpic_of")
-    # band_pics = models.ForeignKey(Picture, db_column="Band pictures", default="", null=True, on_delete=models.SET_DEFAULT, related_name="bandpic_of")
-
-    #location attribute
-    #videos=
-    #social media associations:
-    #main location of the band
+    profile_pic = models.OneToOneField(ProfilePic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)
+    background_pic = models.OneToOneField(BackgroundPic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
 
     class Meta:
         verbose_name="Band Profile"
@@ -195,7 +186,7 @@ class Band(models.Model):
 
     def delete_comment(self, pk, default=False):
         """
-        delete_comment removes comment with `pk` belonging to this band.
+        delete_comment removes band comment with primary key equal to `pk`.
         Returns True if operation went well. Otherwise `default` is returned
         """
         try:
@@ -205,6 +196,10 @@ class Band(models.Model):
             return default
 
     def upvote(self, comment_pk, user):
+        """
+        upvote upvotes comment with primary key `comment_pk` where `user` is the voter.
+        Returns the newly created vote instance or False.
+        """
         c=self.get_comment(comment_pk)
         if not c:
             raise ValueError(f'No comment associated with primary key `{comment_pk}`')
@@ -212,11 +207,114 @@ class Band(models.Model):
         return c.upvote(user)
 
     def downvote(self, comment_pk, user):
+        """
+        downvote downvotes comment with primary key `comment_pk` where `user` is the voter.
+        Returns the newly created vote instance or False.
+        """
         c=self.get_comment(comment_pk)
         if not c:
             raise ValueError(f'No comment associated with primary key `{comment_pk}`')
 
         return c.downvote(user)
+
+
+    @property
+    def upvotes(self):
+        """Get the amount of upvotes for this band."""
+        return  self.amount_upVotes()
+    @property
+    def downvotes(self):
+        """Get the amount of downvotes for this band."""
+        return  self.amount_downVotes()
+
+    def get_vote(self, voter, default=False):
+        """
+        get_vote returns a vote associated to `voter`. `voter` can be a string or int primary_key
+        or a User instance. If no vote exists for `voter`, `default` is returned
+        """
+        if isinstance(voter, int) or isinstance(voter, str):
+            try:
+                return self.bandprofilevote_set.get(pk=str_to_int(voter))
+            except:
+                return default
+        elif isinstance(voter, User):
+            try:
+                return self.bandprofilevote_set.get(voter=voter)
+            except:
+                return default
+        else:
+            raise TypeError("Wrong type for `voter`. Voter can only be a int, str representing a primary key. Or a User instance")
+
+    def get_votes(self, only_up=None, only_down=None):
+        """
+        get_votes returns by default all votes for this band.
+        `only_up` set to true returns only upvotes. only_down set to True only downvotes
+        """
+        if only_up is None and only_down is None:
+            return self.bandprofilevote_set.all()
+        if only_up and only_down is None:
+            return self.bandprofilevote_set.filter(is_upvote=True)
+        elif only_down and only_up is None:
+            return self.bandprofilevote_set.filter(is_upvote=False)
+        else:
+            return self.bandprofilevote_set.all()
+
+    def amount_upVotes(self):
+        """
+        Returns the amount of upvotes for this band
+        """
+        return self.get_votes(only_up=True).count()
+
+    def amount_downVotes(self):
+        """
+        Returns the amount of downvotes for this band
+        """
+        return self.get_votes(only_down=True).count()
+
+    def already_voted(self, user):
+        """
+        already_voted checks whether `user` already voted for this band
+        """
+        return self.bandprofilevote_set.filter(voter=user).exists()
+
+
+    def __vote(self, user, is_upvote):
+        if self.already_voted(user):
+            return False
+        else:
+            return self.bandprofilevote_set.create(voter=user, is_upvote=is_upvote)
+
+    def upvote(self, user):
+        """
+        upvote will create a BandProfileVote instance with `is_upvote` set to True
+        and `voter` set to `user`.
+
+        This method calls `already_voted` first to ensure that the `user` didn't already
+        vote. If the `user` already voted False is returned otherwise the new instance is returned.
+        """
+        return self.__vote(user, is_upvote=True)
+
+    def downvote(self, user):
+        """
+        downvote will create a BandProfileVote instance with `is_upvote` set to False
+        and `voter` set to `user`.
+
+        This method calls `already_voted` first to ensure that the `user` didn't already
+        vote. If the `user` already voted False is returned otherwise the new instance is returned.
+        """
+        return self.__vote(user, is_upvote=False)
+
+    def inverse_vote(self, user):
+        """
+        inverse_vote will inverse the current vote of the `user`.
+        E.g. `is_upvote` equal to True becomes False
+
+        This method assumes that `already_voted` was called to ensure that the vote exists
+        for the voter `user`.
+        """
+        v=self.bandprofilevote_set.get(voter=user)
+        v.is_upvote = not v.is_upvote
+        v.save()
 
     def __remove_comma(self, s):
         if len(s)<= 0:
@@ -507,3 +605,14 @@ class BandCommentVote(VoteAbstract):
     def __str__(self):
         v= 'upvote' if self.is_upvote else 'downvote'
         return f'{v} for comment {self.comment}'
+
+
+class BandProfileVote(VoteAbstract):
+    """
+    This model represents a vote towards one Band profile
+    """
+    band = models.ForeignKey(Band, on_delete=models.CASCADE)
+
+    def __str__(self):
+        v= 'upvote' if self.is_upvote else 'downvote'
+        return f'{v} for band {self.band}'
