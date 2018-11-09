@@ -162,6 +162,62 @@ class Band(models.Model):
     def get_video_set(self):
         return self.videoband_set.all()
 
+    def add_comment(self, msg, commentator):
+        """
+        add_comment method creates a BandComment instance with `msg` as the comment
+        and `commentator` as a User instance that commented.
+
+        Raises a ValueError if `msg` is an empty string or `commentator` is not a User
+        instance
+        """
+        if msg == "":
+            raise ValueError("`msg` cannot be an empty string")
+        if not isinstance(commentator, User):
+            raise ValueError("`commentator` has to be a `User` type")
+
+        return self.bandcomment_set.create(comment=msg, commentator=commentator)
+
+    def get_comment(self, comment_pk, default=False):
+        """
+        get_comment returns a comment with primary key equal to `pk`.
+        If the comment don't exists `default` is returned
+        """
+        try:
+            return self.bandcomment_set.get(pk=str_to_int(comment_pk))
+        except:
+            return default
+
+    def get_comments(self):
+        """
+        returns a queryset of all comments ordered.
+        """
+        return self.bandcomment_set.all()
+
+    def delete_comment(self, pk, default=False):
+        """
+        delete_comment removes comment with `pk` belonging to this band.
+        Returns True if operation went well. Otherwise `default` is returned
+        """
+        try:
+            self.bandcomment_set.get(pk=pk).delete()
+            return True
+        except:
+            return default
+
+    def upvote(self, comment_pk, user):
+        c=self.get_comment(comment_pk)
+        if not c:
+            raise ValueError(f'No comment associated with primary key `{comment_pk}`')
+
+        return c.upvote(user)
+
+    def downvote(self, comment_pk, user):
+        c=self.get_comment(comment_pk)
+        if not c:
+            raise ValueError(f'No comment associated with primary key `{comment_pk}`')
+
+        return c.downvote(user)
+
     def __remove_comma(self, s):
         if len(s)<= 0:
             return ''
@@ -341,8 +397,36 @@ class BandComment(CommentAbstract):
     """
     band = models.ForeignKey(Band, on_delete=models.CASCADE)
 
+
+    @property
+    def upvotes(self):
+        """Get the amount of upvotes for this comment."""
+        return  self.amount_upVotes()
+    @property
+    def downvotes(self):
+        """Get the amount of downvotes for this comment."""
+        return  self.amount_downVotes()
+
     def __str__(self):
         return f'Band Comment' + super(BandComment, self).__str__()
+
+    def get_vote(self, voter, default=False):
+        """
+        get_vote returns a vote associated to `voter`. `voter` can be a string or int primary_key
+        or a User instance. If no vote exists for `voter`, `default` is returned
+        """
+        if isinstance(voter, int) or isinstance(voter, str):
+            try:
+                return self.bandcommentvote_set.get(pk=str_to_int(voter))
+            except:
+                return default
+        elif isinstance(voter, User):
+            try:
+                return self.bandcommentvote_set.get(voter=voter)
+            except:
+                return default
+        else:
+            raise TypeError("Wrong type for `voter`. Voter can only be a int, str representing a primary key. Or a User instance")
 
     def get_votes(self, only_up=None):
         """
@@ -372,14 +456,14 @@ class BandComment(CommentAbstract):
         """
         already_voted checks whether `user` already voted this comment
         """
-        return self.bandcommentvote_set.filter(voter=user).exits()
+        return self.bandcommentvote_set.filter(voter=user).exists()
 
 
     def __vote(self, user, is_upvote):
         if self.already_voted(user):
             return False
         else:
-            return self.bandcommentvote_set.create(voter=user, is_upvote)
+            return self.bandcommentvote_set.create(voter=user, is_upvote=is_upvote)
 
     def upvote(self, user):
         """
