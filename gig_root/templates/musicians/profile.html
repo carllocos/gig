@@ -22,6 +22,34 @@
       </h1>
     </div>
   </div>
+  <div class="row">
+    <div class="col-12">
+      {% if user.is_authenticated %}
+      <button type="button" name="button" onClick="upvoteBand('id_helper-vote-band')">Upvote</button>
+      {% else %}
+      Upvote:
+      {% endif %}
+      {{band.upvotes}}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      {% if user.is_authenticated %}
+      <button type="button" name="button" onClick="downvoteBand('id_helper-vote-band')">Downvote</button>
+      {% else %}
+      Downvote:
+      {% endif %}
+      {{band.downvotes}}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="helper">
+      <p id="id_helper-vote-band"></p>
+    </div>
+
+  </div>
 
   <div class="row">
     <div class="col-12">
@@ -579,7 +607,7 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     sendAjaxRequest("{% url 'musicians:add-comment' %}", dict, $des.val(), success_func, failure_func);
   }
 
-  function vote(comment_id, id_help_text, operation){
+  function vote(comment_id, id_help_text, operation, url){
 
     var dict= {
       'val': comment_id,
@@ -596,16 +624,26 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
       $(`#${id_help_text}`).text(response.reason);
     };
 
-    sendAjaxRequest("{% url 'musicians:vote-comment' %}", dict, comment_id, success_func, failure_func);
+    sendAjaxRequest(url, dict, comment_id, success_func, failure_func);
   }
 
   function upvoteComment(comment_id, id_help_text){
-    vote(comment_id, id_help_text, 'upvote');
+    vote(comment_id, id_help_text, 'upvote', "{% url 'musicians:vote-comment' %}");
   }
 
   function downvoteComment(comment_id, id_help_text){
-    vote(comment_id, id_help_text, 'downvote');
+    vote(comment_id, id_help_text, 'downvote', "{% url 'musicians:vote-comment' %}");
   }
+
+
+function upvoteBand(id_help_text){
+    vote('Not important', id_help_text, 'upvote', "{% url 'musicians:vote-band' %}");
+  }
+
+  function downvoteBand(id_help_text){
+    vote('Not important', id_help_text, 'downvote', "{% url 'musicians:vote-band' %}");
+  }
+
 
 
   $(document).ready(function(){
