@@ -28,5 +28,6 @@ urlpatterns = [
     path('oauth/', include('social_django.urls', namespace='social')),
     path('artists/', include('artists.urls', namespace='artists')),
     path('musicians/', include('musicians.urls', namespace='musicians')),
+    path('events/', include('events.urls', namespace='events')),
     path('users/', include('users.urls')),
 ]
