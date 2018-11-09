@@ -140,7 +140,7 @@
     <div class="col-12">
       {% for pic in band_pics%}
       <div class="pic-container">
-          {% cloudinary pic.public_id width=100 height=150 crop="fill"%}
+        {% cloudinary pic.public_id width=100 height=150 crop="fill"%}
       </div>
       {% if is_owner %}
       <div class="">
@@ -226,6 +226,58 @@
       </ul>
     </div>
   </div>
+
+  <div class="row">
+    <h2>Comments</h2>
+  </div>
+
+  <div class="row comment-container">
+    {% if user.is_authenticated %}
+    <textarea id="id_comment-input" name="name" rows="3" cols="50">Say somenthing</textarea>
+    <button type="button" name="button" onClick="addComment('id_comment-input', 'id_helper-comment')">Save comment</button>
+    <p id="id_helper-comment"></p>
+    {% else %}
+    <p><a href="{% url 'users:login' %}">Login</a> or <a href="{% url 'users:signup' %}">sign up</a> to comment</p>
+    {% endif %}
+  </div>
+  {% for com in comments %}
+  <br>
+  <div class="row comment-container">
+    <div class="row">
+
+      <div class="col-12 col-md-3">
+        {% if user.is_authenticated %}
+        <button type="button" name="button" onClick="upvoteComment({{com.pk}}, 'id_helper-comment')">Upvote</button>
+        {% else %}
+        Upvote:
+        {% endif %}
+        {{com.upvotes}}
+      </div>
+      <div class="col-12 col-md-3">
+        {% if user.is_authenticated %}
+        <button type="button" name="button" onClick="downvoteComment({{com.pk}}, 'id_helper-comment')">Downvote</button>
+        {% else %}
+        Downvote:
+        {% endif %}
+        {{com.downvotes}}
+      </div>
+      <div class="col-12 col-md-3">
+        <h4>{{com.commentator.first_name}} {{com.commentator.last_name}}</h4>
+      </div>
+      <div class="col-12 col-md-3">
+        <p>{{com.date}}</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 col-md-5">
+          <p>{{com.comment}}</p>
+      </div>
+    </div>
+
+  </div>
+  {% endfor %}
+
 </div>
 
 
@@ -507,6 +559,54 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
   function bindVideoListener(){
     uploadVideoAndSave('id_new_video', 'id_helper-message-video', 'add');
   }
+
+  function addComment(id_selector, id_help_text){
+    $des=$(`#${id_selector}`);
+    var dict= {
+      'val': $des.val(),
+      'band_id': {{band.pk}},
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    success_func = function (response){
+      $(`#${id_help_text}`).text('Comment was saved');
+    };
+
+    failure_func = function (response){
+      $(`#${id_help_text}`).text(response.reason);
+    };
+
+    sendAjaxRequest("{% url 'musicians:add-comment' %}", dict, $des.val(), success_func, failure_func);
+  }
+
+  function vote(comment_id, id_help_text, operation){
+
+    var dict= {
+      'val': comment_id,
+      'band_id': {{band.pk}},
+      'operation':operation,
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    success_func = function (response){
+      $(`#${id_help_text}`).text(`New upvotes ${response.upvotes} and downvotes ${response.downvotes}`);
+    };
+
+    failure_func = function (response){
+      $(`#${id_help_text}`).text(response.reason);
+    };
+
+    sendAjaxRequest("{% url 'musicians:vote-comment' %}", dict, comment_id, success_func, failure_func);
+  }
+
+  function upvoteComment(comment_id, id_help_text){
+    vote(comment_id, id_help_text, 'upvote');
+  }
+
+  function downvoteComment(comment_id, id_help_text){
+    vote(comment_id, id_help_text, 'downvote');
+  }
+
 
   $(document).ready(function(){
     bindBackgroundPicListener();
