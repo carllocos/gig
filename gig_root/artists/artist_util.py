@@ -431,3 +431,24 @@ def has_artist_profile(function):
             else:
                 return redirect('artists:no-profile')
     return wrap
+
+
+def is_band_owner(function):
+    """
+    A view function decorator that test whether the user requesting the corresponding URL is the owner
+    of at least one band. We assume that the user has an artist profile and is authenticated.
+    """
+    @wraps(function)
+    def wrap(request, *args, **kwargs):
+
+        artist= request.user.get_artist()
+
+        if artist.owns.all().exists():
+            return function(request, *args, **kwargs)
+        else:
+            context= {'short_message': "You are trying to perform an action that requires you to own a band profile. To register your band profile click on the following link",
+                      'title_msg': "Create a band profile",
+                      'titple_page': "Bad request",
+                      'link': reverse('musicians:band-register')}
+            return render(request, 'users/short_message.html', context=context)
+    return wrap
