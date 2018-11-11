@@ -6,6 +6,30 @@ from artists.artist_util import has_artist_profile, is_band_owner
 
 from musicians.models import Band
 from .forms import CreateEventForm
+from .models import Event
+
+def event_profile(request, event_id):
+    try:
+        event=Event.objects.get(pk=event_id)
+    except:
+        context= {'short_message': "You are trying to access an event page that does not exist.",
+                  'title_msg': f"Event does not exist",
+                  'titple_page': "Bad request",
+                  }
+        return render(request, 'users/short_message.html', context=context)
+
+    band=event.band
+    context={
+            'event': event,
+            'band': band,
+            'user': request.user,
+            'is_owner': band.is_owner(request.user),
+            'comments': event.get_comments(),
+            'participants': event.get_participants(),
+            }
+
+    return render(request, 'events/event.html', context=context)
+
 
 @require_http_methods(["GET", "POST"])
 @login_required
@@ -17,7 +41,6 @@ def create_event(request):
     bands=artist.owns.all()
 
     if request.method == 'POST':
-        print(f"Request type {request.FILES.items()}")
         f=CreateEventForm(request.POST, request.FILES, bands=bands)
         if f.is_valid():
             f.save(commit=False)
