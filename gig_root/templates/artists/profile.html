@@ -271,6 +271,12 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
       </div>
     </div>
     {% endfor %}
+  {% if  is_owner%}
+    <div class="container">
+      <a href="{% url 'musicians:band-register' %}">You wanna register anoter band?</a>
+    </div>
+
+    {% endif %}
   </div>
   {% else %}
   {% if  is_owner%}
