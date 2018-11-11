@@ -216,10 +216,7 @@ class VideoAbstract(models.Model):
         Whenever the video instance is removed. The corresponding video in
         cloudinary is first removed.
         """
-        print("Deleting")
-        print(self.public_id)
-        x=cloudinary.api.delete_resources([self.public_id],resource_type='video')
-        print(x)
+        cloudinary.api.delete_resources([self.public_id],resource_type='video')
         super(VideoAbstract, self).delete(*args, **kwargs)
 
     @staticmethod
