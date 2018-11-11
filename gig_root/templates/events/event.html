@@ -1,0 +1,83 @@
+{% extends "gig/base.html" %}
+{% load cloudinary %}
+{% load staticfiles %}
+
+
+{% block title %}
+{{event.name}}
+{% endblock %}
+
+{% block link %}
+{% cloudinary_includes %}
+{% cloudinary_js_config %}
+{% endblock %}
+
+{% block body %}
+
+<div class="container">
+  <h1>{{band.name}} at {{event.name}} <span class="badge badge-secondary">{{event.date}}</span></h1>
+  <h3>Participants: {{event.amount_participants}}</h3>
+  <p>Add tag to change date of today and tomorrow and yesterday to 'tomorrow', 'today' 'yesterday'</p>
+  <div class="container">
+    {% cloudinary event.picture.public_id width=100 height=150 crop="fill"%}
+
+  </div>
+  <div class="container">
+    {% cloudinary band.profile_pic.public_id width=100 height=150 crop="fill"%}
+  </div>
+  <div class="container">
+    <p>{{event.description}}</p>
+  </div>
+
+  <div class="row">
+    <h2>Comments</h2>
+  </div>
+
+  <div class="row comment-container">
+    {% if user.is_authenticated %}
+    <textarea id="id_comment-input" name="name" rows="3" cols="50">Say somenthing</textarea>
+    <button type="button" name="button" onClick="addComment('id_comment-input', 'id_helper-comment')">Save comment</button>
+    <p id="id_helper-comment"></p>
+    {% else %}
+    <p><a href="{% url 'users:login' %}">Login</a> or <a href="{% url 'users:signup' %}">sign up</a> to comment</p>
+    {% endif %}
+  </div>
+
+  {% for com in comments %}
+  <br>
+  <div class="row comment-container">
+    <div class="row">
+      <div class="col-12 col-md-3">
+        {% if user.is_authenticated %}
+        <button type="button" name="button" onClick="upvoteComment({{com.pk}}, 'id_helper-comment')">Upvote</button>
+        {% else %}
+        Upvote:
+        {% endif %}
+        {{com.upvotes}}
+      </div>
+      <div class="col-12 col-md-3">
+        {% if user.is_authenticated %}
+        <button type="button" name="button" onClick="downvoteComment({{com.pk}}, 'id_helper-comment')">Downvote</button>
+        {% else %}
+        Downvote:
+        {% endif %}
+        {{com.downvotes}}
+      </div>
+      <div class="col-12 col-md-3">
+        <h4>{{com.commentator.first_name}} {{com.commentator.last_name}}</h4>
+      </div>
+      <div class="col-12 col-md-3">
+        <p>{{com.date}}</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12 col-md-5">
+        <p>{{com.comment}}</p>
+      </div>
+    </div>
+
+  </div>
+  {% endfor %}
+
+  {% endblock %}
