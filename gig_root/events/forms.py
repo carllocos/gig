@@ -2,10 +2,17 @@ import datetime
 import json
 
 from django.utils.translation import gettext_lazy as _
+from cloudinary.forms import CloudinaryJsFileField
 
 from django import forms
 from musicians.models import Band
 from .models import Event, EventPicture, DEFAULT_EVENT_PIC
+
+
+class DirectUploadPic(forms.Form):
+    picture = CloudinaryJsFileField(attrs = { 'id': "id_new_picture" },
+                                    label="",
+                                    )
 
 class DateInput(forms.DateInput):
     input_type= 'date'
@@ -34,13 +41,11 @@ class CreateEventForm(forms.ModelForm):
     class Meta:
         model= Event
 
-        exclude=('date', 'ban', 'picture')
+        exclude=('date', 'band', 'picture')
         help_texts={
             'name' : ('Add a short clear name'),
             'description': ('Tell people more about the event'),
         }
-
-
 
     def __init__(self, *args, **kwargs):
         qs=kwargs.pop('bands')
