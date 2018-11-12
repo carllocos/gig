@@ -1,26 +1,26 @@
 {% extends "gig/base.html" %}
 {% load cloudinary %}
 {% load staticfiles %}
-
+{% load user_tags %}
 
 {% block title %}
 {{event.name}}
 {% endblock %}
 
-{% block link %}
-{% cloudinary_includes %}
-{% cloudinary_js_config %}
-{% endblock %}
 
 {% block body %}
 
 <div class="container">
-  <h1>{{band.name}} at {{event.name}} <span class="badge badge-secondary">{{event.date}}</span></h1>
+  <h1>{{band.name}} @ {{event.name}} <span class="badge badge-secondary">{{event.date| fancy_date}}</span></h1>
   <h3>Participants: {{event.amount_participants}}</h3>
   <p>Add tag to change date of today and tomorrow and yesterday to 'tomorrow', 'today' 'yesterday'</p>
+  {% if is_owner %}
+  <div class="container">
+    <a href="{% url 'events:edit' event_id=event.pk%}">Edit the event</a>
+  </div>
+  {% endif %}
   <div class="container">
     {% cloudinary event.picture.public_id width=100 height=150 crop="fill"%}
-
   </div>
   <div class="container">
     {% cloudinary band.profile_pic.public_id width=100 height=150 crop="fill"%}
