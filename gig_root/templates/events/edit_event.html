@@ -1,0 +1,268 @@
+{% extends "gig/base.html" %}
+{% load cloudinary %}
+{% load staticfiles %}
+{% load user_tags %}
+
+{% block title %}
+Evit event
+{% endblock %}
+
+{% block link %}
+{% cloudinary_includes %}
+{% cloudinary_js_config %}
+{% endblock %}
+
+{% block body%}
+
+<div class="d-flex container justify-content-center ">
+
+  <form class="" action="" method="" enctype="multipart/form-data">
+
+    <div class="form-group">
+      <div class="row">
+        <div class="col-12">
+          <label for="id_name">Name</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <input type="text" name="name" maxlength="70" required="" id="id_name" value="{{event.name}}">
+          <button type="button" class="btn btn-warning btn-sm" name="button" onClick="updateName('id_name', 'nameHelp')">Update name</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small id="nameHelp" class="form-text text-muted"> Choose a short clear name.</small>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+
+      <div class="row">
+        <div class="col-12">
+          <label for="id_band">Band</label>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <select name="band" required="" id="id_band">
+            <option value="{{current_band.pk}}" selected="">{{current_band.name}}</option>
+            {% for band in remaining_bands %}
+            <option value="{{band.pk}}">{{band.name}}</option>
+            {% endfor %}
+          </select>
+          <button type="button" class="btn btn-warning btn-sm" name="button" onClick="updateBand('id_band', 'bandHelp')">Update Band</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small id="bandHelp" class="form-text text-muted"> Chose the band for which this event is meant.</small>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="row">
+        <div class="col-12">
+          <label for="id_description">Description</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <textarea name="description" cols="40" rows="10" id="id_description">{{event.description}}</textarea>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small id="descriptionHelp" class="form-text text-muted"> Tell people more about the event.</small>
+          <button type="button" class="btn btn-warning btn-sm" name="button" onClick="updateDescription('id_description', 'descriptionHelp')">Update Description</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="row">
+        <div class="col-12">
+          <label for="id_picture">Picture</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          {% cloudinary event.picture.public_id width=100 height=150 crop="fill"%}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          {{ directPicForm}}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small id="pictureHelp" class="form-text text-muted"> Event Picture.</small>
+          <button type="button" class="btn btn-warning btn-sm" name="button">Update Picture</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="row">
+        <div class="col-12">
+          <label for="id_date">Date</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <input type="date" name="date" required="" id="id_date" value="{{event.date.year}}-{{event.date.month}}-{{event.date.day}}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small id="dateHelp" class="form-text text-muted"> Date of the event.</small>
+          <button type="button" class="btn btn-warning btn-sm" name="button" onClick="updateDate('id_date', 'dateHelp')">Update Date</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <div class="row">
+        <div class="col-12">
+          <label for="id_time">Time</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <input type="time" name="time" required="" id="id_time" value="{{ event.date.hour | correct_time:event.date.minute }}">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small id="timeHelp" class="form-text text-muted"> start time of event.</small>
+          <button type="button" class="btn btn-warning btn-sm" name="button" onClick="updateTime('id_time', 'timeHelp')">Update Time</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+
+
+
+<script type="text/javascript">
+
+
+function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
+  if (valToSend != ''){
+    $.ajax({
+      type: "POST",
+      url: url_l,
+      data: dict,
+      dataType: 'json',
+      success: function(response){
+        if(response.is_executed){
+          success_func(response);
+        }
+        else{
+          failure_func(response);
+        }
+
+      }});
+    }else {
+      alert("AjaxRequest wasn't send. The value involved in the update is an empty string ");
+    }
+  }
+
+  function updateHelpText(id_helptext, id_input, new_text, success){
+    $helper=$(`#${id_helptext}`);
+    $helper.text(new_text);
+    $id_input=$(`#${id_input}`);
+
+    if (success){
+      $helper.removeClass("text-danger").removeClass("text-muted").addClass("text-success");
+      if (id_input != ''){
+        $id_input.removeClass("border").removeClass("border-danger").addClass("border border-success");
+      }
+    }
+    else{
+      $helper.removeClass("text-success").removeClass("text-muted").addClass("text-danger");
+      if (id_input != ''){
+        $id_input.removeClass("border").removeClass("border-success").addClass("border border-danger");
+      }
+    }
+  }
+
+
+  function updateHelper(id_selector, id_helper, url, val){
+    $inp=$(`#${id_selector}`);
+    value=val
+    if (!val){
+      value=$inp.val()
+    }
+    var dict= {
+      'val': value,
+      'event_id': {{event.pk}},
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    success_func = function (response){
+      updateHelpText(id_helper, id_selector, "succesfuly updated", true);
+    };
+
+    failure_func = function (response){
+      updateHelpText(id_helper, id_selector, response.reason, false);
+    };
+
+    sendAjaxRequest(url, dict, value, success_func, failure_func);
+  }
+
+  function bindPicListener(id_selector, progress_func, ready_func){
+    $(`#${id_selector}`).bind('cloudinaryprogress', progress_func)
+    $(`#${id_selector}`).cloudinary_fileupload().on('cloudinarydone', ready_func);
+  }
+
+  function updateDescription(id_selector, id_helper){
+    updateHelper(id_selector, id_helper, "{% url 'events:update-description' %}", false);
+  }
+
+  function updateName(id_selector, id_helper){
+    updateHelper(id_selector, id_helper, "{% url 'events:update-name' %}", false);
+  }
+
+  function updateDate(id_selector, id_helper){
+    updateHelper(id_selector, id_helper, "{% url 'events:update-date' %}", false);
+  }
+
+  function updateTime(id_selector, id_helper){
+    updateHelper(id_selector, id_helper, "{% url 'events:update-time' %}", false);
+  }
+
+  function updatePicture(id_selector, id_helper){
+
+    progress_func=function(e, data){
+      $helper=$(`#${id_helper}`);
+      var per = Math.round((data.loaded * 100.0) / data.total) + '%';
+      $helper.text(`Uploading... ${per}`);
+    };//end of progress_func. Is called when image is being uploaded to Cloudinary.
+
+    ready_func=function(e, data){
+      $helper=$(`#${id_helper}`);
+      $helper.text('Saving changes...');
+
+      updateHelper(id_selector, id_helper, "{% url 'events:update-picture' %}", JSON.stringify(data.result));
+    };//end of ready_func. Is called once upload to cloudinary is completed.
+
+    bindPicListener(id_selector, progress_func, ready_func);
+  }
+
+  function updateBand(id_selector, id_helper){
+    updateHelper(id_selector, id_helper, "{% url 'events:update-band' %}");
+  }
+
+  $(document).ready(function(){
+    updatePicture('id_new_picture', 'pictureHelp');
+  });
+
+</script>
+{% endblock %}
