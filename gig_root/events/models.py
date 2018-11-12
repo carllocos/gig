@@ -42,6 +42,17 @@ class Event(models.Model):
     def __str__(self):
         return f'event {self.name} for {self.band.name}'
 
+    def is_owner(self,user):
+        """
+        method that will check whether the user is the owner of this event.
+        """
+        if not user.is_authenticated:
+            return False
+
+        if not user.has_artistProfile():
+            return False
+
+        return self.band.owner == user.get_artist()
 
     def add_comment(self, msg, commentator):
         """
@@ -134,7 +145,7 @@ class Event(models.Model):
     @property
     def amount_participants(self):
         return self.get_participants().count()
-        
+
 @receiver(pre_delete, sender=Event)
 def delete_pic(sender, instance, **kwargs):
     """
