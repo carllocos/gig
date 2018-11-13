@@ -316,6 +316,39 @@ class Band(models.Model):
         v.is_upvote = not v.is_upvote
         v.save()
 
+    def is_follower(self, user):
+        """
+        `is_follower` checks wether `user` is a follower of `self` instance
+        """
+        if not user.is_authenticated:
+            return False
+        
+        return self.follow_set.filter(follower=user).exists()
+
+    def add_follower(self, user):
+        """
+        `add_follower` marks `user` as follower of `self` band. The method calls first
+        `is_follower` to check whether user is already a follower or not.
+        Returns the `Follow` intance if the user is added otherwise False is returned
+        """
+        if self.is_follower(user):
+            return False
+        return self.follow_set.create(band=self, follower=user)
+
+    def remove_follower(self, user):
+        if self.is_follower(user):
+            return self.follow_set.get(follower=user).delete()
+        return False
+
+    def get_followers(self):
+        return self.follow_set.all()
+
+    @property
+    def amount_followers(self):
+        return self.follow_set.all().count()
+
+
+
     def __remove_comma(self, s):
         if len(s)<= 0:
             return ''
@@ -595,7 +628,18 @@ class BandComment(CommentAbstract):
         v.is_upvote = not v.is_upvote
         v.save()
 
+class Follow(models.Model):
+    """
+    Model to represent the follower of one band instance.
+    """
+    band=models.ForeignKey(Band, on_delete=models.CASCADE)
+    follower = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    class Meta:
+        db_table= "followers"
+
+    def __str__(self):
+        return f'{self.follower.get_full_name()} follows {self.band.name}'
 
 class BandCommentVote(VoteAbstract):
     """
