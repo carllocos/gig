@@ -56,6 +56,7 @@ def band_profile(request, profile_id):
              'direct_pic': DirectUploadBandPic(),
              'direct_video': DirectVideoUpload(),
              'comments': band.get_comments(),
+             'user_follows': band.is_follower(request.user),
              }
 
     return render(request, 'musicians/profile.html', context=context)
@@ -480,3 +481,40 @@ def vote_band(request):
                 band.inverse_vote(request.user)
 
     return JsonResponse({'is_executed': True, 'upvotes': band.upvotes, 'downvotes': band.downvotes})
+
+
+
+@require_http_methods(["POST"])
+@login_required
+def update_follow(request):
+    """
+    Ajax request to follow or unfollow a band profile.
+    The post request needs to contain the following keys;
+    1. `val`: wich holds the value 'follow' or 'unfollow'.
+    2. `band_id`: the identifier for the band involved in the ajax post request
+
+    The user associated with the current session will `follow` or `unfollow` band
+    with id `band_id`.
+
+    If operation was executed returns a response with following keys:
+    1. `is_executed`: a boolean that specifies wether the operation was executed
+    2. 'followers': the new amount of followers for the band
+
+    If the operation failed
+    `reason` is provided instead of `followers`, which contains the reason for the failure
+
+    """
+    failure=__contains_failure(request, keys=['val'], only_owner=False)
+    if failure:
+        return failure
+
+    val=request.POST.get('val')
+    band=Band.get_band(request.POST.get('band_id'))
+
+    if val == 'follow':
+        band.add_follower(request.user) #The user is added as follower
+    else: #unfollow
+        band.remove_follower(request.user) #The user is removed from the follower
+
+
+    return JsonResponse({'is_executed': True, 'followers': band.amount_followers})

@@ -18,5 +18,6 @@ urlpatterns =[
     path('add_comment/', views.add_comment, name='add-comment'),
     path('vote_comment/', views.vote_comment, name="vote-comment"),
     path('vote_band/', views.vote_band, name="vote-band"),
+    path('update_follow/', views.update_follow, name="update-follow"),
 
 ]
