@@ -1,12 +1,13 @@
 from django.contrib import admin
-from .models import Band, Member, LineUp, ProfilePic, BackgroundPic, BandPic, VideoBand, BandComment, BandCommentVote
+from . import models
 
-admin.site.register(Band)
-admin.site.register(Member)
-admin.site.register(LineUp)
-admin.site.register(ProfilePic)
-admin.site.register(BackgroundPic)
-admin.site.register(BandPic)
-admin.site.register(VideoBand)
-admin.site.register(BandComment)
-admin.site.register(BandCommentVote)
+admin.site.register(models.Band)
+admin.site.register(models.Member)
+admin.site.register(models.LineUp)
+admin.site.register(models.ProfilePic)
+admin.site.register(models.BackgroundPic)
+admin.site.register(models.BandPic)
+admin.site.register(models.VideoBand)
+admin.site.register(models.BandComment)
+admin.site.register(models.BandCommentVote)
+admin.site.register(models.Follow)
