@@ -1,4 +1,5 @@
 import datetime
+import calendar
 
 from django import template
 
@@ -46,10 +47,10 @@ def fancy_date(event_date_time):
     event_date=event_date_time.date()
 
     if today == event_date:
-        return "Today at " + str(event_date_time.hour) + ":" + str(event_date_time.minute)
+        return "Today at " + correct_time(event_date_time.hour, event_date_time.minute)
     elif today  + datetime.timedelta(days=1) == event_date:
-        return "Tomorrow at " + str(event_date_time.hour) + ":" + str(event_date_time.minute)
+        return "Tomorrow at " + correct_time(event_date_time.hour, event_date_time.minute)
     elif today  > event_date:
         return "Already played"
     else:
-        return event_date_time
+        return calendar.month_name[event_date.month] +" "+ str(event_date.day)+ " at " + correct_time(event_date_time.hour, event_date_time.minute)
