@@ -16,5 +16,7 @@ path("edit/update_date", views.update_date, name="update-date"),
 path("edit/update_time", views.update_time, name="update-time"),
 path("edit/update_band", views.update_band, name="update-band"),
 path("edit/update_picture", views.update_picture, name="update-picture"),
-
+path("add_comment/", views.add_comment, name="add-comment"),
+path("vote_comment/", views.vote_comment, name="vote-comment"),
+path("update_participation/", views.update_participation, name="update-participation"),
 ]

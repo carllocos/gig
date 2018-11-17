@@ -30,6 +30,7 @@ def event_profile(request, event_id):
             'is_owner': event.is_owner(request.user),
             'comments': event.get_comments(),
             'participants': event.get_participants(),
+            'is_participant': event.is_participant(request.user),
             }
 
     return render(request, 'events/event.html', context=context)
@@ -157,6 +158,9 @@ def __contains_failure(request, keys, allowed_operations=None, only_owner=True):
     return False
 
 def __is_valid_name(name):
+    """
+    private function to validate event name provided trough ajax request.
+    """
     if name == '':
         return {'valid': False, 'reason': 'new name cannot be an empty string.'}
     if len(name) > Event.MAX_LENGTH_NAME:
@@ -185,6 +189,9 @@ def update_name(request):
 
 
 def __is_valid_description(description):
+    """
+    private function to validate event description provided trough ajax request.
+    """
     if description == '':
         return {'valid': False, 'reason': 'new description cannot be an empty string.'}
     return {'valid': True}
@@ -209,9 +216,9 @@ def update_description(request):
     return JsonResponse({'is_executed': True})
 
 def __is_valid_date(date_str):
-    print(date_str)
-    print(f"type {type(date_str)}")
-
+    """
+    private function to validate event date provided trough ajax request.
+    """
     format_str = '%Y-%m-%d' # The format
     try:
         datetime_obj = datetime.datetime.strptime(date_str, format_str).date()
@@ -248,16 +255,15 @@ def update_date(request):
 
 
 def __is_valid_time(time_str, current_date):
-    print(time_str)
-    print(f"type {type(time_str)}")
-
+    """
+    private function to validate event time provided trough ajax request.
+    """
     try:
         time=datetime.datetime.strptime(time_str, '%H:%M').time()
     except:
         return {'valid': False, 'reason': 'new date has incorrect format.'}
 
     now = datetime.datetime.now()
-    print(f'now: {now.time()}')
     new_d= datetime.datetime(current_date.year, current_date.month, current_date.day, time.hour, time.minute, time.second, time.microsecond, time.tzinfo)
     if new_d < now:
          return {'valid': False, 'reason': f'time and date cannot be in the past. Given {new_d}'}
@@ -280,7 +286,6 @@ def update_time(request):
         return JsonResponse({'is_executed': False, 'reason': valid.get('reason')})
 
     t=valid.get('time')
-    print(f"THE TIME {t}")
     dt=datetime.datetime(event.date.year, event.date.month, event.date.day, t.hour, t.minute, t.second, t.microsecond, t.tzinfo)
     event.date=dt
     event.save()
@@ -289,6 +294,9 @@ def update_time(request):
 
 
 def __is_valid_band(band_pk, artist):
+    """
+    private function to validate the band associated to the event provided through ajax request.
+    """
     try:
         band_pk=str_to_int(band_pk)
     except:
@@ -337,3 +345,59 @@ def update_picture(request):
 
     event.picture.save()
     return JsonResponse({'is_executed': True})
+
+@require_http_methods(["POST"])
+@login_required
+def add_comment(request):
+    failure=__contains_failure(request, keys=['val'])
+    if failure:
+        return failure
+
+    event=Event.objects.get(pk=request.POST.get('event_id'))
+    msg=request.POST.get('val')
+
+    event.add_comment(msg, commentator=request.user)
+    return JsonResponse({'is_executed': True})
+
+@require_http_methods(["POST"])
+@login_required
+def vote_comment(request):
+    failure=__contains_failure(request, keys=['val'], allowed_operations=['upvote', 'downvote'])
+    if failure:
+        return failure
+
+    operation=request.POST.get('operation')
+    event=Event.objects.get(pk=request.POST.get('event_id'))
+    comment_id=request.POST.get('val')
+    c=event.get_comment(comment_id)
+    if not c:
+        return JsonResponse({'is_executed': False, 'reason': f'Comment with pk {comment_id} does not exists'})
+
+    if operation == 'upvote':
+        if not c.upvote(request.user): #The user already voted for this comment
+            if not c.get_vote(request.user).is_upvote:
+                c.inverse_vote(request.user)
+    else: #downvote
+        if not c.downvote(request.user):
+            if c.get_vote(request.user).is_upvote:
+                c.inverse_vote(request.user)
+
+    return JsonResponse({'is_executed': True, 'upvotes': c.upvotes, 'downvotes': c.downvotes})
+
+
+@require_http_methods(["POST"])
+@login_required
+def update_participation(request):
+    failure=__contains_failure(request, keys=[], allowed_operations=['participate', 'disengage'])
+    if failure:
+        return failure
+
+    operation=request.POST.get('operation')
+    event=Event.objects.get(pk=request.POST.get('event_id'))
+
+    if operation == 'participate':
+        event.add_participant(request.user)
+    else: #downvote
+        event.remove_participant(request.user)
+
+    return JsonResponse({'is_executed': True, 'participants': event.amount_participants})
