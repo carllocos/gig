@@ -58,7 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def send_email(self, mail_subject, mail_message_txt):
         """
         `send_email` method sends an email to the corresping user with `mail_subject` as subject and `mail_message_txt` as content of the email.
-        The email account used to send the email is the default account associated with the gig web app. 
+        The email account used to send the email is the default account associated with the gig web app.
         """
         email = EmailMessage(subject=mail_subject, body=mail_message_txt, to=[self.email])
         email.send(fail_silently=True)
@@ -95,4 +95,16 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.artistmodel
             return True
         except ObjectDoesNotExist:
+            return False
+
+    @property
+    def has_artist_profile(self):
+        return self.is_authenticated and self.has_artistProfile()
+
+    @property
+    def owns_band(self):
+        if self.has_artistProfile():
+            ar=self.get_artist()
+            return ar.owns.all().exists()
+        else:
             return False
