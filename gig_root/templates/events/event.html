@@ -7,11 +7,33 @@
 {{event.name}}
 {% endblock %}
 
+{% block link %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="{% static 'events/css/event.css' %}">
+{% endblock %}
 
 {% block body %}
 
 <div class="container">
-  <h1>{{band.name}} @{{event.name}} <span class="badge badge-secondary">{{event.date| fancy_date}}</span></h1>
+  <h1>{{band.name}} @{{event.name}} {% if user.is_authenticated %}<span class="badge badge-secondary">{{event.date| fancy_date}}</span> <button id="myBtn"> <i class="fas fa-share-square"></i></button>{% endif %}</h1>
+
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <form class="" action="" method="post">
+        <div class="form-group">
+          <label>Enter an email</label>
+          <input id="id_emailShare" type="email" name="email" value="">
+          <p id="id_modal-helper"></p>
+        </div>
+        <button type="button" name="button" onclick="shareEvent('id_emailShare', 'id_modal-helper')">Share event</button>
+      </form>
+    </div>
+  </div>
+
+
   <h3>Participants: {{event.amount_participants}}</h3>
   {% if user.is_authenticated %}
   {% if is_participant %}
@@ -194,5 +216,52 @@
       update_participation(id_help_text, 'disengage');
     }
 
-  </script>
-  {% endblock %}
+    function shareEvent(id_input, id_help_text){
+      $select=$(`#${id_input}`);
+
+      var dict= {
+        'event_id': {{event.pk}},
+        'val': $select.val(),
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      };
+
+      success_func = function (response){
+        $(`#${id_help_text}`).text(`Event shared successfully`);
+      };
+
+      failure_func = function (response){
+        $(`#${id_help_text}`).text(response.reason);
+      };
+
+      console.log("HEEEy");
+      sendAjaxRequest("{% url 'events:share-event' %}", dict, $select.val(), success_func, failure_func);
+    }
+
+
+    // Get the modal
+    var modal = document.getElementById('myModal');
+
+    // Get the button that opens the modal
+    var btn = document.getElementById("myBtn");
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks the button, open the modal
+    btn.onclick = function() {
+      modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+    </script>
+    {% endblock %}

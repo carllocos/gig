@@ -1,13 +1,17 @@
 import datetime
 import json
 
-from django.shortcuts import render, redirect
+from django.core.mail import EmailMessage
+from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.contrib.sites.shortcuts import get_current_site
 from django.views.decorators.http import require_http_methods
-from artists.artist_util import has_artist_profile, is_band_owner
+from django.template.loader import render_to_string
 
+from artists.artist_util import has_artist_profile, is_band_owner
 from musicians.models import Band
+from users.util import getHTTP_Protocol
 from .forms import CreateEventForm, DirectUploadPic
 from .models import Event, str_to_int
 
@@ -401,3 +405,39 @@ def update_participation(request):
         event.remove_participant(request.user)
 
     return JsonResponse({'is_executed': True, 'participants': event.amount_participants})
+
+def __is_valid_email(email):
+    if not '@' in email:
+        return {'valid': False}
+
+    if not '.' in email:
+        return {'valid': False}
+
+    return {'valid': True, 'email': email}
+
+@login_required
+def share_event(request):
+    failure=__contains_failure(request, keys=['val'])
+    if failure:
+        return failure
+
+    event=Event.objects.get(pk=request.POST.get('event_id'))
+
+    res=__is_valid_email(request.POST.get('val'))
+    if not res.get('valid'):
+        return JsonResponse({'is_executed': False, 'reason': 'unvalid email'})
+
+    context={
+            'user': request.user,
+            'http_protocol': getHTTP_Protocol(),
+            'domain': get_current_site(request).domain,
+            'path': reverse("events:profile", kwargs={'event_id': event.pk}),
+            }
+
+    mail_subject=f"Invitation to {event.name}"
+    mail_message_txt = render_to_string('events/messages/share_event.txt', context=context)
+
+    email = EmailMessage(subject=mail_subject, body=mail_message_txt, to=[res.get('email')])
+    email.send(fail_silently=True)
+
+    return JsonResponse({'is_executed': True})
