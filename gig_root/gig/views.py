@@ -2,9 +2,23 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.urls import reverse
 
-#TODO Needs to be removed
-from django.contrib.auth.decorators import login_required
+from . import search
 
-#@login_required
 def home(request):
-    return render(request, "gig/home.html", {'user': request.user})
+
+    user=request.user
+    has_artistProfile=user.has_artistProfile() if user.is_authenticated else False
+    upc_evs=search.get_upcoming_events()
+    foll_b_evs= search.get_follow_bands_events(user) if user.is_authenticated else False
+    part_evs= search.get_participate_events(user) if user.is_authenticated else False
+    might_like_evs= search.get_might_like_events(user) if user.is_authenticated else False
+
+    context= {
+        'user': user,
+        'has_artistProfile': has_artistProfile,
+        'upcoming_events': upc_evs,
+        'follow_band_events': foll_b_evs,
+        'participate_events': part_evs,
+        'might_like_events': might_like_evs,
+    }
+    return render(request, "gig/home.html", context=context)
