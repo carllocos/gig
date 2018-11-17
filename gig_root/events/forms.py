@@ -69,8 +69,7 @@ class CreateEventForm(forms.ModelForm):
         dt=datetime.datetime(d.year, d.month, d.day, t.hour, t.minute, t.second, t.microsecond,t.tzinfo)
         self.cleaned_data['date']=dt
         self.instance.date = self.cleaned_data['date']
-
-
+        self.instance.band = self.cleaned_data['band']
         super(CreateEventForm, self).save(*args, **kwargs)
 
     def savePicture(self):
