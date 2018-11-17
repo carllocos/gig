@@ -1,0 +1,2 @@
+{{user.first_name}} {{user.last_name}} sent you an invitation to an event.
+Click on the following link to view the event: {{http_protocol}}{{domain}}{{path}}
