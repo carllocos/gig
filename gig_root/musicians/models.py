@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -322,7 +323,7 @@ class Band(models.Model):
         """
         if not user.is_authenticated:
             return False
-        
+            
         return self.follow_set.filter(follower=user).exists()
 
     def add_follower(self, user):
@@ -347,7 +348,9 @@ class Band(models.Model):
     def amount_followers(self):
         return self.follow_set.all().count()
 
-
+    def get_upcoming_events(self):
+        now=datetime.datetime.now()
+        return self.event_set.filter(date__gte=now)
 
     def __remove_comma(self, s):
         if len(s)<= 0:
