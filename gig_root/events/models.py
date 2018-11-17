@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from django.conf import settings
 from django.db import models
@@ -140,11 +141,21 @@ class Event(models.Model):
         return False
 
     def is_participant(self, user):
-        return self.participant_set.filter(participant=user).exists()
+        return user.is_authenticated and self.participant_set.filter(participant=user).exists()
 
     @property
     def amount_participants(self):
         return self.get_participants().count()
+
+    @staticmethod
+    def get_upcoming_events(events=None):
+        now=datetime.datetime.now()
+        if events is None:
+            return Event.objects.filter(date__gte=now).order_by('date')
+        else:
+            return events.filter(date__gte=now).order_by('date')
+
+
 
 @receiver(pre_delete, sender=Event)
 def delete_pic(sender, instance, **kwargs):
