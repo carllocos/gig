@@ -11,9 +11,16 @@
 {% block body %}
 
 <div class="container">
-  <h1>{{band.name}} @ {{event.name}} <span class="badge badge-secondary">{{event.date| fancy_date}}</span></h1>
+  <h1>{{band.name}} @{{event.name}} <span class="badge badge-secondary">{{event.date| fancy_date}}</span></h1>
   <h3>Participants: {{event.amount_participants}}</h3>
-  <p>Add tag to change date of today and tomorrow and yesterday to 'tomorrow', 'today' 'yesterday'</p>
+  {% if user.is_authenticated %}
+  {% if is_participant %}
+  <button class= "btn btn-sm" type="button" name="button" onClick="removeParticipant('id_participateHelp')">Disengage</button>
+  {% else %}
+  <button class= "btn btn-sm" type="button" name="button" onClick="addParticipant('id_participateHelp')">Participate</button>
+  {% endif %}
+  <p id="id_participateHelp"></p>
+  {% endif %}
   {% if is_owner %}
   <div class="container">
     <a href="{% url 'events:edit' event_id=event.pk%}">Edit the event</a>
@@ -23,10 +30,14 @@
     {% cloudinary event.picture.public_id width=100 height=150 crop="fill"%}
   </div>
   <div class="container">
+    <p>{{event.description}}</p>
+  </div>
+  <br>
+  <div class="container">
     {% cloudinary band.profile_pic.public_id width=100 height=150 crop="fill"%}
   </div>
   <div class="container">
-    <p>{{event.description}}</p>
+    <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
   </div>
 
   <div class="row">
@@ -79,5 +90,109 @@
 
   </div>
   {% endfor %}
+  <script type="text/javascript">
 
+
+  function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
+    if (valToSend != ''){
+      $.ajax({
+        type: "POST",
+        url: url_l,
+        data: dict,
+        dataType: 'json',
+        success: function(response){
+
+          if(response.is_executed){
+            success_func(response);
+          }
+          else{
+            failure_func(response);
+          }
+
+        }});
+
+      }else {
+        alert("AjaxRequest wasn't send. The value involved in the update is an empty string ");
+      }
+    }
+
+
+    function addComment(id_selector, id_help_text){
+      $des=$(`#${id_selector}`);
+      var dict= {
+        'val': $des.val(),
+        'band_id': {{band.pk}},
+        'event_id': {{event.pk}},
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      };
+
+      success_func = function (response){
+        $(`#${id_help_text}`).text('Comment was saved');
+      };
+
+      failure_func = function (response){
+        $(`#${id_help_text}`).text(response.reason);
+      };
+
+      sendAjaxRequest("{% url 'events:add-comment' %}", dict, $des.val(), success_func, failure_func);
+    }
+
+    function vote(comment_id, id_help_text, operation){
+
+      var dict= {
+        'val': comment_id,
+        'band_id': {{band.pk}},
+        'event_id': {{event.pk}},
+        'operation':operation,
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      };
+
+      success_func = function (response){
+        $(`#${id_help_text}`).text(`New upvotes ${response.upvotes} and downvotes ${response.downvotes}`);
+      };
+
+      failure_func = function (response){
+        $(`#${id_help_text}`).text(response.reason);
+      };
+
+      sendAjaxRequest("{% url 'events:vote-comment' %}", dict, comment_id, success_func, failure_func);
+    }
+
+    function upvoteComment(comment_id, id_help_text){
+      vote(comment_id, id_help_text, 'upvote');
+    }
+
+    function downvoteComment(comment_id, id_help_text){
+      vote(comment_id, id_help_text, 'downvote');
+    }
+
+
+    function update_participation(id_help_text, operation){
+
+      var dict= {
+        'event_id': {{event.pk}},
+        'operation':operation,
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      };
+
+      success_func = function (response){
+        $(`#${id_help_text}`).text(`New participants ${response.participants}`);
+      };
+
+      failure_func = function (response){
+        $(`#${id_help_text}`).text(response.reason);
+      };
+
+      sendAjaxRequest("{% url 'events:update-participation' %}", dict, "comment_id", success_func, failure_func);
+    }
+
+    function addParticipant(id_help_text){
+      update_participation(id_help_text, 'participate');
+    }
+
+    function removeParticipant(id_help_text){
+      update_participation(id_help_text, 'disengage');
+    }
+
+  </script>
   {% endblock %}
