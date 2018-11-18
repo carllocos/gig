@@ -5,6 +5,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.conf import  settings
 from django.db import models
+from django.core.validators import URLValidator
 
 from artists.models import ArtistModel
 from users.models import User
@@ -37,6 +38,7 @@ class BackgroundPic(PictureAbstract):
         return f'Background pic of band: {self.band.name}'
 
 
+
 class Band(models.Model):
 
     MAX_LENGTH=100
@@ -46,6 +48,8 @@ class Band(models.Model):
     owner = models.ForeignKey(ArtistModel, db_column="owner", on_delete=models.CASCADE, related_name="owns")
     profile_pic = models.OneToOneField(ProfilePic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)
     background_pic = models.OneToOneField(BackgroundPic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
+
+    _soundcloud_profile_url = models.TextField(default='', null=True, validators=[URLValidator()])
 
     class Meta:
         verbose_name="Band Profile"
@@ -323,7 +327,7 @@ class Band(models.Model):
         """
         if not user.is_authenticated:
             return False
-            
+
         return self.follow_set.filter(follower=user).exists()
 
     def add_follower(self, user):
@@ -351,6 +355,19 @@ class Band(models.Model):
     def get_upcoming_events(self):
         now=datetime.datetime.now()
         return self.event_set.filter(date__gte=now)
+
+    @property
+    def soundcloud_profile_url(self):
+        print(self._soundcloud_profile_url)
+        return self._soundcloud_profile_url
+
+    @soundcloud_profile_url.setter
+    def soundcloud_profile_url(self, url):
+        print(f'The new url {url}')
+        if url == '':
+            self._soundcloud_profile_url=False
+        else:
+            self._soundcloud_profile_url=url
 
     def __remove_comma(self, s):
         if len(s)<= 0:

@@ -10,6 +10,8 @@
 {% block link %}
 {% cloudinary_includes %}
 {% cloudinary_js_config %}
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="{% static 'events/css/event.css' %}">
 {% endblock %}
 
 {% block body %}
@@ -86,6 +88,34 @@
       </div>
     </div>
     {% endif %}
+  </div>
+
+  <div class="row">
+    <div class="">
+      {% if  band.soundcloud_profile_url%}
+      <a href="{{band.soundcloud_profile_url}}"><i class="fab fa-soundcloud"></i></a>
+      {% else %}
+      {% if is_owner %}
+      <button id="myBtn"> <i class="fab fa-soundcloud"></i></button>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <form class="" action="" method="post">
+        <div class="form-group">
+          <label>Enter soundcloud profile url</label>
+          <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" value="e.g. https://soundcloud.com/trippie-hippie-2/topanga">
+          <p id="id_modal-helper"></p>
+        </div>
+        <button type="button" name="button" onclick="profileSoundCloud('id_profileSoundcloud', 'id_modal-helper')">Save Profile</button>
+      </form>
+    </div>
   </div>
 
   <div class="row">
@@ -664,13 +694,10 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     };
 
     success_func = function (response){
-      console.log("HEY");
       $(`#${id_help_text}`).text(`New followers ${response.followers}`);
     };
 
     failure_func = function (response){
-      console.log("HEY2");
-      console.log(response)
       $(`#${id_help_text}`).text(response.reason);
     };
 
@@ -696,6 +723,38 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     followOperation(id_help_text, 'unfollow');
   }
 
+  function updateUrl(id_selector, id_help_text, kind_url, operation, url) {
+    $select=$(`#${id_selector}`);
+
+    var dict= {
+      'val': $select.val(),
+      'operation': operation,
+      'band_id': {{band.pk}},
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    success_func = function (response){
+      $(`#${id_help_text}`).text(`New followers ${response.followers}`);
+    };
+
+    failure_func = function (response){
+      $(`#${id_help_text}`).text(response.reason);
+    };
+
+
+    sendAjaxRequest(url, dict, $select.val(), success_func, failure_func);
+  }
+
+
+  function updateSoundCloud(id_selector, id_help_text, operation) {
+    updateUrl(id_selector, id_help_text, 'soundcloud', operation, "{% url 'musicians:update-soundcloud' %}");
+  }
+
+
+  function profileSoundCloud(id_selector, id_help_text) {
+    updateSoundCloud(id_selector, id_help_text, 'profile')
+  }
+
 
 
   $(document).ready(function(){
@@ -704,6 +763,33 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     bindBandPicListener();
     bindVideoListener();
   });
+
+
+  // Get the modal
+  var modal = document.getElementById('myModal');
+
+  // Get the button that opens the modal
+  var btn = document.getElementById("myBtn");
+
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks the button, open the modal
+  btn.onclick = function() {
+    modal.style.display = "block";
+  }
+
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function() {
+    modal.style.display = "none";
+  }
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  }
 
   </script>
   {% endblock %}

@@ -1,5 +1,8 @@
 import json
 
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_text
+from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, JsonResponse
@@ -8,9 +11,10 @@ from django.views.decorators.http import require_http_methods
 
 from artists.artist_util import has_artist_profile
 from users.models import User
+from users.tokens import account_activation_token
 from users.util import getHTTP_Protocol
 
-from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload
+from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, URLForm
 from .models import Band, Member, BandPic, VideoBand
 
 def test(request):
@@ -200,10 +204,7 @@ def update_member(request):
 
     return JsonResponse({'is_executed': True, 'val': val})
 
-from users.tokens import account_activation_token
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.utils.encoding import force_bytes, force_text
-from django.template.loader import render_to_string
+
 @require_http_methods(["POST"])
 @login_required
 @has_artist_profile
@@ -518,3 +519,39 @@ def update_follow(request):
 
 
     return JsonResponse({'is_executed': True, 'followers': band.amount_followers})
+
+
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+def update_soundcloud_url(request):
+    """
+    Ajax request to update a sound cloud url associated to a band.
+    The post request needs to contain the following keys;
+    1. `val`: wich holds the url.
+    2. `band_id`: the identifier for the band involved in the ajax post request
+    3. `operation`: which specifies the operation to be performed
+
+
+    """
+    failure=__contains_failure(request, keys=['val'], only_owner=True)
+    if failure:
+        return failure
+
+    url=request.POST.get('val')
+    print(url)
+    band=Band.get_band(request.POST.get('band_id'))
+    f=URLForm({'url': url})
+    if f.is_valid():
+        print(f"url {url}")
+        band.soundcloud_profile_url=url
+        band.save()
+        return JsonResponse({'is_executed': True, 'followers': band.amount_followers})
+    else:
+        errors=f.errors.as_data().get('url')
+        error_msg=''
+        for err in errors:
+            error_msg+= '.'.join(err.messages)
+
+        return JsonResponse({'is_executed': False, 'reason': error_msg})

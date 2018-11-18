@@ -19,5 +19,6 @@ urlpatterns =[
     path('vote_comment/', views.vote_comment, name="vote-comment"),
     path('vote_band/', views.vote_band, name="vote-band"),
     path('update_follow/', views.update_follow, name="update-follow"),
+    path('update_soundcloud/', views.update_soundcloud_url, name="update-soundcloud"),
 
 ]

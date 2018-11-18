@@ -3,6 +3,8 @@ from cloudinary.forms import CloudinaryJsFileField
 
 from .models import Band, LineUp, Member, DEFAULT_BAND_PROFILE_PIC, DEFAULT_BAND_BACKGROUND_PIC, ProfilePic, BackgroundPic
 
+class URLForm(forms.Form):
+    url = forms.URLField(required=True, error_messages={'required': "You need to provida an url",'invalid': "The specified url is invalid"})
 
 class DirectUploadProfilePicBand(forms.Form):
     profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_band_profile_pic" })
