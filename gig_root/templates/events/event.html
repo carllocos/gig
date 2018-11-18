@@ -233,7 +233,6 @@
         $(`#${id_help_text}`).text(response.reason);
       };
 
-      console.log("HEEEy");
       sendAjaxRequest("{% url 'events:share-event' %}", dict, $select.val(), success_func, failure_func);
     }
 
