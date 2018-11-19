@@ -14,7 +14,7 @@ from users.models import User
 from users.tokens import account_activation_token
 from users.util import getHTTP_Protocol
 
-from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, URLForm
+from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, SoundCloudURL
 from .models import Band, Member, BandPic, VideoBand
 
 def test(request):
@@ -532,26 +532,37 @@ def update_soundcloud_url(request):
     1. `val`: wich holds the url.
     2. `band_id`: the identifier for the band involved in the ajax post request
     3. `operation`: which specifies the operation to be performed
+        We have 3 different allowed operations
+        a) profile-add; operation that add's an URL as the soundcloud profile url
+        b) profile-update; operation that updates existings url to newly provided url
+        c) profile-delete; operation that removes the url
 
 
     """
-    failure=__contains_failure(request, keys=['val'], only_owner=True)
+    failure=__contains_failure(request, keys=['val'], allowed_operations=['profile-add', 'profile-update', 'profile-delete'],only_owner=True)
     if failure:
         return failure
 
     url=request.POST.get('val')
-    print(url)
     band=Band.get_band(request.POST.get('band_id'))
-    f=URLForm({'url': url})
-    if f.is_valid():
-        print(f"url {url}")
-        band.soundcloud_profile_url=url
+    operation=request.POST.get('operation')
+
+    if operation == 'profile-delete':
+        band.soundcloud_profile_url=None
         band.save()
-        return JsonResponse({'is_executed': True, 'followers': band.amount_followers})
-    else:
+        return JsonResponse({'is_executed': True, 'value': 'URL to soundcloud profile succesfuly deleted.'})
+
+    f=SoundCloudURL({'url': url})
+    if not f.is_valid():
         errors=f.errors.as_data().get('url')
         error_msg=''
         for err in errors:
             error_msg+= '.'.join(err.messages)
 
-        return JsonResponse({'is_executed': False, 'reason': error_msg})
+            return JsonResponse({'is_executed': False, 'reason': error_msg})
+
+    band.soundcloud_profile_url=url
+    band.save()
+    msg = 'url succesfuly added.' if operation == 'profile-add' else 'url succesfuly updated.'
+
+    return JsonResponse({'is_executed': True, 'value': msg})
