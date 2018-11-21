@@ -50,6 +50,7 @@ class Band(models.Model):
     background_pic = models.OneToOneField(BackgroundPic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
 
     _soundcloud_profile_url = models.TextField(default='', null=True, validators=[URLValidator()])
+    _soundcloud_playlist_url = models.TextField(default='', null=True)
 
     class Meta:
         verbose_name="Band Profile"
@@ -358,16 +359,25 @@ class Band(models.Model):
 
     @property
     def soundcloud_profile_url(self):
-        print(self._soundcloud_profile_url)
         return self._soundcloud_profile_url
 
     @soundcloud_profile_url.setter
     def soundcloud_profile_url(self, url):
-        print(f'The new url {url}')
         if url == '':
             self._soundcloud_profile_url=False
         else:
             self._soundcloud_profile_url=url
+
+    @property
+    def soundcloud_playlist_url(self):
+        return self._soundcloud_playlist_url
+
+    @soundcloud_playlist_url.setter
+    def soundcloud_playlist_url(self, url):
+        if url == '':
+            self._soundcloud_playlist_url=False
+        else:
+            self._soundcloud_playlist_url=url
 
     def __remove_comma(self, s):
         if len(s)<= 0:
