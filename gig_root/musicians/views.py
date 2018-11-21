@@ -14,7 +14,7 @@ from users.models import User
 from users.tokens import account_activation_token
 from users.util import getHTTP_Protocol
 
-from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, SoundCloudURL
+from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, SoundCloudURL, SoundCloudPlayListURL
 from .models import Band, Member, BandPic, VideoBand
 
 def test(request):
@@ -338,7 +338,6 @@ def update_picture(request):
 
     else: #add a new picutre case
         metadata=json.loads(request.POST.get('val'))
-        print(f"type public_id {type(metadata.get('public_id'))}")
         pic=BandPic(band=band,
                     public_id=metadata.get('public_id'),
                     title=metadata.get('original_filename'),
@@ -373,7 +372,6 @@ def update_video(request):
     band=Band.get_band(request.POST.get('band_id'))
 
     if operation == 'delete':
-        print("delete")
         video_pk = val
         try:
             VideoBand.objects.get(pk=video_pk).delete()
@@ -383,8 +381,6 @@ def update_video(request):
 
     else: #add a new video
         metadata=json.loads(request.POST.get('val'))
-        print("ADD")
-        print(f"type public_id {type(metadata.get('public_id'))}")
         vid=VideoBand(band=band, public_id=metadata.get('public_id'), title=metadata.get('original_filename'))
         vid.save()
         return JsonResponse({'is_executed': True, 'val': metadata.get('url')})
@@ -539,20 +535,29 @@ def update_soundcloud_url(request):
 
 
     """
-    failure=__contains_failure(request, keys=['val'], allowed_operations=['profile-add', 'profile-update', 'profile-delete'],only_owner=True)
+    failure=__contains_failure(request, keys=['val', 'kind_url'], allowed_operations=['add', 'update', 'delete'],only_owner=True)
     if failure:
         return failure
+
+    kind_url = request.POST.get('kind_url')
+    if kind_url not in ['profile', 'playlist']:
+        return JsonResponse({'is_executed': False, 'reason': 'Only profile or playlist urls are accepted.'})
 
     url=request.POST.get('val')
     band=Band.get_band(request.POST.get('band_id'))
     operation=request.POST.get('operation')
+    if operation == 'delete':
+        if kind_url == 'profile':
+            band.soundcloud_profile_url=None
+            msg='URL to soundcloud profile succesfuly deleted.'
+        else:
+            band.soundcloud_playlist_url=None
+            msg='URL to soundcloud playlist succesfuly deleted.'
 
-    if operation == 'profile-delete':
-        band.soundcloud_profile_url=None
         band.save()
-        return JsonResponse({'is_executed': True, 'value': 'URL to soundcloud profile succesfuly deleted.'})
+        return JsonResponse({'is_executed': True, 'value': msg})
 
-    f=SoundCloudURL({'url': url})
+    f= SoundCloudURL({'url': url}) if kind_url == 'profile' else SoundCloudPlayListURL({'url': url})
     if not f.is_valid():
         errors=f.errors.as_data().get('url')
         error_msg=''
@@ -561,8 +566,12 @@ def update_soundcloud_url(request):
 
             return JsonResponse({'is_executed': False, 'reason': error_msg})
 
-    band.soundcloud_profile_url=url
+    if kind_url == 'profile':
+        band.soundcloud_profile_url=url
+    else:
+        band.soundcloud_playlist_url=url
+
     band.save()
-    msg = 'url succesfuly added.' if operation == 'profile-add' else 'url succesfuly updated.'
+    msg = 'url succesfuly added.' if operation == 'add' else 'url succesfuly updated.'
 
     return JsonResponse({'is_executed': True, 'value': msg})
