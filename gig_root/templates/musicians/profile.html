@@ -94,13 +94,9 @@
     <div class="">
       {% if  band.soundcloud_profile_url%}
       <a href="{{band.soundcloud_profile_url}}"><i class="fab fa-soundcloud"></i></a>
+      {% endif %}
       {% if is_owner %}
       <button id="myBtn"> <i class="fas fa-pen"></i></button>
-      {% endif %}
-      {% else %}
-      {% if is_owner %}
-      <button id="myBtn"> <i class="fab fa-soundcloud"></i></button>
-      {% endif %}
       {% endif %}
     </div>
   </div>
@@ -112,18 +108,32 @@
       <span class="close">&times;</span>
       <form class="" action="" method="post">
         <div class="form-group">
+
+          <label>SoundCloud profile</label>
           {% if  band.soundcloud_profile_url%}
           <!-- Situation where the url exists and owner can update or remove it-->
-          <label>Current soundcloud profile url</label>
           <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" value="{{band.soundcloud_profile_url}}">
           <button type="button" name="button" onclick="updateProfileSoundCloud('id_profileSoundcloud', 'id_modalHelper')">Save Update</button>
           <button type="button" name="button" onclick="deleteProfileSoundCloud('id_profileSoundcloud', 'id_modalHelper')">Delete URL</button>
           {% else %}
           <!-- Situation where the does not exists and owner can add an url-->
-          <label>Enter soundcloud profile url</label>
           <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" value="e.g. https://soundcloud.com/your-profile-name">
           <button type="button" name="button" onclick="addProfileSoundCloud('id_profileSoundcloud', 'id_modalHelper')">Save Profile</button>
           {% endif %}
+        </div>
+        <div class="form-group">
+          <label>SoundCloud playlist</label>
+          {% if  band.soundcloud_playlist_url%}
+          <!-- Situation where the url exists and owner can update or remove it-->
+          <input id="id_playlistSoundCloud" type="text" name="soundcloud_playlit" value="{{band.soundcloud_playlist_url}}">
+          <button type="button" name="button" onclick="updatePlayListSoundCloud('id_playlistSoundCloud', 'id_modalHelper')">Save Update</button>
+          <button type="button" name="button" onclick="deletePlayListSoundCloud('id_playlistSoundCloud', 'id_modalHelper')">Delete URL</button>
+          {% else %}
+          <!-- Situation where the does not exists and owner can add an url-->
+          <input id="id_playlistSoundCloud" type="text" name="soundcloud_profile" value="e.g. <iframe ....> </iframe>">
+          <button type="button" name="button" onclick="addPlayListSoundCloud('id_playlistSoundCloud', 'id_modalHelper')">Save Playlist</button>
+          {% endif %}
+
           <p id="id_modalHelper"></p>
         </div>
       </form>
@@ -285,7 +295,23 @@
 
   </div>
 
+  <div class="row">
+    <div class="col-12">
+      <h2>
+        Music
+      </h2>
+    </div>
+  </div>
 
+  <div class="row">
+    <div class="col-12">
+      {% if band.soundcloud_playlist_url %}
+      <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="{{band.soundcloud_playlist_url}}"></iframe>
+      {% else %}
+      No Music specified by the user
+      {% endif %}
+    </div>
+  </div>
 
 
   <div class="row">
@@ -744,6 +770,7 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
       'val': $select.val(),
       'operation': operation,
       'band_id': {{band.pk}},
+      'kind_url': kind_url,
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
@@ -760,22 +787,36 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
   }
 
 
-  function updateSoundCloud(id_selector, id_help_text, operation) {
-    updateUrl(id_selector, id_help_text, 'soundcloud', operation, "{% url 'musicians:update-soundcloud' %}");
+  function profileSoundCloud(id_selector, id_help_text, operation) {
+    updateUrl(id_selector, id_help_text, 'profile', operation, "{% url 'musicians:update-soundcloud' %}");
   }
 
-
   function addProfileSoundCloud(id_selector, id_help_text) {
-    updateSoundCloud(id_selector, id_help_text, 'profile-add')
+    profileSoundCloud(id_selector, id_help_text, 'add')
   }
 
   function updateProfileSoundCloud(id_selector, id_help_text) {
-    updateSoundCloud(id_selector, id_help_text, 'profile-update')
+    profileSoundCloud(id_selector, id_help_text, 'update')
   }
   function deleteProfileSoundCloud(id_selector, id_help_text) {
-    updateSoundCloud(id_selector, id_help_text, 'profile-delete')
+    profileSoundCloud(id_selector, id_help_text, 'delete')
   }
 
+
+  function playListSoundCloud(id_selector, id_help_text, operation) {
+    updateUrl(id_selector, id_help_text, 'playlist', operation, "{% url 'musicians:update-soundcloud' %}");
+  }
+
+  function addPlayListSoundCloud(id_selector, id_help_text) {
+    playListSoundCloud(id_selector, id_help_text, 'add')
+  }
+
+  function updatePlayListSoundCloud(id_selector, id_help_text) {
+    playListSoundCloud(id_selector, id_help_text, 'update')
+  }
+  function deletePlayListSoundCloud(id_selector, id_help_text) {
+    playListSoundCloud(id_selector, id_help_text, 'delete')
+  }
 
 
   $(document).ready(function(){
