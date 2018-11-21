@@ -7,20 +7,31 @@ class URLForm(forms.Form):
     url = forms.URLField(required=True, error_messages={'required': "You need to provida an url",'invalid': "The specified url is invalid"})
 
 class SoundCloudURL(URLForm):
+    soundcloud_prefix='https://soundcloud.com/'
+
     def is_valid(self):
         if super(SoundCloudURL, self).is_valid():
-            soundcloud_prefix='https://soundcloud.com/'
             url=self.cleaned_data['url']
-            if not url.startswith(soundcloud_prefix):
-                self.add_error('url', 'it is not a valid soundcloud url. Copy the URL of your SoundCloud profile.')
+            if not url.startswith(self.soundcloud_prefix):
+                self.add_error('url', 'it is not a valid soundcloud url.')
                 return False
 
-            profile_name= url[len(soundcloud_prefix):]
+            profile_name= url[len(self.soundcloud_prefix):]
             if profile_name == '':
-                self.add_error('url', 'it is not a valid soundcloud url. Copy the URL of your SoundCloud profile.')
+                self.add_error('url', 'it is not a valid soundcloud url.')
                 return False
 
             return True
+        return False
+
+class SoundCloudPlayListURL(SoundCloudURL):
+
+    soundcloud_prefix='https://w.soundcloud.com/player/'
+
+    def is_valid(self):
+        if super(SoundCloudURL, self).is_valid():
+            return True
+
         return False
 
 class DirectUploadProfilePicBand(forms.Form):
