@@ -18,6 +18,8 @@ def str_to_int(s , default=False):
     except ValueError:
         return default
 
+def str_to_float(s):
+    return float(s)
 
 class EventPicture(PictureAbstract):
     def __init__(self, *args, **kwargs):
@@ -37,11 +39,29 @@ class Event(models.Model):
     band=models.ForeignKey(Band, on_delete=models.CASCADE)
     description=models.TextField(default="", null=True)
 
-
-    # location
+    _latitude=models.FloatField(default=50.8503, null=False)
+    _longitude=models.FloatField(default=4.3517, null=False)
 
     def __str__(self):
         return f'event {self.name} for {self.band.name}'
+
+
+    @property
+    def latitude(self):
+        return self._latitude
+
+    @property
+    def longitude(self):
+        return self._longitude
+
+    @latitude.setter
+    def latitude(self, lat):
+        self._latitude=str_to_float(lat)
+
+    @longitude.setter
+    def longitude(self, long):
+        self._longitude=str_to_float(long)
+
 
     def is_owner(self,user):
         """
