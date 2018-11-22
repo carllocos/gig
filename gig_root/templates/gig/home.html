@@ -9,6 +9,7 @@ Gig For Musicians
 
 {% block link %}
 <link rel="stylesheet" type="text/css" href="{% static 'gig/css/home.css' %}">
+<script type="text/javascript" src="{% static 'util/weather_util.js' %}"> </script>
 {% endblock %}
 
 {% block body %}
@@ -116,7 +117,7 @@ Gig For Musicians
     {% if upcoming_events %}
 
     {% for event in upcoming_events %}
-    <div class="card text-center">
+    <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
       <div class="card-header">
         <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
       </div>
@@ -124,6 +125,11 @@ Gig For Musicians
       <div class="card-body">
         <h5 class="card-title"></h5>
         <p class="card-text">{{event.description}}</p>
+        <p class="temp"></p>
+        <p class="temp_max"></p>
+        <p class="temp_min"></p>
+        <p class="weahter_description"></p>
+        <img class="weather_icon" src="" alt="">
       </div>
     </div>
     {% endfor %}
@@ -140,7 +146,7 @@ Gig For Musicians
     {% if  follow_band_events%}
 
     {% for event in follow_band_events %}
-    <div class="card text-center">
+    <div class="card text-center" long='{{event.longitude}}' lat='{{event.latitude}}'>
       <div class="card-header">
         <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
       </div>
@@ -148,6 +154,11 @@ Gig For Musicians
       <div class="card-body">
         <h5 class="card-title"></h5>
         <p class="card-text">{{event.description}}</p>
+        <p class="temp"></p>
+        <p class="temp_max"></p>
+        <p class="temp_min"></p>
+        <p class="weahter_description"></p>
+        <img class="weather_icon" src="" alt="">
       </div>
     </div>
     {% endfor %}
@@ -166,7 +177,7 @@ Gig For Musicians
     <hr class="style1 text-muted">
     {% if participate_events %}
     {% for event in participate_events %}
-    <div class="card text-center">
+    <div class="card text-center" long='{{event.longitude}}' lat='{{event.latitude}}'>
       <div class="card-header">
         <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
       </div>
@@ -174,6 +185,11 @@ Gig For Musicians
       <div class="card-body">
         <h5 class="card-title"></h5>
         <p class="card-text">{{event.description}}</p>
+        <p class="temp"></p>
+        <p class="temp_max"></p>
+        <p class="temp_min"></p>
+        <p class="weahter_description"></p>
+        <img class="weather_icon" src="" alt="">
       </div>
     </div>
     {% endfor %}
@@ -187,7 +203,7 @@ Gig For Musicians
     <h1>Events you might like</h1>
     {% if might_like_events %}
     {% for event in might_like_events %}
-    <div class="card text-center">
+    <div class="card text-center" long='{{event.longitude}}' lat='{{event.latitude}}'>
       <div class="card-header">
         <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
       </div>
@@ -195,6 +211,11 @@ Gig For Musicians
       <div class="card-body">
         <h5 class="card-title"></h5>
         <p class="card-text">{{event.description}}</p>
+        <p class="temp"></p>
+        <p class="temp_max"></p>
+        <p class="temp_min"></p>
+        <p class="weahter_description"></p>
+        <img class="weather_icon" src="" alt="">
       </div>
     </div>
     {% endfor %}
@@ -206,6 +227,44 @@ Gig For Musicians
 
 
 </div>
+
+
+<script type="text/javascript">
+
+function succes_forecast(element) {
+
+  return function(response){
+    $card_body=$(element).find('> .card-body');
+    $img= $card_body.find('> .weather_icon').first();
+    $temp=$card_body.find('> .temp').first();
+    $temp_min=$card_body.find('> .temp_min').first();
+    $temp_max=$card_body.find('> .temp_max').first();
+    $description=$card_body.find('> .weahter_description').first();
+
+    $img.attr('src', response.weather_icon);
+    $temp.text(`${response.temp}°c`);
+    $temp_min.text(`min: ${response.temp_min}°c`);
+    $temp_max.text(`max: ${response.temp_max}°c`);
+    $description.text(response.description);
+  };
+}
+
+
+$(document).ready(function(){
+
+  //Set config for openweathermap
+  weather_config = {'appid': '6f53658522d8b6344fc36d7a6122511f'};
+
+  $cards=$('.card');
+
+  $cards.each(function(index){
+    long=$(this).attr("long");
+    lat=$(this).attr("lat");
+    get_minimal_forecast(long, lat, succes_forecast(this));
+  });//end of each
+
+}); //end of on ready
+</script>
 
 
 {% endblock %}
