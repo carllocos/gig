@@ -1,6 +1,6 @@
-import datetime
 import json
 
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from cloudinary.forms import CloudinaryJsFileField
 
@@ -56,7 +56,7 @@ class CreateEventForm(forms.ModelForm):
 
     def clean_date(self):
         date=self.cleaned_data['date']
-        if date < datetime.date.today():
+        if date < timezone.now().date():
             raise forms.ValidationError(
                     _('The date cannot be in the past.'),
                         code='invalid')
@@ -64,9 +64,10 @@ class CreateEventForm(forms.ModelForm):
 
 
     def save(self, *args, **kwargs):
+        now=timezone.now()
         d=self.cleaned_data.get('date')
         t=self.cleaned_data.get('time')
-        dt=datetime.datetime(d.year, d.month, d.day, t.hour, t.minute, t.second, t.microsecond,t.tzinfo)
+        dt=timezone.datetime(d.year, d.month, d.day, t.hour, t.minute, t.second, t.microsecond,now.tzinfo)
         self.cleaned_data['date']=dt
         self.instance.date = self.cleaned_data['date']
         self.instance.band = self.cleaned_data['band']

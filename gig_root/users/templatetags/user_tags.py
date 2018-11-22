@@ -1,6 +1,6 @@
-import datetime
 import calendar
 
+from django.utils import timezone
 from django import template
 
 register = template.Library()
@@ -43,12 +43,12 @@ def correct_time(hour, minute):
 
 @register.filter(name='fancy_date')
 def fancy_date(event_date_time):
-    today=datetime.date.today()
+    today=timezone.now().date()
     event_date=event_date_time.date()
 
     if today == event_date:
         return "Today at " + correct_time(event_date_time.hour, event_date_time.minute)
-    elif today  + datetime.timedelta(days=1) == event_date:
+    elif today  + timezone.timedelta(days=1) == event_date:
         return "Tomorrow at " + correct_time(event_date_time.hour, event_date_time.minute)
     elif today  > event_date:
         return "Already played"

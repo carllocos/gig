@@ -1,6 +1,6 @@
 import os
-import datetime
 
+from django.utils import timezone
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.conf import  settings
@@ -354,7 +354,7 @@ class Band(models.Model):
         return self.follow_set.all().count()
 
     def get_upcoming_events(self):
-        now=datetime.datetime.now()
+        now=timezone.now()
         return self.event_set.filter(date__gte=now)
 
     @property

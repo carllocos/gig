@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 
 from events.models import Event
 from musicians.models import Band
@@ -26,7 +26,7 @@ def get_participate_events(user):
     """
     `get_participate_events` returns a queryset of all events for which the user said he/she would participate
     """
-    now=datetime.datetime.now()
+    now=timezone.now()
     evs_lst= []
     par_qs=user.participant_set.filter(event__date__gte=now).order_by('event__date').select_related('event')
     for par_ins in par_qs:

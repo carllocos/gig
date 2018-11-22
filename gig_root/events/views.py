@@ -1,6 +1,6 @@
-import datetime
 import json
 
+from django.utils import timezone
 from django.core.mail import EmailMessage
 from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse, JsonResponse
@@ -225,15 +225,16 @@ def __is_valid_date(date_str):
     """
     format_str = '%Y-%m-%d' # The format
     try:
-        datetime_obj = datetime.datetime.strptime(date_str, format_str).date()
+        datetime_obj = timezone.datetime.strptime(date_str, format_str)
     except:
         return {'valid': False, 'reason': 'new date has incorrect format.'}
 
-
-    if datetime_obj < datetime.date.today():
+    now=timezone.now()
+    datetime_obj=timezone.datetime(datetime_obj.year, datetime_obj.month, datetime_obj.day, 0, 30, 30, 30, now.tzinfo)
+    if datetime_obj.date() < now.date():
         return {'valid': False, 'reason': 'date cannot be in the past.'}
 
-    return {'valid': True, 'date': datetime_obj}
+    return {'valid': True, 'datetime': datetime_obj}
 
 @require_http_methods(["POST"])
 @login_required
@@ -250,9 +251,9 @@ def update_date(request):
     if not valid.get('valid'):
         return JsonResponse({'is_executed': False, 'reason': valid.get('reason')})
 
-    d=valid.get('date')
+    d=valid.get('datetime')
 
-    dt=datetime.datetime(d.year, d.month, d.day, event.date.hour, event.date.minute, event.date.second, event.date.microsecond, event.date.tzinfo)
+    dt=timezone.datetime(d.year, d.month, d.day, event.date.hour, event.date.minute, event.date.second, event.date.microsecond, d.tzinfo)
     event.date=dt
     event.save()
     return JsonResponse({'is_executed': True})
@@ -263,16 +264,16 @@ def __is_valid_time(time_str, current_date):
     private function to validate event time provided trough ajax request.
     """
     try:
-        time=datetime.datetime.strptime(time_str, '%H:%M').time()
+        time=timezone.datetime.strptime(time_str, '%H:%M').time()
     except:
-        return {'valid': False, 'reason': 'new date has incorrect format.'}
+        return {'valid': False, 'reason': 'new time has incorrect format.'}
 
-    now = datetime.datetime.now()
-    new_d= datetime.datetime(current_date.year, current_date.month, current_date.day, time.hour, time.minute, time.second, time.microsecond, time.tzinfo)
+    now = timezone.now()
+    new_d= timezone.datetime(current_date.year, current_date.month, current_date.day, time.hour, time.minute, time.second, time.microsecond, now.tzinfo)
     if new_d < now:
          return {'valid': False, 'reason': f'time and date cannot be in the past. Given {new_d}'}
 
-    return {'valid': True, 'time': time}
+    return {'valid': True, 'datetime': new_d}
 
 @require_http_methods(["POST"])
 @login_required
@@ -289,9 +290,8 @@ def update_time(request):
     if not valid.get('valid'):
         return JsonResponse({'is_executed': False, 'reason': valid.get('reason')})
 
-    t=valid.get('time')
-    dt=datetime.datetime(event.date.year, event.date.month, event.date.day, t.hour, t.minute, t.second, t.microsecond, t.tzinfo)
-    event.date=dt
+    d=valid.get('datetime')
+    event.date=d
     event.save()
     return JsonResponse({'is_executed': True})
 

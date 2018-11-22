@@ -1,6 +1,6 @@
 import os
-import datetime
 
+from django.utils import timezone
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import pre_delete
@@ -169,7 +169,7 @@ class Event(models.Model):
 
     @staticmethod
     def get_upcoming_events(events=None):
-        now=datetime.datetime.now()
+        now=timezone.now()
         if events is None:
             return Event.objects.filter(date__gte=now).order_by('date')
         else:
