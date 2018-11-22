@@ -20,5 +20,5 @@ path("add_comment/", views.add_comment, name="add-comment"),
 path("vote_comment/", views.vote_comment, name="vote-comment"),
 path("update_participation/", views.update_participation, name="update-participation"),
 path("share_event/", views.share_event, name="share-event"),
-
+path('update_location', views.update_location,name='update-location'),
 ]
