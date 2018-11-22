@@ -237,7 +237,7 @@
     }
 
 
-
+    {%if is_owner%}
     function update_location(long, lat) {
 
       var dict= {
@@ -284,5 +284,7 @@
         modal.style.display = "none";
       }
     }
+
+    {%endif%}
     </script>
     {% endblock %}
