@@ -237,6 +237,28 @@
     }
 
 
+
+    function update_location(long, lat) {
+
+      var dict= {
+        'event_id': {{event.pk}},
+        'lat': lat,
+        'long': long,
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      };
+
+      success_func = function (response){
+        console.log(`location changed successfully`);
+      };
+
+      failure_func = function (response){
+        console.log(response.reason);
+      };
+
+      sendAjaxRequest("{% url 'events:update-location'%}", dict, "val", success_func, failure_func);
+    }
+
+
     // Get the modal
     var modal = document.getElementById('myModal');
 
