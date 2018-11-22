@@ -147,7 +147,7 @@ def __contains_failure(request, keys, allowed_operations=None, only_owner=True):
         return JsonResponse({'is_executed': False,
                             'reason': f'No event with event id {event_id} stored in the database.'})
 
-    if not event.is_owner(request.user):
+    if only_owner and not event.is_owner(request.user):
         return JsonResponse({'is_executed': False,
                             'reason': f'Unauhtorized request'})
 
@@ -353,7 +353,7 @@ def update_picture(request):
 @require_http_methods(["POST"])
 @login_required
 def add_comment(request):
-    failure=__contains_failure(request, keys=['val'])
+    failure=__contains_failure(request, keys=['val'], only_owner=False)
     if failure:
         return failure
 
@@ -366,7 +366,7 @@ def add_comment(request):
 @require_http_methods(["POST"])
 @login_required
 def vote_comment(request):
-    failure=__contains_failure(request, keys=['val'], allowed_operations=['upvote', 'downvote'])
+    failure=__contains_failure(request, keys=['val'], allowed_operations=['upvote', 'downvote'], only_owner=False)
     if failure:
         return failure
 
@@ -392,7 +392,7 @@ def vote_comment(request):
 @require_http_methods(["POST"])
 @login_required
 def update_participation(request):
-    failure=__contains_failure(request, keys=[], allowed_operations=['participate', 'disengage'])
+    failure=__contains_failure(request, keys=[], allowed_operations=['participate', 'disengage'], only_owner=False)
     if failure:
         return failure
 
@@ -417,7 +417,7 @@ def __is_valid_email(email):
 
 @login_required
 def share_event(request):
-    failure=__contains_failure(request, keys=['val'])
+    failure=__contains_failure(request, keys=['val'], only_owner=False)
     if failure:
         return failure
 
@@ -440,4 +440,19 @@ def share_event(request):
     email = EmailMessage(subject=mail_subject, body=mail_message_txt, to=[res.get('email')])
     email.send(fail_silently=True)
 
+    return JsonResponse({'is_executed': True})
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+@is_band_owner
+def update_location(request):
+    failure=__contains_failure(request, keys=['long', 'lat'])
+    if failure:
+        return failure
+
+    event=Event.objects.get(pk=request.POST.get('event_id'))
+    event.longitude=request.POST.get('long')
+    event.latitude=request.POST.get('lat')
+    event.save()
     return JsonResponse({'is_executed': True})
