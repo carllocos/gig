@@ -99,10 +99,16 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def has_artist_profile(self):
+        """
+        property that checks whethet this user created an ArtistProfile.
+        """
         return self.is_authenticated and self.has_artistProfile()
 
     @property
     def owns_band(self):
+        """
+        property that tells whether this user is owner of any bands.
+        """
         if self.has_artistProfile():
             ar=self.get_artist()
             return ar.owns.all().exists()
