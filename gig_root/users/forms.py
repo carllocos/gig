@@ -10,6 +10,9 @@ from .validators import lettersDigitsValidator
 
 
 class EmailChangeForm(forms.Form):
+    """
+    Form used to change the email of an user.
+    """
     email=forms.EmailField(required=True, help_text="Enter the new email address", label="New email")
     password = forms.CharField(widget=forms.PasswordInput, required=True, help_text="Enter your current password", label="Password")
 
@@ -47,6 +50,9 @@ class EmailChangeForm(forms.Form):
         return psw
 
 class RegistrationForm(forms.ModelForm):
+    """
+    Form that requests the user additional information. To complete registration after signup through facebook or gmail.
+    """
 
     password = forms.CharField(widget=forms.PasswordInput, validators=[MinLengthValidator(8), MaxLengthValidator(32), lettersDigitsValidator])
     confirm_password = forms.CharField(widget=forms.PasswordInput,validators=[MinLengthValidator(8), MaxLengthValidator(32)])
@@ -65,6 +71,9 @@ class RegistrationForm(forms.ModelForm):
 
 
 class UserProfileForm(forms.Form):
+    """
+    Form that displays a user's profile information.
+    """
 
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
