@@ -8,9 +8,6 @@ from django.shortcuts import redirect
 
 from users.models import User
 
-def create_fail():
-    return
-
 def retrieve_user(strategy, details, user=None, backend= None, *args, **kwargs):
     if user is None:
 
