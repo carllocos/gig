@@ -1,4 +1,3 @@
-
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import views as auth_view
 from django.contrib.auth.decorators import login_required
@@ -20,12 +19,14 @@ from .tokens import account_activation_token
 from .util import getHTTP_Protocol
 
 
-#View for the users index
-def index(request):
-    return HttpResponse("users index")
-
 @login_required
 def update_email(request):
+    """
+    View that is called when a user desires to update it's current email.
+    In the corresponding post request the user is expected to provide it's
+    current password, as security mechanism, and the new email address.
+    A confirmation link is send to the new email address as additional validity.
+    """
     form = EmailChangeForm(user=request.user, data=request.POST or None)
     if request.POST and form.is_valid():
         context ={
@@ -54,6 +55,10 @@ def update_email(request):
 
 @login_required
 def update_email_confirm(request, uidb64, token, eid64):
+    """
+    View that is called when the user confirms the email change by clicking on the confirmation link received
+    throug email.
+    """
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -82,9 +87,13 @@ def update_email_confirm(request, uidb64, token, eid64):
               }
     return render(request, 'users/short_message.html',context=context)
 
-#View for requesting a password to associate with users.models.User after signup with facebook or google
-#TODO CREATE another form that only requests for password and confirm password
+
 def request_password(request):
+    """
+    View that invites the user to complete and confirm data, after a user
+    choses to signup through third party apps (e.g. facebook or gmail).
+    `RegistrationForm` will ask the user to chose a password for further logins
+    """
     partial_token=request.GET.get('partial_token')
 
     if request.method == 'GET':
@@ -112,16 +121,22 @@ def request_password(request):
 
 
 def confirm_account(request):
-        context= {
+    """
+    View that invites the user to confirm registration through email confirmation.
+    """
+    context= {
         'title_page': 'Signup Confirmation',
         'title_msg': 'Confirmation Email Send',
         'short_message': 'To complete the registration click on the link send to the email',
         'classes': '',
-        }
-        return  render(request, 'users/short_message.html', context=context)
+    }
+    return  render(request, 'users/short_message.html', context=context)
 
- #View to activate account after email confirmation
 def activate_account(request, uidb64, token):
+    """
+    View that activates the registration of a user, once the user clicks on the confirmation link received
+    through email.
+    """
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -138,11 +153,11 @@ def activate_account(request, uidb64, token):
         return HttpResponse('Activation link is invalid!')
 
 
-#TODO prevent header injection https://docs.djangoproject.com/en/2.1/topics/email/
-#delete users in database after an amount of time that didn't manage to confirm the link
-
-#View class that provides the SignupForm to the user
 class SignupView(CreateView):
+    """
+    View that provides the user with a SignupForm and sends a confirmation link to the email of the user,
+    once the form is filled correctly.
+    """
     form_class = RegistrationForm
     success_url = 'users:signup-confirm'
     model = User
@@ -155,7 +170,6 @@ class SignupView(CreateView):
         user_inst.is_active = False #User first needs to confirm
         user_inst.save()
 
-        #auth.login(request=self.request, user=user_inst, backend='django.contrib.auth.backends.ModelBackend')
         context ={
                 'user':user_inst,
                 'http_protocol': getHTTP_Protocol(),
@@ -175,22 +189,11 @@ class SignupView(CreateView):
         return reverse(self.success_url)
 
 
-
-def reset_password_view(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        user = User.get_user(email=email)
-        if user:
-            short_message = "We will soon reset password for {1}".format(email)
-            return render(request, 'users/short_message.html', {'short_message': short_message})
-        else:
-            short_message = "No user register with {1}".format(email)
-            return render(request, 'users/short_message.html', {'short_message': short_message})
-
-    return HttpResponse("this is your form")
-
-
 def reset_password_request_send(request):
+    """
+    A view that invites the user to confirm the 'the password reset request' through email confirmation.
+    This view is called after a request was made to view `PasswordResetView`.
+    """
     context= {
     'title_page': 'Password Reset',
     'title_msg': 'Confirmation Email Send',
@@ -201,7 +204,9 @@ def reset_password_request_send(request):
 
 
 class PasswordResetConfirmView(auth_view.PasswordResetConfirmView):
-
+    """
+    View called once the user confirms the password reset. Through email confirmation.
+    """
     template_name="users/password_reset_confirm.html"
     success_url='home'
     token_generator=account_activation_token
@@ -212,6 +217,11 @@ class PasswordResetConfirmView(auth_view.PasswordResetConfirmView):
 
 
 class PasswordResetView(auth_view.PasswordResetView):
+    """
+    View that provides the user with a PasswordResetForm.
+    The form correctly filled will send an email to confirm the password reset.
+    redirects to view `reset_password_request_send`.
+    """
     template_name='users/password_reset_form.html'
     email_template_name="users/messages/password_reset_email.html"
     subject_template_name="users/messages/password_reset_subject.txt"
@@ -223,14 +233,24 @@ class PasswordResetView(auth_view.PasswordResetView):
         return reverse(self.success_url)
 
 class LoginView(auth_view.LoginView):
+    """
+    View that provides the user with a LoginForm.
+    """
     template_name="users/login.html"
 
 
 class LogoutView(auth_view.LogoutView):
+    """
+    View for a Logout request made by the user.
+    """
     template_name='gig/home.html'
 
 
 class PasswordChangeView(auth_view.PasswordChangeView):
+    """
+    View that provides the user with a PasswordChange form.
+    """
+
     template_name='users/password_change_form.html'
     success_url='home'
 
@@ -240,6 +260,9 @@ class PasswordChangeView(auth_view.PasswordChangeView):
 
 @login_required
 def userProfileview(request):
+    """
+    View that returns the profile information associated with the user currently logged in.
+    """
     if request.method =='GET':
 
         data = {
@@ -288,6 +311,15 @@ def userProfileview(request):
 
 
 def verify_email_existance(request):
+    """
+    View that responds only to ajax post requests. The view checks whether an account exists with similar 'email'.
+
+    Expects key:
+    `email`: which corresponds with the email on which the condition needs to be checked.
+
+    Replies with JSON:
+    {'is_taken': True} or {'is_taken': False}
+    """
     if request.is_ajax():
         email=request.POST.get('email')
         return JsonResponse({'is_taken': User.objects.filter(email=email).exists()})
