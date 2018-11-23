@@ -3,11 +3,48 @@ import json
 from django import forms
 from .models import User
 from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from .validators import lettersDigitsValidator
 
 
+class EmailChangeForm(forms.Form):
+    email=forms.EmailField(required=True, help_text="Enter the new email address", label="New email")
+    password = forms.CharField(widget=forms.PasswordInput, required=True, help_text="Enter your current password", label="Password")
 
+    def __init__(self, user, data=None):
+        self.user = user
+        super(EmailChangeForm, self).__init__(data=data)
+
+    def clean_email(self):
+        user=self.user
+
+        if user.email == self.cleaned_data['email']:
+            raise ValidationError(
+                _('your new email is equal to the old one.'),
+                params={},
+                )
+
+        return self.cleaned_data['email']
+
+
+    def clean_password(self):
+        psw=self.cleaned_data.get('password', None)
+
+        if psw is None:
+            raise ValidationError(
+                _('You need to provide your current password.'),
+                params={},
+                )
+
+        if not self.user.check_password(psw):
+            raise ValidationError(
+                _('Wrong password.'),
+                params={},
+            )
+
+        return psw
 
 class RegistrationForm(forms.ModelForm):
 
