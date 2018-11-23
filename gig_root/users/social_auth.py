@@ -9,6 +9,9 @@ from django.shortcuts import redirect
 from users.models import User
 
 def retrieve_user(strategy, details, user=None, backend= None, *args, **kwargs):
+    """
+    Function that retrieves a user asossciated with `email` during the `SOCIAL_AUTH_PIPELINE` calls.
+    """
     if user is None:
 
         us= User.get_user(details.get('email'))
@@ -18,7 +21,10 @@ def retrieve_user(strategy, details, user=None, backend= None, *args, **kwargs):
 
 @partial
 def request_password(strategy, details, user=None, backend= None, *args, **kwargs):
-
+    """
+    Function that represents a partial pipeline. The user recently signup up throug facebook or gmail is invited to
+    complete registration by comfirming credentials on view `users:request-password`.
+    """
     if user is None:
         local_password = strategy.session.get('local_password', None)
         if not local_password:
@@ -35,7 +41,9 @@ def request_password(strategy, details, user=None, backend= None, *args, **kwarg
 
 
 def create_user(details, user=None,*args, **kwargs):
-
+    """
+    Function that creates an instance of `User` model, if none exists already during the `SOCIAL_AUTH_PIPELINE` calls.
+    """
     if user is None:
         user = User.get_user(details.get('email'))
         if not user:
@@ -62,7 +70,9 @@ def _facebook_request(**kwargs):
 
 
 def retrieve_email(strategy, details, is_new, user=None , *args, **kwargs):
-
+    """
+    Function that retrieves an email address from facebook or gmail if needed during the `SOCIAL_AUTH_PIPELINE` calls.
+    """
     if user and user.email:
         return
     elif is_new and not details.get('email'):

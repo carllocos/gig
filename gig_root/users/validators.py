@@ -7,6 +7,10 @@ from django.utils.translation import gettext_lazy as _
 
 
 def lettersDigitsValidator(password):
+    """
+    Function that validates whether the password contans some characters.
+    Raises an error if password doesn't contain a letter, digit or capital letter.
+    """
     letters = set(string.ascii_letters)
     digits = set(string.digits)
     capitals = set(string.ascii_uppercase)
@@ -18,6 +22,9 @@ def lettersDigitsValidator(password):
         )
 
 class LettersDigitsValidator:
+    """
+    similar as function `lettersDigitsValidator`
+    """
 
     def validate(self, password, user=None):
         letters = set(string.ascii_letters)
@@ -39,6 +46,9 @@ class LettersDigitsValidator:
 
 
 class MaxLengthValidator:
+    """
+    Validator that checks whether password contains at most `max_length` chars
+    """
 
     def __init__(self, max_length):
         self.max_length=max_length
