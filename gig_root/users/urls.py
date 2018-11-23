@@ -14,6 +14,8 @@ urlpatterns = [
     path('logout/', views.LogoutView.as_view(), name='logout'),
     path('signup/', views.SignupView.as_view(), name='signup'),
     path('signup/ajax/', views.verify_email_existance, name='signup-ajax'),
+    path('update_email/', views.update_email, name='update-email'),
+    re_path(r'^update_email/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/(?P<eid64>[0-9A-Za-z_\-]+)$', views.update_email_confirm, name='update-email-confirm'),
 
     path('signup/request_password/', views.request_password, name='request-password'),
 
