@@ -1,0 +1,5 @@
+
+Hi {{ user.first_name }},
+
+Please click on the link to confirm your new email address,
+{{http_protocol}}{{ domain }}{% url 'users:update-email-confirm' uidb64=uid token=token eid64=eid64%}
