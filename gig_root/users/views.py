@@ -14,7 +14,7 @@ from django.template.loader import render_to_string
 
 from social_django.utils import load_strategy
 
-from .forms import RegistrationForm, UserProfileForm
+from .forms import RegistrationForm, UserProfileForm, EmailChangeForm
 from .models import User
 from .tokens import account_activation_token
 from .util import getHTTP_Protocol
@@ -24,6 +24,63 @@ from .util import getHTTP_Protocol
 def index(request):
     return HttpResponse("users index")
 
+@login_required
+def update_email(request):
+    form = EmailChangeForm(user=request.user, data=request.POST or None)
+    if request.POST and form.is_valid():
+        context ={
+                'user':request.user,
+                'http_protocol': getHTTP_Protocol(),
+                'domain': get_current_site(request).domain,
+                'token': account_activation_token.make_token(request.user),
+                'uid': urlsafe_base64_encode(force_bytes(request.user.pk)).decode(),
+                'eid64': urlsafe_base64_encode(force_bytes(form.cleaned_data['email'])).decode(),
+                }
+
+        mail_subject = 'Email Update confirm'
+        mail_message_txt = render_to_string('users/messages/update_email.txt', context=context)
+
+        emailMsg = EmailMessage(subject=mail_subject, body=mail_message_txt, to=[form.cleaned_data['email']])
+        emailMsg.send(fail_silently=True)
+
+        context_msg= {
+            'title_page': 'Email update',
+            'title_msg': 'Confirmation Email Send',
+            'short_message': 'A confirmation email was send. To confirm email change click on the link send to the new email address.',
+        }
+        return render(request, 'users/short_message.html', context=context_msg)
+
+    return render(request, 'users/update_email.html', {'form': form})
+
+@login_required
+def update_email_confirm(request, uidb64, token, eid64):
+    try:
+        uid = force_text(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+        email=force_text(urlsafe_base64_decode(eid64))
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user=None
+        email=None
+
+    if user is None or email is None or not account_activation_token.check_token(user, token):
+        context= {'short_message': "You seem to have an invalid link. Check if you are logged in with a correct profile. Remember to use previous email to confirm email update.",
+                  'title_msg': "Invalid activation link",
+                  'title_page': "Bad request"}
+        return render(request, 'users/short_message.html',context=context)
+
+    if user.pk != request.user.pk:
+        context= {'short_message': "You are trying to perform a request not meant for you. Check if you are logged in with a correct profile.",
+                  'title_msg': "Unauhtorized request",
+                  'title_page': "Bad request"}
+        return render(request, 'users/short_message.html',context=context)
+
+    user.email=email
+    user.save()
+    context= {'short_message': f"Your email was succesfuly changed to {email}",
+              'title_msg': "Email change completed",
+              'title_page': f"Email update completed",
+              }
+    return render(request, 'users/short_message.html',context=context)
 
 #View for requesting a password to associate with users.models.User after signup with facebook or google
 #TODO CREATE another form that only requests for password and confirm password
