@@ -386,9 +386,15 @@ def _find(value, lst):
 
 
 def suggest_genres(value):
+    """
+    Function that returns a list of genres that contains `value`
+    """
     return _find(value, _genres)
 
 def suggest_instruments(value):
+    """
+    Function that returns a list of instruments that contains `value`
+    """
     return _find(value, _instruments)
 
 
