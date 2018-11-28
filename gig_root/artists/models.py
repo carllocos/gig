@@ -30,9 +30,11 @@ class BackgroundPic(PictureAbstract):
 
 class ArtistModel(models.Model):
     """
-    The ArtistModel represents an the profile of an artistself.
-    The artist profile is equivalent to a person's C.V.
-    Each instance of ArtistModel can be associated with different Band Profiles
+    The ArtistModel represents the profile of an artist. Information such as `stage_name`,
+    `biography`, pictures, `instruments` that the artist can play, and so on. 
+    The artist profile is equivalent to a muscian's C.V.
+    Each instance of ArtistModel can be associated with different Band Profiles,
+    but only with one User.
     """
 
     MAX_LENGTH=30
@@ -53,10 +55,8 @@ class ArtistModel(models.Model):
     #musicians that inspired the artist
     _idols =  models.TextField(null=True, db_column="idols")
 
-    profile_pic = models.OneToOneField(ProfilePic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="profile_of_artist")
-    background_pic = models.OneToOneField(BackgroundPic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)#, related_name="background_of_artist")
-    # profile_pic = models.OneToOneField(Picture, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="profile_of_artist")
-    # background_pic = models.OneToOneField(Picture, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT, related_name="background_of_artist")
+    profile_pic = models.OneToOneField(ProfilePic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
+    background_pic = models.OneToOneField(BackgroundPic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)
 
     class Meta:
         verbose_name = 'Artist Profile'
