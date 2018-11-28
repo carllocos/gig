@@ -7,10 +7,6 @@ from .forms import CreateArtistForm, DirectUploadProfilePic, DirectUploadBackgro
 from .models import ArtistModel
 from .artist_util import has_not_artist_profile, suggest_genres, suggest_instruments, has_artist_profile
 
-
-def home(request):
-    return HttpResponse("This is home of artists")
-
 def no_profile(request):
     """
     no_profile view is meant to display a message to users that try to perform operations only meant
@@ -82,6 +78,19 @@ def register_artist_view(request):
 @require_http_methods(["GET"])
 @login_required
 def ajax_suggestions(request):
+    """
+    view that provides suggestions for 'genre' or 'instrument' for autocomplete purposes on the client side.
+    The request can only be ajax requests.
+
+    This view expects as key:
+    `kind`: which specifies `genre` or `instrument`, the kind of suggestions the requester is
+    expecting.
+
+    The view returns a JsonResponse with key:
+    `suggestions`: which contains a list of string suggestions or False. If
+    nothing can be suggested.
+
+    """
     if not request.is_ajax():
         return JsonResponse({'suggestions': False})
 
@@ -95,13 +104,7 @@ def ajax_suggestions(request):
 
     return JsonResponse({'suggestions': False})
 
-@require_http_methods(['POST'])
-@login_required
-def direct_upload_complete(request):
-    return JsonResponse({'response': 'Got it'})
 
-
-#TODO Validation of post input.
 @require_http_methods(['POST'])
 @login_required
 @has_artist_profile
@@ -324,8 +327,20 @@ def update_biography(request):
 @login_required
 @has_artist_profile
 def update_pic(request):
-    #TODO check for security: encapsulates common behaviour
+    """
+    Ajax request to update the profile or background picture metadata associated to pictures of an
+    artist profile. This `update_pic` ajax request assumes that the new profile or background
+    picture was already uploaded into cloudinary. A client-side upload. This view is called to
+    synchronize the backend with the new metada of the picture.
 
+    The Post request needs to contain the following keys:
+    `val`: which specifies if the update corresponds with the `profile` or `background` picture.
+    `public_id`: which corresponds with the new public id of the already uploaded picture.
+    `original_filename`: which give a human readable version of the picture
+    `width`: the width of the newly uploaded picture
+    `height`: the height of the newly uploaded picture
+    `url`: the url of the picture uploaded to cloudinary
+    """
     ar=request.user.get_artist()
     pic=ar.profile_pic if request.POST.get('val') =='profile' else ar.background_pic
     pic.update_metadata(public_id=request.POST.get('public_id'),
