@@ -4,15 +4,24 @@ from cloudinary.forms import CloudinaryJsFileField
 from .models import ArtistModel, DEFAULT_PROFILE_PIC, DEFAULT_BACKGROUND_PIC, ProfilePic, BackgroundPic
 
 class DirectUploadProfilePic(forms.Form):
+    """
+    Form to direcly upload a profile picture to cloudinary from client-side
+    """
     profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_profile_pic" })
 
 
 
 
 class DirectUploadBackgroundPic(forms.Form):
+    """
+    Form to direcly upload a background picture to cloudinary from client-side
+    """
     background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_background_pic" })
 
 class CreateArtistForm(forms.ModelForm):
+    """
+    Form to create an artist profile.
+    """
 
     stage_name = forms.CharField(required=False)
 
