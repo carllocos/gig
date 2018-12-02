@@ -97,6 +97,7 @@
     <div class="collapse" id="collapseArtist">
       {% if has_artistProfile %}
       <p class="text-center">Here comes your artistprofile</p>
+      <p>Link to your artist profile <a href="{% url 'artists:artist-profile' profile_id=artis_profile.pk%}">{{artis_profile.stage_name}}</a> </p>
       {% else %}
       <p class="text-center">You don't have currently a registered artist profile.
         <a href="{% url 'artists:register' %}">
@@ -114,8 +115,12 @@
       Band Profiles
     </button>
     <div class="collapse" id="collapseBands">
-      {% if has_bands %}
+      {% if associated_to_bands %}
       <p class="text-center">Here comes your bands</p>
+      {% for band in bands %}
+        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
+        <br>
+      {% endfor %}
       {% else %}
       {% if  has_artistProfile %}
       <p class="text-center">You currently not involved into any band</p>
@@ -133,13 +138,19 @@
   <div class="venu-container">
     <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseVenu" aria-expanded="false" aria-controls="collapseVenu">
       <i class="fas fa-caret-down"></i>
-      Venu Profiles
+      Events
     </button>
     <div class="collapse" id="collapseVenu">
-      {% if has_ven %}
-      <p class="text-center">Here comes you artistprofile</p>
+      {% if has_events %}
+      <p class="text-center">Here comes your events</p>
+      <br>
+      {% for event in events %}
+        <a href="{% url 'events:profile' event_id=event.pk%}">{{event.name}}</a>
+        <a href="{% url 'events:edit' event_id=event.pk%}">edit</a>
+        <br>
+      {% endfor %}
       {% else %}
-      <p class="text-center">You currently not involved into any band</p>
+      <p class="text-center">You currently didn't create any event for a band</p>
       {% endif %}
     </div>
   </div>
