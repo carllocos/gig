@@ -70,6 +70,9 @@ def band_profile(request, profile_id):
 @login_required
 @has_artist_profile
 def register_band(request):
+    """
+    View to register a band profile.
+    """
     f= RegisterForm()
     if request.method == 'POST':
         f=RegisterForm(request.POST, request.FILES)
@@ -83,6 +86,10 @@ def register_band(request):
     context={'form': f}
     return render(request, 'musicians/register_band.html',context=context )
 
+##############################################################################################
+####
+####    The following views are meant for ajax requests.
+##############################################################################################
 
 def __contains_failure(request, keys, allowed_operations=None, only_owner=True):
     """
@@ -148,6 +155,19 @@ def __contains_failure(request, keys, allowed_operations=None, only_owner=True):
 @login_required
 @has_artist_profile
 def update_description(request):
+    """
+    View meant to update the band description through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the new band description
+    `band_id`: the id of the band for which this request is meant.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    `val`: contains the new description
+    """
 
     failure=__contains_failure(request, keys=['val'])
     if failure:
@@ -164,6 +184,21 @@ def update_description(request):
 @login_required
 @has_artist_profile
 def update_genre(request):
+    """
+    View meant to update the band genres through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: a genre to add or remove from the band information
+    `band_id`: the id of the band for which this request is meant.
+    'operation': which contains a value `add` or `remove`, which respectively adds `val`
+    as a new genre that the band plays or removes `val` from de genres that the band plays.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    `val`: the genre involved in the request
+    """
 
     failure=__contains_failure(request, keys=['val'], allowed_operations=['add', 'remove'])
     if failure:
@@ -189,6 +224,23 @@ def update_genre(request):
 @login_required
 @has_artist_profile
 def update_member(request):
+    """
+    View meant to update the role of a member or remove a member of a band through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the new role of a member (e.g. singer, drummer, and so on)
+    `band_id`: the id of the band for which this request is meant.
+    `operation`: contains the values `update` or `remove`, which respectively means that the role
+    of the member is updated or the member is removed.
+    `member_id`: the id of the 'Member' instance for which the request is meant.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    `val`: contains the new description
+    """
+
     failure=__contains_failure(request, keys=['val', 'member_id'], allowed_operations=['update', 'remove'])
     if failure:
         return failure
@@ -209,6 +261,22 @@ def update_member(request):
 @login_required
 @has_artist_profile
 def add_member(request):
+    """
+    View meant to send an invitation email to an artist through Ajax request.
+    The email will invite the user to click on a link in order to accept whether
+    he/she desires to become member of the band. The link will be validated through
+    `confirm_member` view.
+
+    The POST request needs to contain following keys:
+    `val`: the email of the artist that needs to be invited
+    `band_id`: the id of the band for which this request is meant.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'])
     if failure:
         return failure
@@ -256,6 +324,11 @@ def add_member(request):
 @login_required
 @has_artist_profile
 def confirm_member(request, uidb64, token, mid64):
+    """
+    View that confirms an invitation link received by an artist through email.
+    The view validate the link. And make the corresponding user, an official
+    member of the corresponding band
+    """
     try:
         uid = force_text(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
