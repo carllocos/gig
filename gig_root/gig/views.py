@@ -5,6 +5,11 @@ from django.urls import reverse
 from . import search
 
 def home(request):
+    """
+    The home page of gigForMusicians.
+    The home page focus on displaying several kinds of upcoming events.
+    Depending whether the user is logged in or not.
+    """
 
     user=request.user
     has_artistProfile=user.has_artistProfile() if user.is_authenticated else False
