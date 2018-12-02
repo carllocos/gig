@@ -586,16 +586,6 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
 
   function uploadToCloudAndSave(id_selector, id_helper, operation){
 
-    success_func = function(response){
-      $helper=$(`#${id_helper}`);
-      $helper.text("Saved succesfuly");
-    };
-
-    failure_func = function(response){
-      $helper=$(`#${id_helper}`);
-      $helper.text(response.reason);
-    }
-
     start_func=function(){
       $helper=$(`#${id_helper}`);
       $helper.text("Start upload");
@@ -609,12 +599,23 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
       $helper=$(`#${id_helper}`);
       $helper.text('Updating backend...');
 
+      success_func = function(response){
+        $helper=$(`#${id_helper}`);
+        $helper.text("Saved succesfuly");
+      };
+
+      failure_func = function(response){
+        $helper=$(`#${id_helper}`);
+        $helper.text(response.reason);
+      }
+
       dict={
         'val': JSON.stringify(data.result),
         csrfmiddlewaretoken: '{{ csrf_token }}',
         'operation': operation,
         'band_id': {{band.pk}},
       };
+      console.log(success_func);
 
       sendAjaxRequest("{% url 'musicians:update-picture' %}", dict, data.result, success_func, failure_func);
     };
