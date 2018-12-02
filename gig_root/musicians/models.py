@@ -22,6 +22,9 @@ def str_to_int(s , default=False):
 
 
 class ProfilePic(PictureAbstract):
+    """
+    Model that represents the profile picture of a band.
+    """
     def __init__(self, *args, **kwargs):
         super(ProfilePic, self).__init__(*args, **kwargs)
 
@@ -30,6 +33,10 @@ class ProfilePic(PictureAbstract):
         return f'Profile pic of band: {self.band.name}'
 
 class BackgroundPic(PictureAbstract):
+    """
+    Model tha represents the background picture of a band.
+    """
+
     def __init__(self, *args, **kwargs):
         super(BackgroundPic, self).__init__(*args, **kwargs)
 
@@ -40,6 +47,13 @@ class BackgroundPic(PictureAbstract):
 
 
 class Band(models.Model):
+    """
+    Each `Band` instance corresponds with one band. Each band information such as
+    a band name, description, genres that the band plays, and so on.
+    Each band can also contain urls to other social profiles like soundcloud and youtube,
+    which are used to display eventual playlist, video's of that band
+
+    """
 
     MAX_LENGTH=100
     name = models.CharField(null=False, max_length=MAX_LENGTH)
@@ -94,9 +108,17 @@ class Band(models.Model):
             return default
 
     def get_contact_email(self):
+        """
+        Method that returns the email of the band owner.
+        Whenever a user wants to contact the responsable of a band,
+        this email is returned.
+        """
         return self.owner.user.email
 
     def is_owner(self, other):
+        """
+        Method that checks wether `other` is the owner of this band profile.
+        """
         if isinstance(other, ArtistModel):
             return self.owner == other
         elif isinstance(other, User):
@@ -108,6 +130,11 @@ class Band(models.Model):
             return False
 
     def get_member(self, artist, only_active_members=True):
+        """
+        Method that returns a `Member` instance  corresponding to artist with profile `artist`.
+        `only_active_members` if set to true returns only the instance if `artist` is currently active
+        in the band.
+        """
         return self.lineup.get_member(artist, only_active_members)
 
     def get_active_members(self, default=False):
@@ -117,9 +144,15 @@ class Band(models.Model):
         return self.lineup.get_memberships()
 
     def is_member(self, other, only_active_members=True):
+        """
+        Method that checks whether `other` is a member of this band.
+        """
         return self.lineup.is_member(other, only_active_members)
 
     def add_member(self, artist, role="No role dessigned", is_active=False):
+        """
+        Method that adds `artist` as a member of the band which active status set to `is_active`
+        """
         return self.lineup.add_member(artist=artist, role=role, is_active=is_active)
 
     @property
@@ -342,18 +375,31 @@ class Band(models.Model):
         return self.follow_set.create(band=self, follower=user)
 
     def remove_follower(self, user):
+        """
+        Method that removes `user` from the follow_set. In other words the user indicated that he/she
+        is no longer interested in this band.
+        """
         if self.is_follower(user):
             return self.follow_set.get(follower=user).delete()
         return False
 
     def get_followers(self):
+        """
+        Returns the set of all followers of `self` band.
+        """
         return self.follow_set.all()
 
     @property
     def amount_followers(self):
+        """
+        Method that returns the amount of followers for `self` band.
+        """
         return self.follow_set.all().count()
 
     def get_upcoming_events(self):
+        """
+        Method that returns upcoming event instances associated to `self` band
+        """
         now=timezone.now()
         return self.event_set.filter(date__gte=now)
 
@@ -419,6 +465,10 @@ def delete_pics(sender, instance, **kwargs):
 
 
 class BandPic(PictureAbstract):
+    """
+    Model that represents a picture of a band. Besides of a profile or background picture, a
+    band can upload multiple pictures.
+    """
 
     band=models.ForeignKey(Band, on_delete=models.CASCADE)
 

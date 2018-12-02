@@ -4,9 +4,15 @@ from cloudinary.forms import CloudinaryJsFileField
 from .models import Band, LineUp, Member, DEFAULT_BAND_PROFILE_PIC, DEFAULT_BAND_BACKGROUND_PIC, ProfilePic, BackgroundPic
 
 class URLForm(forms.Form):
+    """
+    Form to validate any url
+    """
     url = forms.URLField(required=True, error_messages={'required': "You need to provida an url",'invalid': "The specified url is invalid"})
 
 class SoundCloudURL(URLForm):
+    """
+    Form to validate a soundcloud profile url
+    """
     soundcloud_prefix='https://soundcloud.com/'
 
     def is_valid(self):
@@ -25,6 +31,9 @@ class SoundCloudURL(URLForm):
         return False
 
 class SoundCloudPlayListURL(SoundCloudURL):
+    """
+    Form to validate a soundcloud url of a playlist
+    """
 
     soundcloud_prefix='https://w.soundcloud.com/player/'
 
@@ -35,18 +44,33 @@ class SoundCloudPlayListURL(SoundCloudURL):
         return False
 
 class DirectUploadProfilePicBand(forms.Form):
+    """
+    Form that allows client-side upload of a band profile picture.
+    """
     profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_band_profile_pic" })
 
 class DirectUploadBackgroundPicBand(forms.Form):
+    """
+    Form that allows client-side upload of a band background picture.
+    """
     background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_background_pic" })
 
 class DirectUploadBandPic(forms.Form):
+    """
+    Form that allows client-side upload for a picture (no profile or background).
+    """
     band_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_pic" })
 
 class DirectVideoUpload(forms.Form):
+    """
+    Form that allows client-side upload of a video for a band.
+    """
     video = CloudinaryJsFileField(attrs = { 'id': "id_new_video" })
 
 class RegisterForm(forms.ModelForm):
+    """
+    Form to register a band.
+    """
 
     genres =  forms.CharField(required=False)
     background_pic = forms.ImageField(required=False)
@@ -59,7 +83,6 @@ class RegisterForm(forms.ModelForm):
 
     def is_valid(self):
         if super(RegisterForm, self).is_valid():
-            #TODO add error messages when genres is not valid: the amount of genres characteres is greater than the MAX_LENGTH allowed
             return self.__is_genres_valid()
         return False
 
