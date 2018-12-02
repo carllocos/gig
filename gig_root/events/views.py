@@ -16,6 +16,9 @@ from .forms import CreateEventForm, DirectUploadPic
 from .models import Event, str_to_int
 
 def event_profile(request, event_id):
+    """
+    View that renders event with id `event_id`
+    """
     try:
         event=Event.objects.get(pk=event_id)
     except:
@@ -45,6 +48,10 @@ def event_profile(request, event_id):
 @has_artist_profile
 @is_band_owner
 def create_event(request):
+    """
+    View to create an upcoming event for a band. The user requesting this page
+    is required to be the owner of at least one band.
+    """
 
     artist=request.user.get_artist()
     bands=artist.owns.all()
@@ -70,6 +77,9 @@ def create_event(request):
 @has_artist_profile
 @is_band_owner
 def event_edit(request, event_id):
+    """
+    View meant for the editing of an event with id `event_id`.
+    """
 
     try:
         event=Event.objects.get(pk=event_id)
@@ -176,6 +186,18 @@ def __is_valid_name(name):
 @has_artist_profile
 @is_band_owner
 def update_name(request):
+    """
+    View meant to update the event name through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the new name for the event
+    `event_id`: the id of the event for which the name needs to change.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the update executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
     failure=__contains_failure(request, keys=['val'])
     if failure:
         return failure
@@ -205,6 +227,19 @@ def __is_valid_description(description):
 @has_artist_profile
 @is_band_owner
 def update_description(request):
+    """
+    View meant to update the event description through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the new description for the event
+    `event_id`: the id of the event for which the description needs to change.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the update executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'])
     if failure:
         return failure
@@ -241,6 +276,19 @@ def __is_valid_date(date_str):
 @has_artist_profile
 @is_band_owner
 def update_date(request):
+    """
+    View meant to update the event date through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the new date for the event
+    `event_id`: the id of the event for which the date needs to change.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the update executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'])
     if failure:
         return failure
@@ -280,6 +328,19 @@ def __is_valid_time(time_str, current_date):
 @has_artist_profile
 @is_band_owner
 def update_time(request):
+    """
+    View meant to update the event time through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the new time for the event
+    `event_id`: the id of the event for which the time needs to change.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the update executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'])
     if failure:
         return failure
@@ -316,6 +377,19 @@ def __is_valid_band(band_pk, artist):
 @has_artist_profile
 @is_band_owner
 def update_band(request):
+    """
+    View meant to update the band associated with a particular event through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the new band id for the event
+    `event_id`: the id of the event for which the associated band needs to change.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'])
     if failure:
         return failure
@@ -335,6 +409,19 @@ def update_band(request):
 @has_artist_profile
 @is_band_owner
 def update_picture(request):
+    """
+    View meant to update the picture of an event through Ajax request.
+    And is called after the new picture was uploaded to Cloudinary through client-side.
+
+    The POST request needs to contain following keys:
+    `val`: the metadata of the new picture uploaded through the client side
+    `event_id`: the id of the event for which the picture needs to change.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
     failure=__contains_failure(request, keys=['val'])
     if failure:
         return failure
@@ -353,6 +440,19 @@ def update_picture(request):
 @require_http_methods(["POST"])
 @login_required
 def add_comment(request):
+    """
+    View meant to add a comment to an event through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the comment message
+    `event_id`: the id of the event for which a comment is added.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'], only_owner=False)
     if failure:
         return failure
@@ -366,6 +466,20 @@ def add_comment(request):
 @require_http_methods(["POST"])
 @login_required
 def vote_comment(request):
+    """
+    View meant to upvote or downvote a comment associated to an event through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: the ID of the comment that is being upvoted or downvoted
+    `event_id`: the id of the event for which a comment is being up/downvoted.
+    `operation`: wich contains the value `upvote` or `downvote` to respectively upvote or downvote the comment
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'], allowed_operations=['upvote', 'downvote'], only_owner=False)
     if failure:
         return failure
@@ -392,6 +506,20 @@ def vote_comment(request):
 @require_http_methods(["POST"])
 @login_required
 def update_participation(request):
+    """
+    View meant to mark a user as participant for an event or mark his/her disengage for the event through Ajax request.
+
+    The POST request needs to contain following keys:
+    `event_id`: the id of the event for which a user is added/removed as participant of the event.
+    `operation`: a value equal to `participate` or `disengage` to respectively add the user or remove
+    the user of the Participants set.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `participants`: a intiger with the new amount of participants after the request was executed succesfully
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
     failure=__contains_failure(request, keys=[], allowed_operations=['participate', 'disengage'], only_owner=False)
     if failure:
         return failure
@@ -401,7 +529,7 @@ def update_participation(request):
 
     if operation == 'participate':
         event.add_participant(request.user)
-    else: #downvote
+    else: #disengage
         event.remove_participant(request.user)
 
     return JsonResponse({'is_executed': True, 'participants': event.amount_participants})
@@ -417,6 +545,19 @@ def __is_valid_email(email):
 
 @login_required
 def share_event(request):
+    """
+    View meant to share an event through Ajax request.
+
+    The POST request needs to contain following keys:
+    `val`: an email address where the event Invitation needs to be send
+    `event_id`: the id of the event that is being shared throug email.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['val'], only_owner=False)
     if failure:
         return failure
@@ -447,6 +588,20 @@ def share_event(request):
 @has_artist_profile
 @is_band_owner
 def update_location(request):
+    """
+    View meant to update the longitude and latitude of the event location of an event through Ajax request.
+
+    The POST request needs to contain following keys:
+    `long`: the new longitude value
+    `lat`: the new latitude value
+    `event_id`: the id of the event for which the longitude and latitude is being updated.
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+
     failure=__contains_failure(request, keys=['long', 'lat'])
     if failure:
         return failure

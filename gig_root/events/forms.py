@@ -10,17 +10,31 @@ from .models import Event, EventPicture, DEFAULT_EVENT_PIC
 
 
 class DirectUploadPic(forms.Form):
+    """
+    Form to directly upload a picture to cloudinary from the client-side.
+    """
     picture = CloudinaryJsFileField(attrs = { 'id': "id_new_picture" },
                                     label="",
                                     )
 
 class DateInput(forms.DateInput):
+    """
+    DateInput Field meant to check validity of a new date value, when the user attempts
+    to update the date of an existing event.
+    """
     input_type= 'date'
 
 class TimeInput(forms.TimeInput):
+    """
+    TimeInput Field meant to check validity of a new time value, when the user attempts
+    to update the time of an existing event.
+    """
     input_type='time'
 
 class CreateEventForm(forms.ModelForm):
+    """
+    Form provided that allows a user to create an upcoming event for one of his/her bands.
+    """
 
     band=forms.ModelChoiceField(queryset=Band.objects.none(),
                                 help_text='Chose the band for which this event is meant',
@@ -55,6 +69,9 @@ class CreateEventForm(forms.ModelForm):
 
 
     def clean_date(self):
+        """
+        clean_date makes sure that the chosen date is not in the past.
+        """
         date=self.cleaned_data['date']
         if date < timezone.now().date():
             raise forms.ValidationError(
@@ -74,6 +91,9 @@ class CreateEventForm(forms.ModelForm):
         super(CreateEventForm, self).save(*args, **kwargs)
 
     def savePicture(self):
+        """
+        Method called seperatly from `self.save`, to save a picture into cloudinary.
+        """
 
         pic=self.cleaned_data.get('picture', None)
         if pic is None:

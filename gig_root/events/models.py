@@ -22,6 +22,9 @@ def str_to_float(s):
     return float(s)
 
 class EventPicture(PictureAbstract):
+    """
+    Model that represents the picture from an event.
+    """
     def __init__(self, *args, **kwargs):
         super(EventPicture, self).__init__(*args, **kwargs)
 
@@ -32,6 +35,10 @@ class EventPicture(PictureAbstract):
 
 
 class Event(models.Model):
+    """
+    Event is a model that holds all the information of an upcoming gig for musicians.
+    The name, date, some description, band that will play and so on.
+    """
     MAX_LENGTH_NAME=70
     picture=models.OneToOneField(EventPicture, null=True, default="", on_delete=models.SET_DEFAULT)
     name=models.CharField(max_length=MAX_LENGTH_NAME, null=False)
@@ -39,12 +46,12 @@ class Event(models.Model):
     band=models.ForeignKey(Band, on_delete=models.CASCADE)
     description=models.TextField(default="", null=True)
 
+    #We store the latitude and longitude as location for the event.
     _latitude=models.FloatField(default=50.8503, null=False)
     _longitude=models.FloatField(default=4.3517, null=False)
 
     def __str__(self):
         return f'event {self.name} for {self.band.name}'
-
 
     @property
     def latitude(self):
@@ -141,19 +148,31 @@ class Event(models.Model):
 
 
     def get_participant(self, user):
+        """
+        `get_participant` returns a Participant instance for `user`
+        """
         if self.is_participant(user):
             return self.participant_set.get(participant=user)
         return False
 
     def get_participants(self):
+        """
+        `get_participants` returns a queryset of all Participants
+        """
         return self.participant_set.all()
 
     def add_participant(self, user):
+        """
+        `add_participant` creates a Participant instance for `user`, if no one exists.
+        """
         if not self.is_participant(user):
             return self.participant_set.create(participant=user)
         return False
 
     def remove_participant(self, user):
+        """
+        `remove_participant` removes a Participant instance associated with `user`
+        """
         p=self.get_participant(user)
         if p:
             p.delete()
@@ -161,6 +180,10 @@ class Event(models.Model):
         return False
 
     def is_participant(self, user):
+        """
+        `is_participant` checks whether `user` is associated with a Participant instance.
+        In other words, checks whether `user` indicated that he/she will participate to `self` event.
+        """
         return user.is_authenticated and self.participant_set.filter(participant=user).exists()
 
     @property
