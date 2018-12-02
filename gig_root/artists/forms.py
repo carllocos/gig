@@ -7,7 +7,7 @@ class DirectUploadProfilePic(forms.Form):
     """
     Form to direcly upload a profile picture to cloudinary from client-side
     """
-    profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_profile_pic" })
+    profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_profile_pic", 'accept' : 'image/*' })
 
 
 
@@ -16,7 +16,7 @@ class DirectUploadBackgroundPic(forms.Form):
     """
     Form to direcly upload a background picture to cloudinary from client-side
     """
-    background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_background_pic" })
+    background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_background_pic", 'accept' : 'image/*' })
 
 class CreateArtistForm(forms.ModelForm):
     """

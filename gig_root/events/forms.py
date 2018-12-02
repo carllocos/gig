@@ -13,7 +13,7 @@ class DirectUploadPic(forms.Form):
     """
     Form to directly upload a picture to cloudinary from the client-side.
     """
-    picture = CloudinaryJsFileField(attrs = { 'id': "id_new_picture" },
+    picture = CloudinaryJsFileField(attrs = { 'id': "id_new_picture", 'accept' : 'image/*'},
                                     label="",
                                     )
 

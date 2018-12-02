@@ -47,25 +47,25 @@ class DirectUploadProfilePicBand(forms.Form):
     """
     Form that allows client-side upload of a band profile picture.
     """
-    profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_band_profile_pic" })
+    profile_picture = CloudinaryJsFileField(attrs = { 'id': "id_new_band_profile_pic", 'accept' : 'image/*' })
 
 class DirectUploadBackgroundPicBand(forms.Form):
     """
     Form that allows client-side upload of a band background picture.
     """
-    background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_background_pic" })
+    background_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_background_pic", 'accept' : 'image/*' })
 
 class DirectUploadBandPic(forms.Form):
     """
     Form that allows client-side upload for a picture (no profile or background).
     """
-    band_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_pic" })
+    band_pic = CloudinaryJsFileField(attrs = { 'id': "id_new_band_pic", 'accept' : 'image/*' })
 
 class DirectVideoUpload(forms.Form):
     """
     Form that allows client-side upload of a video for a band.
     """
-    video = CloudinaryJsFileField(attrs = { 'id': "id_new_video" })
+    video = CloudinaryJsFileField(attrs = { 'id': "id_new_video", 'accept': "video/mp4,video/x-m4v,video/*" })
 
 class RegisterForm(forms.ModelForm):
     """
