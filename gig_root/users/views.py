@@ -20,6 +20,18 @@ from .util import getHTTP_Protocol
 
 
 @login_required
+def follows_bands(request):
+    """
+    View that is called when a user desires to get a overview of all the bands that he/she follows.
+    """
+    bands=[f.band for f in request.user.follow_set.all()]
+    context={
+        'bands': bands,
+        'user': request.user
+    }
+    return render(request, 'users/follow_bands.html', context=context)
+
+@login_required
 def update_email(request):
     """
     View that is called when a user desires to update it's current email.

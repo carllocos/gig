@@ -48,7 +48,7 @@
             {{user.first_name}}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="#">Follows</a>
+            <a class="dropdown-item" href="{% url 'users:follows-bands' %}">Follows</a>
             <a class="dropdown-item" href="#">Participate</a>
             <div class="dropdown-divider"></div>
             {% if user.owns_band %}
