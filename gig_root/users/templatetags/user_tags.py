@@ -71,3 +71,7 @@ def fancy_date(event_date_time):
         return "Already played ("+ dt+ ")"
     else:
         return calendar.month_name[event_date.month] +" "+ str(event_date.day)+ " at " + correct_time(event_date_time.hour, event_date_time.minute)
+
+@register.filter(name='is_the_band_owner')
+def is_the_band_owner(band, user):
+    return band.is_owner(user)
