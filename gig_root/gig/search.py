@@ -1,8 +1,23 @@
-from django.utils import timezone
+import operator
+from functools import reduce
 
+from django.utils import timezone
+from django.db.models import Q
 from events.models import Event
 from musicians.models import Band
+from django.shortcuts import reverse
 
+
+def get_suggestions(query):
+    """
+    function that return a dictionary containing a list of bands and events that matches `query`.
+    """
+    band_filter_condition = reduce(operator.or_, [Q(name__icontains=query), Q(_genres__icontains=query)])
+
+    bands=[__band_to_dict(band) for band in Band.objects.filter(band_filter_condition)]
+    events=[__event_to_dict(event) for event in Event.objects.filter(name__icontains=query)]
+
+    return {'bands': bands, 'events': events}
 
 def get_upcoming_events():
     """
@@ -14,7 +29,6 @@ def get_follow_bands_events(user):
     """
     `get_follow_bands_events` returns a queryset of upcoming events created by bands that the user follows.
     """
-
     events= Event.objects.none()
     for follows in user.follow_set.all():
         events = events.union(follows.band.get_upcoming_events())
@@ -84,3 +98,26 @@ def __band_genres(bands):
             set_genres.add(g.lower())
 
     return set_genres
+
+
+def __band_to_dict(band):
+    """
+    helper function that transform a band instance into a dictionary
+    """
+    return {
+        'name': band.name,
+        'id': band.pk,
+        'pic_id': band.profile_pic.public_id,
+        'url': reverse("musicians:band-profile", kwargs={'profile_id': band.pk}),
+    }
+
+def __event_to_dict(event):
+    """
+    helper function that transform an event instance into a dictionary
+    """
+    return {
+            'name': event.name,
+            'id': event.pk,
+            'pic_id': event.picture.public_id,
+            'url': reverse("events:profile", kwargs={'event_id': event.pk}),
+            }
