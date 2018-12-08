@@ -66,6 +66,9 @@ class Band(models.Model):
     _soundcloud_profile_url = models.TextField(default='', null=True, validators=[URLValidator()])
     _soundcloud_playlist_url = models.TextField(default='', null=True)
 
+    _youtube_profile_url = models.TextField(default='', null=True, validators=[URLValidator()])
+    _youtube_playlist_url = models.TextField(default='', null=True)
+
     class Meta:
         verbose_name="Band Profile"
         verbose_name_plural="Bands Profiles"
@@ -431,6 +434,29 @@ class Band(models.Model):
             self._soundcloud_playlist_url=False
         else:
             self._soundcloud_playlist_url=url
+
+
+    @property
+    def youtube_profile_url(self):
+        return self._youtube_profile_url
+
+    @youtube_profile_url.setter
+    def youtube_profile_url(self, url):
+        if url == '':
+            self._youtube_profile_url=False
+        else:
+            self._youtube_profile_url=url
+
+    @property
+    def youtube_playlist_url(self):
+        return self._youtube_playlist_url
+
+    @youtube_playlist_url.setter
+    def youtube_playlist_url(self, url):
+        if url == '':
+            self._youtube_playlist_url=False
+        else:
+            self._youtube_playlist_url=url
 
     def __remove_comma(self, s):
         if len(s)<= 0:
