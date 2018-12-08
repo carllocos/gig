@@ -14,7 +14,7 @@ from users.models import User
 from users.tokens import account_activation_token
 from users.util import getHTTP_Protocol
 
-from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, SoundCloudURL, SoundCloudPlayListURL
+from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, SoundCloudURL, SoundCloudPlayListURL, YoutubeURL, YoutubePlayListURL
 from .models import Band, Member, BandPic, VideoBand
 
 def agenda(request, band_id):
@@ -616,9 +616,10 @@ def update_soundcloud_url(request):
     """
     Ajax request to update a sound cloud url associated to a band.
     The post request needs to contain the following keys;
-    1. `val`: wich holds the url.
+    1. `val`: which holds the url.
     2. `band_id`: the identifier for the band involved in the ajax post request
-    3. `operation`: which specifies the operation to be performed
+    3. `kind_url`: the url that is involved in the request can be `profile` or `playlist`
+    4. `operation`: which specifies the operation to be performed
         We have 3 different allowed operations
         a) profile-add; operation that add's an URL as the soundcloud profile url
         b) profile-update; operation that updates existings url to newly provided url
@@ -661,6 +662,69 @@ def update_soundcloud_url(request):
         band.soundcloud_profile_url=url
     else:
         band.soundcloud_playlist_url=url
+
+    band.save()
+    msg = 'url succesfuly added.' if operation == 'add' else 'url succesfuly updated.'
+
+    return JsonResponse({'is_executed': True, 'value': msg})
+
+
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+def update_youtube_url(request):
+    """
+    Ajax request to update a youtube url associated to a band.
+    The post request needs to contain the following keys;
+    1. `val`: which holds the url.
+    2. `band_id`: the identifier for the band involved in the ajax post request
+    3. `kind_url`: the url that is involved in the request can be `channel` or `playlist`
+    4. `operation`: which specifies the operation to be performed
+        We have 3 different allowed operations
+        a) profile-add; operation that add's an URL as the youtube channel url
+        b) profile-update; operation that updates existings url to newly provided url
+        c) profile-delete; operation that removes the url
+
+
+    """
+    failure=__contains_failure(request, keys=['val', 'kind_url'], allowed_operations=['add', 'update', 'delete'],only_owner=True)
+    if failure:
+        return failure
+
+    kind_url = request.POST.get('kind_url')
+    if kind_url not in ['channel', 'playlist']:
+        return JsonResponse({'is_executed': False, 'reason': 'Only channel or playlist urls are accepted.'})
+
+    url=request.POST.get('val')
+    band=Band.get_band(request.POST.get('band_id'))
+    operation=request.POST.get('operation')
+    print("The following was received", operation, kind_url, url)
+    if operation == 'delete':
+        if kind_url == 'channel':
+            band.youtube_profile_url=None
+            msg='URL to youtube channel succesfuly deleted.'
+        else:
+            band.youtube_playlist_url=None
+            msg='URL to youtube playlist succesfuly deleted.'
+
+        band.save()
+        return JsonResponse({'is_executed': True, 'value': msg})
+
+    f= YoutubeURL({'url': url}) if kind_url == 'channel' else YoutubePlayListURL({'url': url})
+    if not f.is_valid():
+        errors=f.errors.as_data().get('url')
+        error_msg=''
+        for err in errors:
+            error_msg+= '.'.join(err.messages)
+
+            return JsonResponse({'is_executed': False, 'reason': error_msg})
+
+    if kind_url == 'channel':
+        print("HERERERER")
+        band.youtube_profile_url=url
+    else:
+        band.youtube_playlist_url=url
 
     band.save()
     msg = 'url succesfuly added.' if operation == 'add' else 'url succesfuly updated.'
