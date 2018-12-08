@@ -125,6 +125,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env_config.get('SOCIAL_AUTH_GOOGLE_OAUTH2_SEC
 LOGIN_URL = 'users:login'
 LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 
 #pipeline that represents the operations that are execute when information is retrieved
 #from social medias.
