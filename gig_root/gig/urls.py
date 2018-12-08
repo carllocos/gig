@@ -25,9 +25,12 @@ app_name = 'gig_app'
 urlpatterns = [
     path('', views.home, name='home'),
     path('admin/', admin.site.urls),
+    path('search_suggestions/', views.search_suggestions, name='search-suggestions'),
+    path('search/', views.search_query, name='search'),
     path('oauth/', include('social_django.urls', namespace='social')),
     path('artists/', include('artists.urls', namespace='artists')),
     path('musicians/', include('musicians.urls', namespace='musicians')),
     path('events/', include('events.urls', namespace='events')),
     path('users/', include('users.urls')),
+
 ]
