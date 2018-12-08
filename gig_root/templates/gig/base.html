@@ -48,18 +48,32 @@
             {{user.first_name}}
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Follows</a>
+            <a class="dropdown-item" href="#">Participate</a>
+            <div class="dropdown-divider"></div>
             {% if user.owns_band %}
             <a class="dropdown-item" href="{% url 'events:create' %}">create event</a>
+            {% elif user.has_artist_profile%}
+            <a href="{% url 'musicians:band-register' %}">register a band</a>
             {% else %}
-            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="{% url 'artists:register' %}">register an artist profile</a>
             {% endif %}
-            <a class="dropdown-item" href="#">Another action</a>
             <div class="dropdown-divider"></div>
+
             {% if user.has_artist_profile %}
-            <a class="dropdown-item" href="{% url 'artists:artist-profile' profile_id=user.artistmodel.pk%}">Artist Profile</a>
+
+            {% if user.bands%}
+            {% for band in user.bands%}
+            <a class="dropdown-item" href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
+            {% endfor %}
+            <div class="dropdown-divider"></div>
             {% endif %}
-            <a class="dropdown-item" href="{% url 'users:profile' %}">Manage Profile</a>
-            <a class="dropdown-item" href="{% url 'users:profile' %}">Manage Profile</a>
+            <a class="dropdown-item" href="{% url 'artists:artist-profile' profile_id=user.artistmodel.pk%}">{{user.artistmodel.stage_name}}</a>
+            <div class="dropdown-divider"></div>
+            {% endif %}
+
+            <a class="dropdown-item" href="{% url 'users:profile' %}">Manage Profiles</a>
+            <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a>
           </div>
         </li>
