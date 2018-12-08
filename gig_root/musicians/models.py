@@ -403,6 +403,13 @@ class Band(models.Model):
         now=timezone.now()
         return self.event_set.filter(date__gte=now)
 
+    def get_past_events(self):
+        """
+        Method that returns past event instances associated to `self` band
+        """
+        now=timezone.now()
+        return self.event_set.filter(date__lt=now).order_by('-date')
+
     @property
     def soundcloud_profile_url(self):
         return self._soundcloud_profile_url
