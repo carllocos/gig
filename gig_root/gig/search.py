@@ -90,7 +90,8 @@ def __search_similar_bands(genres,exclude_bands=None):
         if b in exclude_bands:
             continue
         for g in genres:
-            if g.lower() in genres:
+            band_genres=[genre.lower() for genre in b.genres]
+            if g.lower() in band_genres:
                 rst.append(b)
                 break
     return rst
@@ -144,6 +145,9 @@ def __get_matches(query, process_band, process_event):
     band_filter_condition = reduce(operator.or_, [Q(name__icontains=query), Q(_genres__icontains=query)])
 
     bands=[process_band(band) for band in Band.objects.filter(band_filter_condition)]
-    events=[process_event(event) for event in Event.objects.filter(name__icontains=query)]
+
+    now=timezone.now()
+    event_filter_condition = reduce(operator.and_, [Q(name__icontains=query), Q(date__gte=now)])
+    events=[process_event(event) for event in Event.objects.filter(event_filter_condition).order_by('date')]
 
     return {'bands': bands, 'events': events}
