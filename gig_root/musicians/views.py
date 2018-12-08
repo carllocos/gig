@@ -17,8 +17,26 @@ from users.util import getHTTP_Protocol
 from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, SoundCloudURL, SoundCloudPlayListURL
 from .models import Band, Member, BandPic, VideoBand
 
-def test(request):
-    return HttpResponse("Received reuqest")
+def agenda(request, band_id):
+    """
+    The view that renders the agenda (all events) of band with id `band_id`.
+    """
+
+    band = Band.get_band(band_id)
+
+    if not band:
+        context= {'short_message': "The agenda of the band can't be loaded, because the provided band profile id does not exists.",
+                  'title_msg': "Profile does not exists",
+                  'title_page': "Bad request"}
+        return render(request, 'users/short_message.html',context=context)
+
+    context={
+    'band': band,
+    'upcoming_events': band.get_upcoming_events(),
+    'past_events': band.get_past_events(),
+    'is_owner': band.is_owner(request.user)
+    }
+    return render(request, 'musicians/agenda.html',context=context)
 
 
 
