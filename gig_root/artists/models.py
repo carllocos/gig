@@ -7,7 +7,7 @@ from django.conf import  settings
 from django.db import models
 from users.models import User
 from users.sharedModels import PictureAbstract
-
+from django.db.models.query import QuerySet
 
 DEFAULT_PROFILE_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/profile_default.jpg")
 DEFAULT_BACKGROUND_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/background_default.jpg")
@@ -279,16 +279,8 @@ class ArtistModel(models.Model):
         bands=self.owns.all()
 
         events_qs= False
-        for band in bands:
-            if isinstance(events_qs, bool):
-                events_qs=band.event_set.all()
-            else:
-                events_qs=events_qs.union(band.event_set.all())
-
-        events=[]
-        for event in events_qs.order_by('-date'):
-            events.append(event)
-
+        evs_lst=[band.event_set.all() for band in bands]
+        events=[event for event in QuerySet.union(*evs_lst).order_by('-date')]
         return events
 
     def __remove_comma(self, s):
