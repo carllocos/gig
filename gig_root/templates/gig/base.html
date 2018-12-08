@@ -14,6 +14,8 @@
 
   {% load static %}
   <link rel="stylesheet" type="text/css" href="{% static 'gig/css/navbar.css' %}">
+  <script src="{% static 'gig/js/search_bar.js' %}"></script>
+
 
   {# Additional links for our css or js#}
   {% block link %}
@@ -34,9 +36,10 @@
           <a class="nav-link" href="#">Discover Artists <span class="sr-only">(current)</span></a>
         </li>
       </ul>
-      <form class="form-navbar form-inline my-2 my-md-0 mr-md-auto ">
-        <input class="form-navbar-input form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="form-navbar-btn btn btn-outline-warning my-2 my-sm-0" type="submit">Search</button>
+      <form action="{% url 'search' %}" class="form-navbar form-inline my-2 my-md-0 mr-md-auto ">
+        {% csrf_token %}
+        <input name="query" id="searchInput" class="form-navbar-input form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button id="searchButton" class="form-navbar-btn btn btn-outline-warning my-2 my-sm-0" type="submit">Search</button>
       </form>
       <ul class="navbar-nav mr-auto mt-2 mt-md-0 mr-md-0">
         {% if user.is_authenticated %}
@@ -71,6 +74,11 @@
         {% endif %}
       </ul>
     </div>
+
+    <div class="results-container">
+      <ul id="resultsGroup" class="list-group" style="display:none;">
+      </ul>
+    </div>
   </nav>
 
 
@@ -81,5 +89,26 @@
 
   {% block footer %}
   {% endblock %}
+
+  <script type="text/javascript">
+
+
+  $(document).ready(function(){
+    //set the intial Configuration to use search_bar.js
+    searchConfig = {
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+      id_input: "searchInput",
+      url_suggestions: "{% url 'search-suggestions' %}",
+      id_search_group: "resultsGroup",
+    }
+
+    //activates suggestions for the search input field with id `id_search_input`
+    activateSuggestions(function(suggestions){
+      removeListGroup();
+      addSuggestions(suggestions);
+    });
+
+  });
+  </script>
 </body>
 </html>
