@@ -1,7 +1,8 @@
 {% extends 'gig/base.html' %}
 {% load static %}
+{% load user_tags %}
 
-.{% block title %}
+{% block title %}
 {{form.last_name.value}} {{form.first_name.value}}
 {% endblock %}
 
@@ -118,7 +119,7 @@
       {% if associated_to_bands %}
       <p class="text-center">Here comes your bands</p>
       {% for band in bands %}
-        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
+        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>{% if band|is_the_band_owner:user %} (owner){% endif %}
         <br>
       {% endfor %}
       {% else %}
