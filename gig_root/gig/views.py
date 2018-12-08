@@ -32,11 +32,15 @@ def home(request):
 
 @require_http_methods(["GET"])
 def search_query(request):
-    return JsonResponse({'response': 'response'})
+    query= request.GET.get('query', '')
+    context={ 'query': query}
+
+    matches= {'bands': [], 'events': []} if query == '' else dbSearch.search_query(query)
+    context.update(matches)
+    return render(request, "gig/search_results.html", context=context)
 
 @require_http_methods(["GET"])
 def search_suggestions(request):
     query = request.GET.get("query")
     results=dbSearch.get_suggestions(query)
-    print(results)
     return JsonResponse(results)

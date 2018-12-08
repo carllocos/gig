@@ -7,17 +7,21 @@ from events.models import Event
 from musicians.models import Band
 from django.shortcuts import reverse
 
+def search_query(query):
+    """
+    function that return a dictionary containing a list of bands and events that matches `query`.
+    """
+    def identity_func(x):
+        return x
+
+    return __get_matches(query, identity_func, identity_func)
+
 
 def get_suggestions(query):
     """
     function that return a dictionary containing a list of bands and events that matches `query`.
     """
-    band_filter_condition = reduce(operator.or_, [Q(name__icontains=query), Q(_genres__icontains=query)])
-
-    bands=[__band_to_dict(band) for band in Band.objects.filter(band_filter_condition)]
-    events=[__event_to_dict(event) for event in Event.objects.filter(name__icontains=query)]
-
-    return {'bands': bands, 'events': events}
+    return __get_matches(query, __band_to_dict, __event_to_dict)
 
 def get_upcoming_events():
     """
@@ -121,3 +125,25 @@ def __event_to_dict(event):
             'pic_id': event.picture.public_id,
             'url': reverse("events:profile", kwargs={'event_id': event.pk}),
             }
+
+
+def __get_matches(query, process_band, process_event):
+    """
+    function that return a dictionary containing a list of band- and event instances that matches `query`.
+    A succesful match on `query` satisfies one of the following condition;
+    For band instances:
+    1. band.name contains `query`
+    2. band.genres contains `query`
+
+    For event instances:
+    1. event.name contains `query`
+
+    Succesful band- and event-instances are applied respectively on function `process_band` and `process_event`, before it is
+    added to the list.
+    """
+    band_filter_condition = reduce(operator.or_, [Q(name__icontains=query), Q(_genres__icontains=query)])
+
+    bands=[process_band(band) for band in Band.objects.filter(band_filter_condition)]
+    events=[process_event(event) for event in Event.objects.filter(name__icontains=query)]
+
+    return {'bands': bands, 'events': events}
