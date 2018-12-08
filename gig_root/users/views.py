@@ -10,7 +10,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_text
 from django.views.generic import CreateView
 from django.template.loader import render_to_string
-
+from django.utils import timezone
 from social_django.utils import load_strategy
 
 from .forms import RegistrationForm, UserProfileForm, EmailChangeForm
@@ -30,6 +30,24 @@ def follows_bands(request):
         'user': request.user
     }
     return render(request, 'users/follow_bands.html', context=context)
+
+@login_required
+def participate_events(request):
+    """
+    View that is called when a user desires to get a overview of all the events that he/she participates.
+    """
+    now=timezone.now()
+    upc_par_qs=request.user.participant_set.filter(event__date__gte=now).order_by('event__date').select_related('event')
+    upcoming_events=[par_ins.event for par_ins in upc_par_qs]
+
+    past_par_qs=request.user.participant_set.filter(event__date__lt=now).order_by('-event__date').select_related('event')
+    past_events=[par_ins.event for par_ins in past_par_qs]
+    context={
+        'upcoming_events': upcoming_events,
+        'past_events': past_events,
+        'user': request.user
+    }
+    return render(request, 'users/participate_events.html', context=context)
 
 @login_required
 def update_email(request):
