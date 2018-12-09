@@ -32,5 +32,6 @@ urlpatterns = [
     path('musicians/', include('musicians.urls', namespace='musicians')),
     path('events/', include('events.urls', namespace='events')),
     path('users/', include('users.urls')),
+    path('api/events/', include('events.api.urls', namespace='api-events')),
 
 ]
