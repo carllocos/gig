@@ -49,18 +49,7 @@ class CommentAbstract(models.Model):
         return f'comment of {self.commentator}: {c}'
 
 
-
-class Comment(models.Model):
-    pass
-        ##Comment belongs to band profile but also eventself.
-        #cotnains a field of votes
-
-class Vote(models.Model):
-        #the vote can be replaced by just an integerfield
-        #The vote can be done on a Artist and band profile but also on a comment
-        pass
-
-class PictureAbstract(models.Model): #TODO needs to become abstract and the other pics extend from here. Comment Video need to become mixins
+class PictureAbstract(models.Model):
     """
     PictureAbstract represents the base for pictures in any app. This abstract model provides api's to communicate
     with an extern web service called Cloudinary. Based on a `public_id` we can
