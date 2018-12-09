@@ -55,7 +55,8 @@ INSTALLED_APPS = [
 
     #Third-party apps
     'social_django',
-    'cloudinary'
+    'cloudinary',
+    'rest_framework'
 
     #local apps
 
@@ -222,3 +223,12 @@ cloudinary.config(
   api_key = env_config.get('CLOUDINARY_API_KEY'),
   api_secret = env_config.get('CLOUDINARY_API_SECRET')
 )
+
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
