@@ -47,18 +47,24 @@ class YoutubeURL(URLForm):
     """
     Form to validate a youtube channel url
     """
-    youtube_prefix='https://www.youtube.com/channel'
+    youtube_prefixes=['https://www.youtube.com/channel', 'https://www.youtube.com/user']
 
     def is_valid(self):
         if super(YoutubeURL, self).is_valid():
             url=self.cleaned_data['url']
-            if not url.startswith(self.youtube_prefix):
-                self.add_error('url', 'it is not a valid youtube channel url.')
+
+            current_prefix=False
+            for prefix in self.youtube_prefixes:
+                if url.startswith(prefix):
+                    current_prefix=prefix
+                    break
+            if not current_prefix:
+                self.add_error('url', 'it is not a valid youtube channel/user url.')
                 return False
 
-            profile_id= url[len(self.youtube_prefix):]
+            profile_id= url[len(current_prefix):]
             if profile_id == '':
-                self.add_error('url', 'it is not a valid youtube channel url.')
+                self.add_error('url', 'it is not a valid youtube channel/user url.')
                 return False
 
             return True
