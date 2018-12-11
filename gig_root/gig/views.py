@@ -19,6 +19,8 @@ def home(request):
     part_evs= dbSearch.get_participate_events(user) if user.is_authenticated else False
     might_like_evs= dbSearch.get_might_like_events(user) if user.is_authenticated else False
 
+    random_bands= dbSearch.get_randomBands()
+    
     context= {
         'user': user,
         'has_artistProfile': has_artistProfile,
@@ -26,6 +28,7 @@ def home(request):
         'follow_band_events': foll_b_evs,
         'participate_events': part_evs,
         'might_like_events': might_like_evs,
+        'random_bands': random_bands,
     }
     return render(request, "gig/home.html", context=context)
 
