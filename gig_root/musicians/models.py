@@ -60,8 +60,8 @@ class Band(models.Model):
     description =models.TextField(null=True, db_column="description")
     _genres =models.TextField(null=True, db_column="genres")
     owner = models.ForeignKey(ArtistModel, db_column="owner", on_delete=models.CASCADE, related_name="owns")
-    profile_pic = models.OneToOneField(ProfilePic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)
-    background_pic = models.OneToOneField(BackgroundPic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
+    profile_pic = models.OneToOneField(ProfilePic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
+    background_pic = models.OneToOneField(BackgroundPic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)
 
     _soundcloud_profile_url = models.TextField(default='', null=True, validators=[URLValidator()])
     _soundcloud_playlist_url = models.TextField(default='', null=True)
