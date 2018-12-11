@@ -611,3 +611,34 @@ def update_location(request):
     event.latitude=request.POST.get('lat')
     event.save()
     return JsonResponse({'is_executed': True})
+
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+@is_band_owner
+def delete_event(request):
+    """
+    View that is called when a user desires to delete an event.
+    The request is performed through Ajax.
+
+    The POST request needs to contain following keys:
+    `password`: the password of the current user
+    `event_id`: the id of the event that needs to be deleted
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: contains a error message meant to inform the `user` or the `programmer`
+    of the corresponding error.
+    """
+    failure=__contains_failure(request, keys=['password'])
+    if failure:
+        return failure
+
+    if not request.user.check_password(request.POST.get('password')):
+        return JsonResponse({'is_executed': False, 'reason': 'Password incorrect'})
+
+    event=Event.objects.get(pk=request.POST.get('event_id'))
+    event.delete()
+
+    return JsonResponse({'is_executed': True})
