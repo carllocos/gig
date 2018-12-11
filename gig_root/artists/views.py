@@ -349,3 +349,26 @@ def update_pic(request):
                         height=request.POST.get('height'))
     pic.save()
     return JsonResponse({'is_executed': True, 'val': request.POST.get('url')})
+
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+def delete_profile(request):
+    """
+    View that is called when a user desires to delete his/her artist profile.
+    The request is performed through Ajax.
+
+    The POST request needs to contain following keys:
+    `password`: the password of the current user
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: a error message only provided when `is_executed` is set to false.
+    """
+
+    if not request.user.check_password(request.POST.get('password', '')):
+        return JsonResponse({'is_executed': False, 'reason': 'Password incorrect'})
+
+    request.user.get_artist().delete()
+    return JsonResponse({'is_executed': True})

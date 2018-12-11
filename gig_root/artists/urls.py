@@ -13,4 +13,6 @@ urlpatterns = [
     path('profile/update_stage_name/', views.update_stage_name, name="update-stage-name"),
     path('profile/update_biography/', views.update_biography, name="update-biography"),
     path('profile/update_pic/', views.update_pic, name="update-pic"),
+    path('delete/', views.delete_profile, name='artist-delete'),
+
 ]
