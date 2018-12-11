@@ -25,6 +25,11 @@
   </div>
 
   <div class="gig-container">
+
+    <div class="form-group">
+      <label for="">Password to test delete ajax requests</label>
+      <input id="passwordField" type="password" name="" value="">
+    </div>
     <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseGig" aria-expanded="false" aria-controls="collapseGig">
       <i class="fas fa-caret-down"></i>
       Gig Profile
@@ -99,6 +104,7 @@
       {% if has_artistProfile %}
       <p class="text-center">Here comes your artistprofile</p>
       <p>Link to your artist profile <a href="{% url 'artists:artist-profile' profile_id=artis_profile.pk%}">{{artis_profile.stage_name}}</a> </p>
+      <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteArtistProfile()">Delete profile</button>
       {% else %}
       <p class="text-center">You don't have currently a registered artist profile.
         <a href="{% url 'artists:register' %}">
@@ -119,8 +125,8 @@
       {% if associated_to_bands %}
       <p class="text-center">Here comes your bands</p>
       {% for band in bands %}
-        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>{% if band|is_the_band_owner:user %} (owner){% endif %}
-        <br>
+      <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>{% if band|is_the_band_owner:user %} (owner) <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteBand({{band.pk}})">Delete</button>{% endif %}
+      <br>
       {% endfor %}
       {% else %}
       {% if  has_artistProfile %}
@@ -146,9 +152,10 @@
       <p class="text-center">Here comes your events</p>
       <br>
       {% for event in events %}
-        <a href="{% url 'events:profile' event_id=event.pk%}">{{event.name}}</a>
-        <a href="{% url 'events:edit' event_id=event.pk%}">edit</a>
-        <br>
+      <a href="{% url 'events:profile' event_id=event.pk%}">{{event.name}}</a>
+      <a href="{% url 'events:edit' event_id=event.pk%}">edit</a>
+      <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteEvent({{event.pk}})">Delete Event</button>
+      <br>
       {% endfor %}
       {% else %}
       <p class="text-center">You currently didn't create any event for a band</p>
@@ -159,39 +166,113 @@
 
 <script>
 
+function sendAjaxRequest(url_l, dict, success_func, failure_func){
+  $.ajax({
+    type: "POST",
+    url: url_l,
+    data: dict,
+    dataType: 'json',
+    success: function(response){
+      if(response.is_executed){
+        success_func(response);
+      }
+      else{
+        failure_func(response);
+      }
+    }});
+  }
 
-$(document).ready(function(){
+  function deleteArtistProfile(){
+    success_func= function(response){
+      console.log(response);
+    }
 
-  $(".gig-form").submit(function(event){
+    failure_func= function(response){
+      console.log(response);
+    }
+
+    $inp=$(`#passwordField`);
+    var dict= {
+      'password': $inp.val(),
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    sendAjaxRequest("{% url 'artists:artist-delete' %}", dict, success_func, failure_func);
+  }
+
+  function deleteBand(band_id){
+    success_func= function(response){
+      console.log(response);
+    }
+
+    failure_func= function(response){
+      console.log(response);
+    }
+
+    $inp=$(`#passwordField`);
+    var dict= {
+      'password': $inp.val(),
+      'band_id': band_id,
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    sendAjaxRequest("{% url 'musicians:band-delete' %}", dict, success_func, failure_func);
+  }
+
+  function deleteEvent(event_id){
+    success_func= function(response){
+      console.log(response);
+    }
+
+    failure_func= function(response){
+      console.log(response);
+    }
+
+    $inp=$(`#passwordField`);
+    var dict= {
+      'password': $inp.val(),
+      'event_id': event_id,
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    sendAjaxRequest("{% url 'events:delete' %}", dict, success_func, failure_func);
+  }
+
+  $(document).ready(function(){
+
+    $(".gig-form").submit(function(event){
 
 
-    event.preventDefault();
-    var first_name = $("#id_first_name").val();
-    var last_name = $("#id_last_name").val();
-    var email = $("#id_email").val();
+      event.preventDefault();
+      var first_name = $("#id_first_name").val();
+      var last_name = $("#id_last_name").val();
+      var email = $("#id_email").val();
 
-    $.ajax({
-      type: "POST",
-      url: window.location.pathname,
-      data: { 'first_name': first_name, 'last_name': last_name, 'email': email, csrfmiddlewaretoken: '{{ csrf_token }}'},
-      dataType: 'json',
-      success: function(data){
+      $.ajax({
+        type: "POST",
+        url: window.location.pathname,
+        data: { 'first_name': first_name, 'last_name': last_name, 'email': email, csrfmiddlewaretoken: '{{ csrf_token }}'},
+        dataType: 'json',
+        success: function(data){
 
-        selectors=["#id_first_nameHelper", "#id_last_nameHelper", "#id_emailHelper"];
-        if(data.is_valid){
-          msgs=[data.success_msgs.first_name, data.success_msgs.last_name, data.success_msgs.email];
-          updateHelpMessage(selectors, "text-danger", "text-success", msgs);
-          new_name=$("#id_first_name:first").val();
-          updateNameNavBar(new_name);
-        }
-        else{
-          msgs=[data.error_msgs.first_name, data.error_msgs.last_name, data.error_msgs.email];
-          updateHelpMessage(selectors, "text-success", "text-danger", msgs);
-        }}});
+          selectors=["#id_first_nameHelper", "#id_last_nameHelper", "#id_emailHelper"];
+          if(data.is_valid){
+            msgs=[data.success_msgs.first_name, data.success_msgs.last_name, data.success_msgs.email];
+            updateHelpMessage(selectors, "text-danger", "text-success", msgs);
+            new_name=$("#id_first_name:first").val();
+            updateNameNavBar(new_name);
+          }
+          else{
+            msgs=[data.error_msgs.first_name, data.error_msgs.last_name, data.error_msgs.email];
+            updateHelpMessage(selectors, "text-success", "text-danger", msgs);
+          }}});
+        });
+
+
+
+
       });
 
-    });
+      </script>
 
-  </script>
-
-  {% endblock %}
+      {% endblock %}
