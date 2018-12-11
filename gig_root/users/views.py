@@ -45,7 +45,8 @@ def participate_events(request):
     context={
         'upcoming_events': upcoming_events,
         'past_events': past_events,
-        'user': request.user
+        'user': request.user,
+        'http_protocol': getHTTP_Protocol()
     }
     return render(request, 'users/participate_events.html', context=context)
 

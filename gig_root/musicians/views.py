@@ -34,7 +34,8 @@ def agenda(request, band_id):
     'band': band,
     'upcoming_events': band.get_upcoming_events(),
     'past_events': band.get_past_events(),
-    'is_owner': band.is_owner(request.user)
+    'is_owner': band.is_owner(request.user),
+    'http_protocol': getHTTP_Protocol()
     }
     return render(request, 'musicians/agenda.html',context=context)
 

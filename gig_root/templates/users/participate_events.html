@@ -92,7 +92,9 @@ function succes_forecast(element) {
 $(document).ready(function(){
 
   //Set config for openweathermap
-  weather_config = {'appid': '6f53658522d8b6344fc36d7a6122511f'};
+  weather_config = {'appid': '6f53658522d8b6344fc36d7a6122511f',
+                    'http_protocol': '{{http_protocol}}'};
+
 
   $cards=$('.card');
 

@@ -4,17 +4,20 @@ This module assumes that jquery is loaded and weather_config is correctly set.
 **/
 
 
-var weather_config = {'appid': "YOUR_APP_API"};
-var forecast_base_url = 'http://api.openweathermap.org/data/2.5/weather?';
-var img_base_url = 'http://openweathermap.org/img/w/';
+var weather_config = {'appid': "YOUR_APP_API", 'http_protocol': "httpOrHttps"};
+var forecast_base_url = 'api.openweathermap.org/data/2.5/weather?';
+var img_base_url = 'openweathermap.org/img/w/';
 
 
 function make_url(long, lat){
-  return forecast_base_url + 'lat=' + lat + '&lon='+long + '&appid='+weather_config['appid'];
+  protocol=weather_config['http_protocol'];
+  return protocol + forecast_base_url + 'lat=' + lat + '&lon='+long + '&appid='+weather_config['appid'];
 }
 
 function get_weahter_icon_url(icon_name){
-  return img_base_url + icon_name + '.png';
+  protocol=weather_config['http_protocol'];
+
+  return protocol+ img_base_url + icon_name + '.png';
 }
 
 function get_minimal_forecast(long, lat, success_func, failure_func = default_failure) {
