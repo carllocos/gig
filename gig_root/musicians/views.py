@@ -700,7 +700,7 @@ def update_youtube_url(request):
     url=request.POST.get('val')
     band=Band.get_band(request.POST.get('band_id'))
     operation=request.POST.get('operation')
-    print("The following was received", operation, kind_url, url)
+
     if operation == 'delete':
         if kind_url == 'channel':
             band.youtube_profile_url=None
@@ -722,7 +722,6 @@ def update_youtube_url(request):
             return JsonResponse({'is_executed': False, 'reason': error_msg})
 
     if kind_url == 'channel':
-        print("HERERERER")
         band.youtube_profile_url=url
     else:
         band.youtube_playlist_url=url

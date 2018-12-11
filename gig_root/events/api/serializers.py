@@ -15,7 +15,6 @@ class EventPictureSerializer(serializers.ModelSerializer):
             'height',
         ]
 
-from pprint import pprint
 class EventSerializer(serializers.ModelSerializer):
     # picture=EventPictureSerializer()
     class Meta:
