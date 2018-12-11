@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
-from artists.artist_util import has_artist_profile
+from artists.artist_util import has_artist_profile, is_band_owner
 from users.models import User
 from users.tokens import account_activation_token
 from users.util import getHTTP_Protocol
@@ -731,3 +731,33 @@ def update_youtube_url(request):
     msg = 'url succesfuly added.' if operation == 'add' else 'url succesfuly updated.'
 
     return JsonResponse({'is_executed': True, 'value': msg})
+
+
+@require_http_methods(["POST"])
+@login_required
+@has_artist_profile
+@is_band_owner
+def delete_profile(request):
+    """
+    View that is called when a user desires to delete his/her band profile.
+    The request is performed through Ajax.
+
+    The POST request needs to contain following keys:
+    `password`: the password of the current user
+    'band_id': the id of the band that needs to be deleted
+
+    The view response with a JSON containing following keys:
+    `is_executed`: Boolean that tells whether the request was executed succesfully.
+    `reason`: a error message only provided when `is_executed` is set to false.
+    """
+    failure=__contains_failure(request, keys=['password'], only_owner=True)
+    if failure:
+        return failure
+
+    if not request.user.check_password(request.POST.get('password', '')):
+        return JsonResponse({'is_executed': False, 'reason': 'Password incorrect'})
+
+    band=Band.get_band(request.POST.get('band_id'))
+    band.delete()
+
+    return JsonResponse({'is_executed': True})

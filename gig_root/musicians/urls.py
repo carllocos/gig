@@ -5,6 +5,7 @@ from . import views
 app_name='musicians'
 urlpatterns =[
     path('register/', views.register_band, name='band-register'),
+    path('delete/', views.delete_profile, name='band-delete'),
     path('agenda/<int:band_id>', views.agenda, name='agenda'),
     path('profile/<int:profile_id>', views.band_profile, name="band-profile"),
     path('update_description/', views.update_description, name="update-description"),
