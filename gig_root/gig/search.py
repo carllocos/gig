@@ -7,6 +7,19 @@ from events.models import Event
 from musicians.models import Band
 from django.shortcuts import reverse
 
+
+def get_randomBands(amount=5, min_weight=1500, min_height=850):
+    """
+    function that returns max `amount` of partially, randomly selected bands.
+    The bands are intended to be shown on the carousel of the homepage. Therefore,
+    for bands to be considered for selection, their profile picture needs to have
+    at least dimensions `min_weight`X`min_height`.
+    """
+
+    img_filter = reduce(operator.and_, [Q(profile_pic__width__gte=min_weight), Q(profile_pic__height__gte=min_height)])
+    amount=min(Band.objects.filter(img_filter).count(), amount)
+    return Band.objects.filter(img_filter).order_by('?')[:amount]
+
 def search_query(query):
     """
     function that return a dictionary containing a list of bands and events that matches `query`.
