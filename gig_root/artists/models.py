@@ -7,7 +7,7 @@ from django.conf import  settings
 from django.db import models
 from users.models import User
 from users.sharedModels import PictureAbstract
-
+from django.db.models.query import QuerySet
 
 DEFAULT_PROFILE_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/profile_default.jpg")
 DEFAULT_BACKGROUND_PIC = os.path.join(settings.STATICFILES_DIRS [0], "pics/background_default.jpg")
@@ -31,7 +31,7 @@ class BackgroundPic(PictureAbstract):
 class ArtistModel(models.Model):
     """
     The ArtistModel represents the profile of an artist. Information such as `stage_name`,
-    `biography`, pictures, `instruments` that the artist can play, and so on. 
+    `biography`, pictures, `instruments` that the artist can play, and so on.
     The artist profile is equivalent to a muscian's C.V.
     Each instance of ArtistModel can be associated with different Band Profiles,
     but only with one User.
@@ -241,7 +241,47 @@ class ArtistModel(models.Model):
         """
         return self.background_pic.public_id
 
+    def is_involved_with_bands(self):
+        """
+        Method that tells whether `self` artist is the owner or member of at least one band.
+        """
+        return self.owns.all().exists() or self.get_memberships().exists()
 
+    def get_bands(self):
+        """
+        Method that returns a list of all bands where `self` artist is a member of.
+        """
+
+        bands=[]
+        for membs in self.get_memberships():
+            bands.append(membs.get_band())
+        return bands
+
+    def has_events(self):
+        """
+        Method that checks wether `self` artist created at least one event for a band that he/she owns.
+        """
+        bands=self.owns.all()
+        if not bands.exists():
+            return False
+
+        for band in bands:
+            if band.event_set.all().exists():
+                return True
+
+        #No event found
+        return False
+
+    def get_events(self):
+        """
+        Method that returns a list of all the events of bands for which the artist owns the band.
+        """
+        bands=self.owns.all()
+
+        events_qs= False
+        evs_lst=[band.event_set.all() for band in bands]
+        events=[event for event in QuerySet.union(*evs_lst).order_by('-date')]
+        return events
 
     def __remove_comma(self, s):
         if len(s)<= 0:

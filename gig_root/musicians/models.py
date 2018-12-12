@@ -60,11 +60,14 @@ class Band(models.Model):
     description =models.TextField(null=True, db_column="description")
     _genres =models.TextField(null=True, db_column="genres")
     owner = models.ForeignKey(ArtistModel, db_column="owner", on_delete=models.CASCADE, related_name="owns")
-    profile_pic = models.OneToOneField(ProfilePic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)
-    background_pic = models.OneToOneField(BackgroundPic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
+    profile_pic = models.OneToOneField(ProfilePic, db_column= "profile_pic", default="", null=True, on_delete=models.SET_DEFAULT)
+    background_pic = models.OneToOneField(BackgroundPic, db_column= "background_pic", default="", null=True, on_delete=models.SET_DEFAULT)
 
     _soundcloud_profile_url = models.TextField(default='', null=True, validators=[URLValidator()])
     _soundcloud_playlist_url = models.TextField(default='', null=True)
+
+    _youtube_profile_url = models.TextField(default='', null=True, validators=[URLValidator()])
+    _youtube_playlist_url = models.TextField(default='', null=True)
 
     class Meta:
         verbose_name="Band Profile"
@@ -403,6 +406,13 @@ class Band(models.Model):
         now=timezone.now()
         return self.event_set.filter(date__gte=now)
 
+    def get_past_events(self):
+        """
+        Method that returns past event instances associated to `self` band
+        """
+        now=timezone.now()
+        return self.event_set.filter(date__lt=now).order_by('-date')
+
     @property
     def soundcloud_profile_url(self):
         return self._soundcloud_profile_url
@@ -424,6 +434,29 @@ class Band(models.Model):
             self._soundcloud_playlist_url=False
         else:
             self._soundcloud_playlist_url=url
+
+
+    @property
+    def youtube_profile_url(self):
+        return self._youtube_profile_url
+
+    @youtube_profile_url.setter
+    def youtube_profile_url(self, url):
+        if url == '':
+            self._youtube_profile_url=False
+        else:
+            self._youtube_profile_url=url
+
+    @property
+    def youtube_playlist_url(self):
+        return self._youtube_playlist_url
+
+    @youtube_playlist_url.setter
+    def youtube_playlist_url(self, url):
+        if url == '':
+            self._youtube_playlist_url=False
+        else:
+            self._youtube_playlist_url=url
 
     def __remove_comma(self, s):
         if len(s)<= 0:

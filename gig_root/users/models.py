@@ -114,3 +114,15 @@ class User(AbstractBaseUser, PermissionsMixin):
             return ar.owns.all().exists()
         else:
             return False
+
+
+    @property
+    def bands(self):
+        """
+        property that returns a list of band instances where the `self` user is currently involved in.
+        """
+        if self.has_artistProfile():
+            ar=self.get_artist()
+            return ar.get_bands()
+        else:
+            return []

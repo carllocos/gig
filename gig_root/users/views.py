@@ -10,7 +10,7 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.encoding import force_bytes, force_text
 from django.views.generic import CreateView
 from django.template.loader import render_to_string
-
+from django.utils import timezone
 from social_django.utils import load_strategy
 
 from .forms import RegistrationForm, UserProfileForm, EmailChangeForm
@@ -18,6 +18,37 @@ from .models import User
 from .tokens import account_activation_token
 from .util import getHTTP_Protocol
 
+
+@login_required
+def follows_bands(request):
+    """
+    View that is called when a user desires to get a overview of all the bands that he/she follows.
+    """
+    bands=[f.band for f in request.user.follow_set.all()]
+    context={
+        'bands': bands,
+        'user': request.user
+    }
+    return render(request, 'users/follow_bands.html', context=context)
+
+@login_required
+def participate_events(request):
+    """
+    View that is called when a user desires to get a overview of all the events that he/she participates.
+    """
+    now=timezone.now()
+    upc_par_qs=request.user.participant_set.filter(event__date__gte=now).order_by('event__date').select_related('event')
+    upcoming_events=[par_ins.event for par_ins in upc_par_qs]
+
+    past_par_qs=request.user.participant_set.filter(event__date__lt=now).order_by('-event__date').select_related('event')
+    past_events=[par_ins.event for par_ins in past_par_qs]
+    context={
+        'upcoming_events': upcoming_events,
+        'past_events': past_events,
+        'user': request.user,
+        'http_protocol': getHTTP_Protocol()
+    }
+    return render(request, 'users/participate_events.html', context=context)
 
 @login_required
 def update_email(request):
@@ -263,51 +294,47 @@ def userProfileview(request):
     """
     View that returns the profile information associated with the user currently logged in.
     """
-    if request.method =='GET':
 
-        data = {
-                'first_name': request.user.first_name,
-                'last_name':request.user.last_name,
-                'email': request.user.email,
-                }
-        form = UserProfileForm(initial=data)
-        context= {'form': form,
-                  'user': request.user,
-                  'has_artistProfile': request.user.has_artistProfile(),
-                  'has_bands': request.user.has_artistProfile() and request.user.artistmodel.has_bands(),
-                  'has_ven': False}
-        return render(request, "users/profile.html", context=context)
-    else:
+    if request.method == "POST" and request.is_ajax():
+        form =UserProfileForm(request.POST)
 
-        if request.is_ajax():
+        if form.is_valid(request.user.email):
+            request.user.first_name = form.cleaned_data['first_name']
+            request.user.last_name = form.cleaned_data['last_name']
+            request.user.save()
+            data={ 'is_valid': True, 'success_msgs': {'first_name': "changes saved", "last_name": "changes saved", "email": ""}}
+        else:
+            data= {'is_valid': False, 'error_msgs': form.errors_to_dict(),}
 
-            form =UserProfileForm(request.POST)
-            if form.is_valid(request.user.email):
-                if request.user.first_name == form.cleaned_data['first_name']:
-                    msg_first=""
-                else:
-                    request.user.first_name = form.cleaned_data['first_name']
-                    msg_first="changes saved"
+        return JsonResponse(data)
 
-                if request.user.last_name == form.cleaned_data['last_name']:
-                    msg_last=""
-                else:
-                    request.user.last_name = form.cleaned_data['last_name']
-                    msg_last="changes saved"
+    initial_data = {
+            'first_name': request.user.first_name,
+            'last_name':request.user.last_name,
+            'email': request.user.email,
+            }
 
-                request.user.save()
-                data={
-                    'is_valid': True,
-                    'success_msgs': {'first_name': msg_first, "last_name": msg_last, "email": ""}
-                }
-                return JsonResponse(data)
-            else:
+    form = UserProfileForm(initial=initial_data)
+    user=request.user
+    has_artistProfile= user.has_artistProfile()
+    artist_profile=user.get_artist()
+    associated_to_bands= artist_profile.is_involved_with_bands() if has_artistProfile else False
+    bands= artist_profile.get_bands() if associated_to_bands else []
+    has_events= associated_to_bands and artist_profile.has_events()
+    events= artist_profile.get_events() if associated_to_bands else []
+
+    context= {'form': form,
+              'user': user,
+              'has_artistProfile': has_artistProfile,
+              'associated_to_bands': associated_to_bands,
+              'has_events': has_events,
+              'artis_profile': artist_profile,
+              'bands': bands,
+              'events': events,}
+
+    return render(request, "users/profile.html", context=context)
 
 
-                data= {'is_valid': False,
-                       'error_msgs': form.errors_to_dict(),
-                       }
-                return JsonResponse(data)
 
 
 def verify_email_existance(request):

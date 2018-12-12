@@ -8,6 +8,7 @@ app_name = 'events'
 
 urlpatterns = [
 path("create/", views.create_event, name="create"),
+path('delete/', views.delete_event, name='delete'),
 path("profile/<int:event_id>", views.event_profile, name="profile"),
 path("edit/<int:event_id>", views.event_edit, name="edit"),
 path("edit/update_name", views.update_name, name="update-name"),

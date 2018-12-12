@@ -67,6 +67,11 @@ def fancy_date(event_date_time):
     elif today  + timezone.timedelta(days=1) == event_date:
         return "Tomorrow at " + correct_time(event_date_time.hour, event_date_time.minute)
     elif today  > event_date:
-        return "Already played"
+        dt =str(event_date.day)+ "/"+ str(event_date.month)+"/"+str(event_date.year) +" at " + correct_time(event_date_time.hour, event_date_time.minute)
+        return "Already played ("+ dt+ ")"
     else:
         return calendar.month_name[event_date.month] +" "+ str(event_date.day)+ " at " + correct_time(event_date_time.hour, event_date_time.minute)
+
+@register.filter(name='is_the_band_owner')
+def is_the_band_owner(band, user):
+    return band.is_owner(user)

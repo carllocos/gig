@@ -4,8 +4,9 @@ from . import views
 
 app_name='musicians'
 urlpatterns =[
-    path('', views.test),
     path('register/', views.register_band, name='band-register'),
+    path('delete/', views.delete_profile, name='band-delete'),
+    path('agenda/<int:band_id>', views.agenda, name='agenda'),
     path('profile/<int:profile_id>', views.band_profile, name="band-profile"),
     path('update_description/', views.update_description, name="update-description"),
     path('update_genre/', views.update_genre, name="update-genre"),
@@ -20,5 +21,6 @@ urlpatterns =[
     path('vote_band/', views.vote_band, name="vote-band"),
     path('update_follow/', views.update_follow, name="update-follow"),
     path('update_soundcloud/', views.update_soundcloud_url, name="update-soundcloud"),
+    path('update_youtube/', views.update_youtube_url, name="update-youtube"),
 
 ]

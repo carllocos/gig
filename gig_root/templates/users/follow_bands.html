@@ -1,0 +1,44 @@
+{% extends "gig/base.html" %}
+{% load static %}
+{% load cloudinary %}
+{% load user_tags %}
+
+{% block title %}
+Following
+{% endblock %}
+
+{% block link %}
+<link rel="stylesheet" type="text/css" href="{% static 'gig/css/home.css' %}">
+{% endblock %}
+
+{% block body %}
+
+
+<div class="container">
+
+  <div class="following-container">
+    <h1>Following</h1>
+    <hr class="style1 text-muted">
+    {% if bands %}
+    {% for band in bands %}
+    <div class="card text-center" id='band_card_{{band.pk}}'>
+      <div class="card-header">
+        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
+      </div>
+      {% cloudinary band.profile_pic.public_id width=300 height=150 crop="fill"%}
+      <div class="card-body">
+        <h5 class="card-title"></h5>
+        <p class="card-text">{{band.description}}</p>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>You currently don't follow any musician.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+
+
+{% endblock %}

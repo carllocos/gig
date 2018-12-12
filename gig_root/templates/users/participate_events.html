@@ -1,0 +1,110 @@
+{% extends "gig/base.html" %}
+{% load static %}
+{% load cloudinary %}
+{% load staticfiles %}
+{% load user_tags %}
+
+
+{% block title %}
+Agenda of {{band.name}}
+{% endblock %}
+
+{% block link %}
+{% cloudinary_includes %}
+{% cloudinary_js_config %}
+<link rel="stylesheet" type="text/css" href="{% static 'events/css/event.css' %}">
+<script type="text/javascript" src="{% static 'util/weather_util.js' %}"> </script>
+
+{% endblock %}
+
+{% block body %}
+<div class="container">
+  <h1>Participate</h1>
+  {% if  not upcoming_events and not past_events%}
+  <p>You currently don't participate at any event.</p>
+  {% else %}
+
+  {% if upcoming_events %}
+  <h2>Upcoming events</h2>
+  <hr class="style1 text-muted">
+  {% for event in upcoming_events %}
+  <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
+    <div class="card-header">
+      <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+    </div>
+    {% cloudinary event.picture.public_id width=300 height=150 crop="fill"%}
+    <div class="card-body">
+      <h5 class="card-title"></h5>
+      <p class="card-text">{{event.description}}</p>
+      <p class="temp"></p>
+      <p class="temp_max"></p>
+      <p class="temp_min"></p>
+      <p class="weahter_description"></p>
+      <img class="weather_icon" src="" alt="">
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if past_events %}
+  <h2>Past events</h2>
+  <hr class="style1 text-muted">
+  {% for event in past_events %}
+  <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
+    <div class="card-header">
+      <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+    </div>
+    {% cloudinary event.picture.public_id width=300 height=150 crop="fill"%}
+    <div class="card-body">
+      <h5 class="card-title"></h5>
+      <p class="card-text">{{event.description}}</p>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% endif %}
+</div>
+
+
+
+<script type="text/javascript">
+
+function succes_forecast(element) {
+
+  return function(response){
+    $card_body=$(element).find('> .card-body');
+    $img= $card_body.find('> .weather_icon').first();
+    $temp=$card_body.find('> .temp').first();
+    $temp_min=$card_body.find('> .temp_min').first();
+    $temp_max=$card_body.find('> .temp_max').first();
+    $description=$card_body.find('> .weahter_description').first();
+
+    $img.attr('src', response.weather_icon);
+    $temp.text(`${response.temp}°c`);
+    $temp_min.text(`min: ${response.temp_min}°c`);
+    $temp_max.text(`max: ${response.temp_max}°c`);
+    $description.text(response.description);
+  };
+}
+
+
+$(document).ready(function(){
+
+  //Set config for openweathermap
+  weather_config = {'appid': '6f53658522d8b6344fc36d7a6122511f',
+                    'http_protocol': '{{http_protocol}}'};
+
+
+  $cards=$('.card');
+
+  $cards.each(function(index){
+    long=$(this).attr("long");
+    lat=$(this).attr("lat");
+    get_minimal_forecast(long, lat, succes_forecast(this));
+  });//end of each
+
+}); //end of on ready
+</script>
+
+  {% endblock %}
