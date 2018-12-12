@@ -1,0 +1,16 @@
+:root{
+	--primary-color:#343A40;
+	--secondary-color:#FFC107;
+	--text-color-default:white;
+	
+}
+
+body{
+	background-color:var(--primary-color);
+	color:var(--text-color-default);
+}
+
+h1{
+	color: var(--secondary-color);
+	
+}
