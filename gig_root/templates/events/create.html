@@ -5,15 +5,33 @@
 Create an event
 {% endblock %}
 
+{% block link %}
+<!-- Map -->
+<script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
+
+<!--Links to geocoder-->
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css' />
+{% endblock %}
+
 
 {% block body %}
 
 <div class="d-flex container justify-content-center ">
 
-  <form class="" action="{% url 'events:create' %}" method="post" enctype="multipart/form-data">
+  <form id="id_form" class=""  action="{% url 'events:create' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
+    {% for field in form.hidden_fields%}
+    {{ field}}
+    {% endfor %}
 
-    {% for field in form %}
+    <div id="address_suggestions"class="">
+      <ul>
+      </ul>
+    </div>
+
+    {% for field in form.visible_fields %}
 
     <div class="row">
       <div class="col-12">
@@ -41,11 +59,11 @@ Create an event
     <div class="row">
       <div class="col-12">
         {% if  field.errors%}
-          {% for  error in field.errors %}
-            <small id="{{field.name}}Help" class="form-text text-danger"> {{error}}</small>
-          {% endfor %}
+        {% for  error in field.errors %}
+        <small id="{{field.name}}Help" class="form-text text-danger"> {{error}}</small>
+        {% endfor %}
         {% else %}
-          <small id="{{field.name}}Help" class="form-text text-muted"> {{field.help_text}}.</small>
+        <small id="{{field.name}}Help" class="form-text text-muted"> {{field.help_text}}.</small>
         {% endif %}
       </div>
     </div>
@@ -57,9 +75,91 @@ Create an event
     <button type="submit" name="button">Submit</button>
   </form>
 
-
-
 </div>
 
+<script type="text/javascript">
+
+L.mapbox.accessToken = 'pk.eyJ1IjoiYW50ZW1vb28iLCJhIjoiY2pwOTB5ZDBjMDJidzN1cWoxOWZncGdhdSJ9.dJg1hseRjqfD9aHXjXfNtA';
+var geocoder=L.mapbox.geocoder("mapbox.places");
+
+
+function queryAddress(callback){
+  var address = $("#id_address").val();
+  if (address != ""){
+    geocoder.query({query: address,
+      //country: 'be',
+      //autocomplete: true
+    }, callback);
+  }
+  else {
+    console.log("Nos search performed the query is empty");
+  }
+}
+
+function populateSuggestions(response){
+  var suggests_container=$('#address_suggestions');
+  suggests_container.empty();
+  for(idx in response.results.features){
+    var feature = response.results.features[idx];
+    if (typeof feature.matching_place_name !== 'undefined'){
+      var id= "suggest_id_"+ idx;
+      var onc= "onclick=populateFromSuggestion('" + id + "')";
+      var el= "<li id=" + id+" "+onc+ ">" + feature.matching_place_name + "</li>";
+      suggests_container.append(el);
+    }
+  }
+}
+
+function populateFromSuggestion(id_element){
+  var suggestion= $(`#${id_element}`).text();
+  $("#id_address").val(suggestion);
+}
+
+$(document).ready(function(){
+  $("#id_address").keyup(function(){
+    queryAddress(function(err, response){populateSuggestions(response);});
+  });
+});
+
+
+
+$( "#id_form" ).submit(function(event){
+
+  //creating the corresponding latitude and longitude for the provided address
+  var address=$("#id_address").val();
+  var q=encodeURIComponent(address);
+  var remote_url= "http://a.tiles.mapbox.com/geocoding/v5/mapbox.places/"+q +".json?access_token="+L.mapbox.accessToken;
+  var response=$.ajax({ type: "GET", url: remote_url, async: false}).responseJSON;
+
+  var match_feature=false;
+  if (response.type === "FeatureCollection"){
+    //search the most relevant match
+    for (idx in response.features){
+      var feature = response.features[idx];
+      if (match_feature){
+        if (match_feature.relevance < feature.relevance){
+          match_feature=feature;
+        }
+      }
+      else {
+        match_feature=feature;
+      }
+    }
+  }
+  else{
+    //case where the response is one relevant match
+    match_feature=response;
+  }
+
+  var longitude= match_feature.geometry.coordinates[0]
+  var latitude= match_feature.geometry.coordinates[1]
+  $("#id_latitude").val(latitude);
+  $("#id_longitude").val(longitude);
+
+});
+
+
+
+</script>
 
 {% endblock %}
