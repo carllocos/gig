@@ -46,9 +46,10 @@ class Event(models.Model):
     band=models.ForeignKey(Band, on_delete=models.CASCADE)
     description=models.TextField(default="", null=True)
 
-    #We store the latitude and longitude as location for the event.
+    #We store the address and corresponding latitude and longitude as location for the event.
     _latitude=models.FloatField(default=50.8503, null=False)
     _longitude=models.FloatField(default=4.3517, null=False)
+    address=models.TextField(null=False, default="")
 
     def __str__(self):
         return f'event {self.name} for {self.band.name}'
