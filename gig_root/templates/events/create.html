@@ -30,8 +30,8 @@ Create an event
     {{ field}}
     {% endfor %}
 
-    <div id="address_suggestions"class="">
-      <ul>
+    <div>
+      <ul id="address_suggestions" class="list-group">
       </ul>
     </div>
 
@@ -93,7 +93,7 @@ function populateSuggestions(response){
     if (typeof feature.matching_place_name !== 'undefined'){
       var id= "suggest_id_"+ idx;
       var onc= "onclick=populateFromSuggestion('" + id + "')";
-      var el= "<li id=" + id+" "+onc+ ">" + feature.matching_place_name + "</li>";
+      var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + feature.matching_place_name + "</li>";
       suggests_container.append(el);
     }
   }
@@ -112,7 +112,7 @@ $(document).ready(function(){
 
 
 $( "#id_form" ).submit(function(event){
-  
+
   var match_feature=queryAddressSync("id_address");
   var longitude= match_feature.geometry.coordinates[0]
   var latitude= match_feature.geometry.coordinates[1]
