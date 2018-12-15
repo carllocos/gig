@@ -23,7 +23,7 @@ function queryAddress(id_selector, callback){
   */
   var address = $("#"+id_selector).val();
   if (address != ""){
-    geocoder.query({query: address}, callback);
+    geocoder.query({query: address, autocomplete: true}, callback);
   }
 }
 
