@@ -10,6 +10,18 @@ Evit event
 {% block link %}
 {% cloudinary_includes %}
 {% cloudinary_js_config %}
+
+<!-- Map -->
+<script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
+
+<!--Links to geocoder-->
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css' />
+
+<!-- Links to local files-->
+<script src='{% static "events/js/map_util.js" %}'></script>
+
 {% endblock %}
 
 {% block body%}
@@ -36,6 +48,33 @@ Evit event
         </div>
       </div>
     </div>
+
+
+    <div class="form-group">
+      <div class="row">
+        <div class="col-12">
+          <label for="id_address">Address</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <input type="text" name="name" maxlength="200" required id="id_address" value="{{event.address}}">
+          <button type="button" class="btn btn-warning btn-sm" name="button" onClick="updateAdress('id_address', 'addressHelp')">Update address</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <small id="addressHelp" class="form-text text-muted"> Enter the address of the event.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic Container to populate search suggestions -->
+    <div>
+      <ul id="address_suggestions"class="list-group">
+      </ul>
+    </div>
+
 
 
     <div class="form-group">
@@ -260,8 +299,65 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     updateHelper(id_selector, id_helper, "{% url 'events:update-band' %}");
   }
 
+  function updateAdress(id_address, id_helper) {
+    $inp=$("#"+ id_address);
+
+    if($inp.val() === ""){
+      updateHelpText(id_helper, id_address, "The address is required", false);
+      return;
+    }
+
+    queryAddress(id_address, function(err, response){
+
+      var dict= {
+        'address': $inp.val(),
+        'lat':response.latlng[0],
+        'long':response.latlng[1],
+        'event_id': {{event.pk}},
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      };
+
+      success_func = function (response){
+        updateHelpText(id_helper, id_address, "succesfuly updated", true);
+      };
+
+      failure_func = function (response){
+        updateHelpText(id_helper, id_address, response.reason, false);
+      };
+      sendAjaxRequest("{% url 'events:update-location' %}", dict, $inp.val(), success_func, failure_func);
+    });
+  }
+
+  function populateSuggestions(response){
+    var suggests_container=$('#address_suggestions');
+    suggests_container.empty();
+    for(idx in response.results.features){
+      var feature = response.results.features[idx];
+      if (typeof feature.matching_place_name !== 'undefined'){
+        var id= "suggest_id_"+ idx;
+        var onc= "onclick=populateFromSuggestion('" + id + "')";
+        var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + feature.matching_place_name + "</li>";
+        suggests_container.append(el);
+      }
+    }
+  }
+
+  function populateFromSuggestion(id_element){
+    var suggestion= $(`#${id_element}`).text();
+    $("#id_address").val(suggestion);
+  }
+
+
   $(document).ready(function(){
     updatePicture('id_new_picture', 'pictureHelp');
+
+    createGeocoder();
+
+    $("#id_address").keyup(function(){
+      queryAddress("id_address", function(err, response){populateSuggestions(response);});
+    });
+
+
   });
 
 </script>
