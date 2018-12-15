@@ -1,5 +1,5 @@
 /*
-map_util.js module is meant to abstract over the Mapbox Geocoder API.
+geocoder_util module is meant to abstract over the Mapbox Geocoder API.
 */
 
 
@@ -35,7 +35,12 @@ function queryAddressSync(id_selector){
   */
   var address=$("#"+id_selector).val();
   var q=encodeURIComponent(address);
-  var remote_url= "http://a.tiles.mapbox.com/geocoding/v5/mapbox.places/"+q +".json?access_token="+L.mapbox.accessToken;
+  var protocol= 'http:';
+  if(window.location.protocol === "https:"){
+    protocol="https:";
+  }
+
+  var remote_url= protocol+ "//a.tiles.mapbox.com/geocoding/v5/mapbox.places/"+q +".json?access_token="+L.mapbox.accessToken;
   var response=$.ajax({ type: "GET", url: remote_url, async: false}).responseJSON;
 
   var match_feature=false;
