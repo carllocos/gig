@@ -1,5 +1,6 @@
 {% extends "gig/base.html" %}
 {% load user_tags %}
+{% load staticfiles %}
 
 {% block title %}
 Create an event
@@ -13,6 +14,9 @@ Create an event
 <!--Links to geocoder-->
 <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
 <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css' />
+
+<!-- Links to local files-->
+<script src='{% static "events/js/map_util.js" %}'></script>
 {% endblock %}
 
 
@@ -79,22 +83,7 @@ Create an event
 
 <script type="text/javascript">
 
-L.mapbox.accessToken = 'pk.eyJ1IjoiYW50ZW1vb28iLCJhIjoiY2pwOTB5ZDBjMDJidzN1cWoxOWZncGdhdSJ9.dJg1hseRjqfD9aHXjXfNtA';
-var geocoder=L.mapbox.geocoder("mapbox.places");
-
-
-function queryAddress(callback){
-  var address = $("#id_address").val();
-  if (address != ""){
-    geocoder.query({query: address,
-      //country: 'be',
-      //autocomplete: true
-    }, callback);
-  }
-  else {
-    console.log("Nos search performed the query is empty");
-  }
-}
+createGeocoder()
 
 function populateSuggestions(response){
   var suggests_container=$('#address_suggestions');
@@ -117,45 +106,18 @@ function populateFromSuggestion(id_element){
 
 $(document).ready(function(){
   $("#id_address").keyup(function(){
-    queryAddress(function(err, response){populateSuggestions(response);});
+    queryAddress("id_address", function(err, response){populateSuggestions(response);});
   });
 });
 
 
-
 $( "#id_form" ).submit(function(event){
-
-  //creating the corresponding latitude and longitude for the provided address
-  var address=$("#id_address").val();
-  var q=encodeURIComponent(address);
-  var remote_url= "http://a.tiles.mapbox.com/geocoding/v5/mapbox.places/"+q +".json?access_token="+L.mapbox.accessToken;
-  var response=$.ajax({ type: "GET", url: remote_url, async: false}).responseJSON;
-
-  var match_feature=false;
-  if (response.type === "FeatureCollection"){
-    //search the most relevant match
-    for (idx in response.features){
-      var feature = response.features[idx];
-      if (match_feature){
-        if (match_feature.relevance < feature.relevance){
-          match_feature=feature;
-        }
-      }
-      else {
-        match_feature=feature;
-      }
-    }
-  }
-  else{
-    //case where the response is one relevant match
-    match_feature=response;
-  }
-
+  
+  var match_feature=queryAddressSync("id_address");
   var longitude= match_feature.geometry.coordinates[0]
   var latitude= match_feature.geometry.coordinates[1]
   $("#id_latitude").val(latitude);
   $("#id_longitude").val(longitude);
-
 });
 
 
