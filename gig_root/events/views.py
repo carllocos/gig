@@ -51,6 +51,10 @@ def create_event(request):
     """
     View to create an upcoming event for a band. The user requesting this page
     is required to be the owner of at least one band.
+
+    Additionaly, the form requires two hidden_fields to be automatically filled at the client side.
+    The value provided at `address` field by the user needs to be transformed into
+    latitude and longitude values, which are used to populate the two hidden_fields: `latitude` and `longitude`
     """
 
     artist=request.user.get_artist()
