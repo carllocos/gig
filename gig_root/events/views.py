@@ -15,6 +15,29 @@ from users.util import getHTTP_Protocol
 from .forms import CreateEventForm, DirectUploadPic
 from .models import Event, str_to_int
 
+
+def event_details(request, event_id):
+    """
+    View that displays the essential information about event with id `event_id`;
+    e.g. name, time, date, address,..
+    Additionaly the address is displayed on a map.
+    """
+    try:
+        event=Event.objects.get(pk=event_id)
+    except:
+        context= {'short_message': "You are trying to access an event page that does not exist.",
+                  'title_msg': f"Event does not exist",
+                  'titple_page': "Bad request",
+                  }
+        return render(request, 'users/short_message.html', context=context)
+
+
+    context={
+            'event': event,
+            }
+
+    return render(request, 'events/event_details.html', context=context)
+
 def event_profile(request, event_id):
     """
     View that renders event with id `event_id`
