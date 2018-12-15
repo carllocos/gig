@@ -330,13 +330,24 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
 
   function populateSuggestions(response){
     var suggests_container=$('#address_suggestions');
+
     suggests_container.empty();
     for(idx in response.results.features){
       var feature = response.results.features[idx];
+      var name=false;
       if (typeof feature.matching_place_name !== 'undefined'){
+        name=feature.matching_place_name;
+      }
+      else if (typeof feature.place_name !== 'undefined'){
+        name=feature.place_name;
+      }
+      else{
+      }
+
+      if(name){
         var id= "suggest_id_"+ idx;
         var onc= "onclick=populateFromSuggestion('" + id + "')";
-        var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + feature.matching_place_name + "</li>";
+        var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + name + "</li>";
         suggests_container.append(el);
       }
     }
