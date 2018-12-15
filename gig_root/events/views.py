@@ -593,12 +593,13 @@ def share_event(request):
 @is_band_owner
 def update_location(request):
     """
-    View meant to update the longitude and latitude of the event location of an event through Ajax request.
+    View meant to update the address and the corresponding, longitude and latitude of the event location through Ajax request.
 
     The POST request needs to contain following keys:
     `long`: the new longitude value
     `lat`: the new latitude value
-    `event_id`: the id of the event for which the longitude and latitude is being updated.
+    `address`: the human readable address
+    `event_id`: the id of the event for which the address, longitude and latitude is being updated.
 
     The view response with a JSON containing following keys:
     `is_executed`: Boolean that tells whether the request was executed succesfully.
@@ -606,11 +607,12 @@ def update_location(request):
     of the corresponding error.
     """
 
-    failure=__contains_failure(request, keys=['long', 'lat'])
+    failure=__contains_failure(request, keys=['address', 'long', 'lat'])
     if failure:
         return failure
 
     event=Event.objects.get(pk=request.POST.get('event_id'))
+    event.address=request.POST.get('address')
     event.longitude=request.POST.get('long')
     event.latitude=request.POST.get('lat')
     event.save()
