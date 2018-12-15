@@ -31,11 +31,6 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarResponsive">
       <a class="navbar-brand" href="{% url 'home' %}">Gig</a>
-      <ul class="navbar-nav mr-auto mt-2 mt-md-0">
-        <li class="nav-item">
-          <a class="nav-link" href="#">Discover Artists <span class="sr-only">(current)</span></a>
-        </li>
-      </ul>
       <form action="{% url 'search' %}" class="form-navbar form-inline my-2 my-md-0 mr-md-auto ">
         {% csrf_token %}
         <input name="query" id="searchInput" class="form-navbar-input form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
