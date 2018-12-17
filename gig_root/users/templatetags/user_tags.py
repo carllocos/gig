@@ -54,6 +54,13 @@ def correct_time(hour, minute):
 
     return str_h + ':' + str_min
 
+@register.filter(name='adapt_to_html_date_format')
+def adapt_to_html_date_format(date):
+    month= '0'+ str(date.month) if int(date.month) < 10 else str(date.month)
+    day= '0'+ str(date.day) if int(date.day) < 10 else str(date.day)
+    res= str(date.year) + '-'+ month + '-'+ day
+    return res
+
 @register.filter(name='fancy_date')
 def fancy_date(event_date_time):
     """
