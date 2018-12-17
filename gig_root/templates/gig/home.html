@@ -39,187 +39,116 @@ Gig For Musicians
       <span class="sr-only">Next</span>
     </a>
   </div>
-
-
-
-
-
-  {% if user.is_authenticated %}
-
-  {% if  not has_artistProfile %}
-  <div class="jumbotron">
-
-    <div class="row">
-      <div class="col-12">
-        <h1 class="display-4">
-          Hi {{user.first_name}},
-        </h1>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-12">
-        <p class="lead"> Are you an artist? Register your band.</p>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-12">
-        <p class="lead">
-          <a class="btn btn-warning btn-lg" href="{% url 'artists:register' %}" role="button">Signup</a>
-        </p>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {% else %}
-  <div class="jumbotron">
-
-    <div class="row">
-      <div class="col-12">
-        <h1 class="display-4">
-          Hi stranger,
-        </h1>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-12">
-        <p class="lead"><a class="btn btn-warning btn-md" href="{% url 'users:login' %}" role="button">Login</a> or <a class="btn btn-warning btn-md" href="{% url 'users:signup' %}" role="button">Sign up</a> to follow artist and be up to date with upcoming events.</p>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-12">
-        <p class="lead">
-
-        </p>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-</div>
-
 {% endif %}
 
-<div class="container">
-
-  <div class="upcoming-events-container">
-    <h1>Upcoming events</h1>
-    <hr class="style1 text-muted">
-    {% if upcoming_events %}
-
-    {% for event in upcoming_events %}
-    <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
-      <div class="card-header">
-        <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-      </div>
-      {% cloudinary event.picture.public_id width=300 height=150 crop="fill"%}
-      <div class="card-body">
-        <h5 class="card-title"></h5>
-        <p class="card-text">{{event.description}}</p>
-        <p class="temp"></p>
-        <p class="temp_max"></p>
-        <p class="temp_min"></p>
-        <p class="weahter_description"></p>
-        <img class="weather_icon" src="" alt="">
-      </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>No upcoming events registered by bands</p>
-    {% endif %}
-  </div>
-
-  {% if  user.is_authenticated%}
-
-  <div class="follow-events-container">
-    <h1>Events for musicians you follow</h1>
-    <hr class="style1 text-muted">
-    {% if  follow_band_events%}
-
-    {% for event in follow_band_events %}
-    <div class="card text-center" long='{{event.longitude}}' lat='{{event.latitude}}'>
-      <div class="card-header">
-        <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-      </div>
-      {% cloudinary event.picture.public_id width=300 height=150 crop="fill"%}
-      <div class="card-body">
-        <h5 class="card-title"></h5>
-        <p class="card-text">{{event.description}}</p>
-        <p class="temp"></p>
-        <p class="temp_max"></p>
-        <p class="temp_min"></p>
-        <p class="weahter_description"></p>
-        <img class="weather_icon" src="" alt="">
-      </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>No upcoming events for musicians you follow </p>
-    {% endif %}
 
 
+<div class="container-fluid pt-3 content">
+	<div class="row justify-content-between">
+	
+		<div class="col-lg-8 user-specific-content">
+			<div class="jumbotron">	
+			{% if user.is_authenticated %}
 
+				<h1 class="display-4">Hi {{user.first_name}},</h1>
+					{% if  not has_artistProfile %}
+				<p class="lead"> 
+					Are you an artist? Register your band.
+					<a class="btn btn-warning btn-lg" href="{% url 'artists:register' %}" role="button">register as artist</a>
+				</p>
+					{% endif %}
+			</div>
+			
+			<div class="follow-events-container">
+				<h4>Events of followed bands</h4>
+				<hr class="style1 text-muted">
+				<div class="d-flex flex-row justify-content-start">
+					{% if  follow_band_events%}
+						{% for event in follow_band_events %}
+						<div class="card text-center">
+							<div class="card-header">
+								<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+							</div>
+						{% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+						</div>
+						{% endfor %}
+					{% else %}
+					<p>No upcoming events for bands you follow </p>
+					{% endif %}
+				</div>
+			</div>
 
+			<div class="participate-events-container">
+				<h4>Events you participate in</h4>
+				<hr class="style1 text-muted">
+				<div class="d-flex flex-row justify-content-start">
+					{% if participate_events %}
+						{% for event in participate_events %}
+					<div class="card text-center p-1">
+						<div class="card-header">
+							<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+						</div>
+						{% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+					</div>
+						{% endfor %}
+					{% else %}
+					<p>You don't participate in any events</p>
+					{% endif %}
+				</div>
+			</div>
+	  
+			{% else %}
 
-  </div>
-
-  <div class="participate-events-container">
-    <h1>Events you participate</h1>
-    <hr class="style1 text-muted">
-    {% if participate_events %}
-    {% for event in participate_events %}
-    <div class="card text-center" long='{{event.longitude}}' lat='{{event.latitude}}'>
-      <div class="card-header">
-        <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-      </div>
-      {% cloudinary event.picture.public_id width=300 height=150 crop="fill"%}
-      <div class="card-body">
-        <h5 class="card-title"></h5>
-        <p class="card-text">{{event.description}}</p>
-        <p class="temp"></p>
-        <p class="temp_max"></p>
-        <p class="temp_min"></p>
-        <p class="weahter_description"></p>
-        <img class="weather_icon" src="" alt="">
-      </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>You don't participate in any events</p>
-    {% endif %}
-  </div>
-
-
-  <div class="might-like-events-container">
-    <h1>Events you might like</h1>
-    {% if might_like_events %}
-    {% for event in might_like_events %}
-    <div class="card text-center" long='{{event.longitude}}' lat='{{event.latitude}}'>
-      <div class="card-header">
-        <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-      </div>
-      {% cloudinary event.picture.public_id width=300 height=150 crop="fill"%}
-      <div class="card-body">
-        <h5 class="card-title"></h5>
-        <p class="card-text">{{event.description}}</p>
-        <p class="temp"></p>
-        <p class="temp_max"></p>
-        <p class="temp_min"></p>
-        <p class="weahter_description"></p>
-        <img class="weather_icon" src="" alt="">
-      </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>No suggestions for you</p>
-    {% endif %}
-  </div>
-  {% endif %}
-
-
+				<h1 class="display-4">Hi, stranger</h1>
+				<p class="lead">
+					<a class="btn btn-warning btn-md" href="{% url 'users:login' %}" role="button">Login</a> or <a class="btn btn-warning btn-md" href="{% url 'users:signup' %}" role="button">Sign up</a> to follow bands and be up to date with upcoming events.
+				</p>
+			</div>
+			{% endif %}
+		</div>
+		
+		<div class="container col-lg-2 upcoming">
+			<div class="upcoming-events-container">
+				<h4>Upcoming events</h4>
+				<hr class="style1 text-muted">
+				<div class="d-flex justify-content-start vertical-on-lg">
+					{% if upcoming_events %}
+						{% for event in upcoming_events %}
+					<div class="card text-center p-1">
+						<div class="card-header">
+							<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+						</div>
+						{% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+					</div>
+						{% endfor %}
+					{% else %}
+					<p>No upcoming events</p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		
+		<div class="container col-lg-2 recommended">
+			<div class="might-like-events-container">
+				<h4>recommended events</h4>
+				<hr class="style1 text-muted">
+				<div class="d-flex justify-content-start vertical-on-lg">
+					{% if might_like_events %}
+						{% for event in might_like_events %}
+					<div class="card text-center p-1">
+					  <div class="card-header">
+						<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+					  </div>
+					  {% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+					</div>
+						{% endfor %}
+					{% else %}	
+					<p>No suggestions for you</p>
+					{% endif %}
+				 </div>
+			</div>
+		</div>
+	</div>
 </div>
 
 

@@ -1,3 +1,4 @@
+
 .carousel-inner{
   width:100%;
   max-height: 300px;
@@ -11,3 +12,58 @@
 	color: var(--text-color-default);
 }
 
+div > h4{
+	color:var(--secondary-color);
+}
+
+/* scrollbar width */
+::-webkit-scrollbar {
+	width: 5px;
+	height: 5px;
+}
+ 
+/* scrollbar Handle */
+::-webkit-scrollbar-thumb {
+	background: grey; 
+	border-radius: 2px;
+}
+
+div.d-flex{
+	overflow-x: scroll; 
+}
+
+/*event cards*/
+* .card{
+	background-color:var(--secondary-color);
+	color:var(--primary-color);
+	font-weight:bold;
+	min-width:13rem;
+}
+
+@media only screen and (min-width: 992px){
+
+	.row > .col-lg-2{
+		border-style:solid;
+		border-width:small;
+		border-color:var(--secondary-color);
+		color: var(--text-color-default);
+		height: 150vh;
+		overflow-y:scroll;
+	}
+	
+	.row > .upcoming{
+		order:-1;
+	}
+	
+	.col-lg-2 .vertical-on-lg{
+		flex-direction:column;
+	}
+	
+	.col-lg-2 .card{
+		min-width:inherit;
+	}
+	
+	.row > .recommended{
+		order:1;
+	}
+}

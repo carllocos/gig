@@ -10,7 +10,7 @@ body{
 	color:var(--text-color-default);
 }
 
-h1{
+h1, h4{
 	color: var(--secondary-color);
 	
 }
