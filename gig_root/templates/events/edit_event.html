@@ -153,7 +153,7 @@ Edit {{event.name}}
       </div>
       <div class="row">
         <div class="col-12">
-          <input type="date" name="date" required="" id="id_date" value="{{event.date.year}}-{{event.date.month}}-{{event.date.day}}">
+          <input type="date" name="date" required="" id="id_date" value="{{event.date| adapt_to_html_date_format}}">
         </div>
       </div>
       <div class="row">
