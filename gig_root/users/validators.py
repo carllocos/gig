@@ -17,7 +17,7 @@ def lettersDigitsValidator(password):
     psw = set(password)
     if psw.isdisjoint(letters) or psw.isdisjoint(digits) or psw.isdisjoint(capitals):
         raise ValidationError(
-        _('Password must contain at least one digit, small- and capital letter'),
+        _('Needs digits, small- and capital letters'),
         params={},
         )
 
@@ -33,7 +33,7 @@ class LettersDigitsValidator:
         psw = set(password)
         if psw.isdisjoint(letters) or psw.isdisjoint(digits) or psw.isdisjoint(capitals):
             raise ValidationError(
-            _('Password must contain at least one digit, small- and capital letter'),
+            _('Needs digits, small- and capital letters'),
             params={},
             )
 
