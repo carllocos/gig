@@ -67,7 +67,7 @@ class RegistrationForm(forms.ModelForm):
         password = cleaned_data.get('password')
 
         if not password == confirm_password:
-            self.add_error('confirm_password', 'Password does not match.')
+            self.add_error('password', 'Password does not match.')
 
 
 class UserProfileForm(forms.Form):
