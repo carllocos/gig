@@ -1,8 +1,22 @@
 {% extends "gig/base.html" %}
 {% load user_tags %}
+{% load staticfiles %}
 
 {% block title %}
 Create an event
+{% endblock %}
+
+{% block link %}
+<!-- Map -->
+<script src='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v3.1.1/mapbox.css' rel='stylesheet' />
+
+<!--Links to geocoder-->
+<script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.min.js'></script>
+<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v2.3.0/mapbox-gl-geocoder.css' type='text/css' />
+
+<!-- Links to local files-->
+<script src='{% static "events/js/geocoder_util.js" %}'></script>
 {% endblock %}
 
 
@@ -10,10 +24,18 @@ Create an event
 
 <div class="d-flex container justify-content-center ">
 
-  <form class="" action="{% url 'events:create' %}" method="post" enctype="multipart/form-data">
+  <form id="id_form" class=""  action="{% url 'events:create' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
+    {% for field in form.hidden_fields%}
+    {{ field}}
+    {% endfor %}
 
-    {% for field in form %}
+    <div>
+      <ul id="address_suggestions" class="list-group">
+      </ul>
+    </div>
+
+    {% for field in form.visible_fields %}
 
     <div class="row">
       <div class="col-12">
@@ -41,11 +63,11 @@ Create an event
     <div class="row">
       <div class="col-12">
         {% if  field.errors%}
-          {% for  error in field.errors %}
-            <small id="{{field.name}}Help" class="form-text text-danger"> {{error}}</small>
-          {% endfor %}
+        {% for  error in field.errors %}
+        <small id="{{field.name}}Help" class="form-text text-danger"> {{error}}</small>
+        {% endfor %}
         {% else %}
-          <small id="{{field.name}}Help" class="form-text text-muted"> {{field.help_text}}.</small>
+        <small id="{{field.name}}Help" class="form-text text-muted"> {{field.help_text}}.</small>
         {% endif %}
       </div>
     </div>
@@ -57,9 +79,59 @@ Create an event
     <button type="submit" name="button">Submit</button>
   </form>
 
-
-
 </div>
 
+<script type="text/javascript">
+
+createGeocoder()
+
+function populateSuggestions(response){
+
+  var suggests_container=$('#address_suggestions');
+  suggests_container.empty();
+
+  for(idx in response.results.features){
+    var feature = response.results.features[idx];
+    var name=false;
+    if (typeof feature.matching_place_name !== 'undefined'){
+      name=feature.matching_place_name;
+    }
+    else if (typeof feature.place_name !== 'undefined'){
+      name=feature.place_name;
+    }
+    else{
+    }
+
+    if(name){
+      var id= "suggest_id_"+ idx;
+      var onc= "onclick=populateFromSuggestion('" + id + "')";
+      var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + name + "</li>";
+      suggests_container.append(el);
+    }
+  }
+}
+
+function populateFromSuggestion(id_element){
+  var suggestion= $(`#${id_element}`).text();
+  $("#id_address").val(suggestion);
+}
+
+$(document).ready(function(){
+  $("#id_address").keyup(function(){
+    queryAddress("id_address", function(err, response){populateSuggestions(response);});
+  });
+});
+
+
+$( "#id_form" ).submit(function(event){
+
+  var match_feature=queryAddressSync("id_address");
+  var longitude= match_feature.geometry.coordinates[0]
+  var latitude= match_feature.geometry.coordinates[1]
+  $("#id_latitude").val(latitude);
+  $("#id_longitude").val(longitude);
+});
+
+</script>
 
 {% endblock %}

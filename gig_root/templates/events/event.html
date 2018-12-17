@@ -49,6 +49,10 @@
   </div>
   {% endif %}
   <div class="container">
+    <a href="{% url 'events:details' event_id=event.pk%}">Show details</a>
+  </div>
+
+  <div class="container">
     {% cloudinary event.picture.public_id width=100 height=150 crop="fill"%}
   </div>
   <div class="container">

@@ -52,10 +52,19 @@ class CreateEventForm(forms.ModelForm):
                           help_text="start time of event",
                           )
 
+    address=forms.CharField(required=True,
+                          label="Address",
+                          help_text="Enter the Address of the event.",
+                          )
+
+    longitude = forms.FloatField(required=True, widget=forms.HiddenInput())
+    latitude = forms.FloatField(required=True, widget=forms.HiddenInput())
+
+
     class Meta:
         model= Event
 
-        exclude=('date', 'band', 'picture')
+        exclude=('date', 'band', 'picture', '_latitude', '_longitude')
         help_texts={
             'name' : ('Add a short clear name'),
             'description': ('Tell people more about the event'),
@@ -79,7 +88,6 @@ class CreateEventForm(forms.ModelForm):
                         code='invalid')
         return date
 
-
     def save(self, *args, **kwargs):
         now=timezone.now()
         d=self.cleaned_data.get('date')
@@ -88,6 +96,9 @@ class CreateEventForm(forms.ModelForm):
         self.cleaned_data['date']=dt
         self.instance.date = self.cleaned_data['date']
         self.instance.band = self.cleaned_data['band']
+        self.instance._latitude=self.cleaned_data['latitude']
+        self.instance._longitude=self.cleaned_data['longitude']
+        self.instance.address=self.cleaned_data['address']
         super(CreateEventForm, self).save(*args, **kwargs)
 
     def savePicture(self):
