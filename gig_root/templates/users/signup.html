@@ -29,31 +29,63 @@ Signup
           <label for="id_first_name">First name:</label>
         </div>
         <div class="col-12">
-          <input type="text" name="first_name" maxlength="30" required="" id="id_first_name">
+          <input type="text" name="first_name" maxlength="30" required="" id="id_first_name" value="{{ form.first_name.value|default_if_none:'' }}">
         </div>
+        {% if  form.first_name.errors%}
+        {% for  error in form.first_name.errors %}
+        <div class="col-12">
+          <small class="helper-text text-danger text-center text-left-sm"> {{error}}</small>
+        </div>
+        {% endfor %}
+        {%endif%}
       </div>
 
       <div class="form-group">
         <label for="id_last_name">Last name:</label>
-        <input type="text" name="last_name" maxlength="30" required="" id="id_last_name">
+        <input type="text" name="last_name" maxlength="30" required="" id="id_last_name" value="{{ form.last_name.value|default_if_none:'' }}">
+        {% if  form.last_name.errors%}
+        {% for  error in form.last_name.errors %}
+        <div class="col-12">
+          <small class="helper-text text-danger text-center text-left-sm"> {{error}}</small>
+        </div>
+        {% endfor %}
+        {%endif%}
       </div>
 
       <div class="form-group">
         <label for="id_email">Email:</label>
-        <input type="email" name="email" maxlength="254" required="" id="id_email">
+        <input type="email" name="email" maxlength="254" required="" id="id_email" value="{{ form.email.value|default_if_none:'' }}">
         <small id="id_emailHelper" class="helper-text text-center text-left-sm">
           Changes Saved
         </small>
       </div>
 
       <div class="form-group">
-        <label for="id_password">Password:</label>
-        <input type="password" name="password" required="" id="id_password">
+        <div class="col-12">
+          <label for="id_password">Password:</label>
+        </div>
+        <div class="col-12">
+          <input type="password" name="password" required="" id="id_password">
+        </div>
+        {% if  form.password.errors%}
+        {% for  error in form.password.errors %}
+        <div class="col-12">
+          <small class="helper-text text-danger text-center text-left-sm"> {{error}}</small>
+        </div>
+        {% endfor %}
+        {%endif%}
       </div>
 
       <div class="form-group">
         <label for="id_confirm_password">Confirm password:</label>
         <input type="password" name="confirm_password" required="" id="id_confirm_password">
+        {% if  form.confirm_password.errors%}
+        {% for  error in form.confirm_password.errors %}
+        <div class="col-12">
+          <small class="helper-text text-danger text-center text-left-sm"> {{error}}</small>
+        </div>
+        {% endfor %}
+        {%endif%}
       </div>
 
       <div class="form-group">
@@ -89,16 +121,19 @@ var typingTimer;                //timer identifier
 var doneTypingInterval = 1000;  //time in ms, 5 second for example
 var $input =$("#id_email");
 
-//on keyup, start the countdown
-$input.on('keyup', function () {
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(doneTyping, doneTypingInterval);
+$(document).ready(function(){
+  //on keyup, start the countdown
+  $input.on('keyup', function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(doneTyping, doneTypingInterval);
+  });
+
+  //on keydown, clear the countdown
+  $input.on('keydown', function () {
+    clearTimeout(typingTimer);
+  });
 });
 
-//on keydown, clear the countdown
-$input.on('keydown', function () {
-  clearTimeout(typingTimer);
-});
 
 //user is "finished typing," do something
 function doneTyping () {
@@ -113,24 +148,24 @@ function doneTyping () {
       type: "POST",
       url: "{% url 'users:signup-ajax' %}",
       data: { 'email': email,
-              csrfmiddlewaretoken: '{{ csrf_token }}',
-            },
-      dataType: 'json',
-      success: function(data){
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    },
+    dataType: 'json',
+    success: function(data){
 
-        if(data.is_taken){
-          new_cls="text-danger";
-          rem_cls="text-success"
-          msg="email is already registered";
-        }
-        else{
-          rem_cls="text-danger";
-          new_cls="text-success"
-          msg="email is available";
-        }
+      if(data.is_taken){
+        new_cls="text-danger";
+        rem_cls="text-success"
+        msg="email is already registered";
+      }
+      else{
+        rem_cls="text-danger";
+        new_cls="text-success"
+        msg="email is available";
+      }
 
-        updateHelpMessage(["#id_emailHelper"], rem_cls, new_cls, [msg]);
-      }});
+      updateHelpMessage(["#id_emailHelper"], rem_cls, new_cls, [msg]);
+    }});
   }
 }
 
