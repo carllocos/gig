@@ -37,6 +37,9 @@ function activateSuggestions(callb){
         success: callb
       });
     }
+    else{
+      removeListGroup();
+    }
   });
 }
 
