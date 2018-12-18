@@ -779,7 +779,7 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
       new_cmt.removeAttr("id");
       new_cmt.css("display", 'block');
 
-      new_cmt.find('.commentator-container > h4').text(response.first_name + response.last_name);
+      new_cmt.find('.commentator-container > h4').text(response.first_name + " " +response.last_name);
       new_cmt.find('.comment-text-container > p').text(response.val);
       new_cmt.find('.comment-date-container > p').text(response.date);
 
