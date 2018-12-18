@@ -23,7 +23,9 @@ Details {{event.name}}
 <!-- Jquery  -->
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
 
+
 <!-- Links to local files-->
+<script type="text/javascript" src="{% static 'util/weather_util.js' %}"> </script>
 <script src='{% static "events/js/directions.js" %}'></script>
 
 {% endblock %}
@@ -47,13 +49,30 @@ Details {{event.name}}
     <h4>Date</h4>
     <p class="text-left text-muted"> {{event.date| fancy_date}}</p>
   </div>
+
+  <div class="container weaether">
+    <h4>Forecast</h4>
+    <image id="icon_weahter"></image>
+    <p id="id_weather_description" class="text-left text-muted"></p>
+  </div>
+
   <br>
-  <div class="map-container">
-    <div id="map_canvas" style="width: 750px; height: 750px; margin: 0 auto"></div>
+  <div class="container map-heading">
+    <h4>Map</h4>
+    <div class="map-container">
+      <div id="map_canvas" style="width: 750px; height: 750px; margin: 0 auto"></div>
+    </div>
   </div>
 </div>
 
 <script type="text/javascript">
+
+function succes_forecast(forecast){
+  var description= forecast.description + " with an average temperature of " + forecast.temp
+                  +"°C (min: "+ forecast.temp_min +"°C, max: " + forecast.temp_max+"°C)"
+  $("#id_weather_description").text(description);
+  $("#icon_weahter").attr("src", forecast.weather_icon);
+}
 
 $(document).ready(function(){
   var map_options={
@@ -64,6 +83,15 @@ $(document).ready(function(){
     address: "{{event.address}}",
   }
   createMap("map_canvas", map_options);
+
+
+  //Set config for openweathermap
+  weather_config = {'appid': '6f53658522d8b6344fc36d7a6122511f',
+  'http_protocol': '{{http_protocol}}'
+};
+//request forecast for event
+get_minimal_forecast({{event.longitude}}, {{event.latitude}}, succes_forecast);
+
 });
 
 </script>
