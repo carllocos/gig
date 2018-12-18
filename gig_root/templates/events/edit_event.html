@@ -129,7 +129,7 @@ Edit {{event.name}}
       </div>
       <div class="row">
         <div class="col-12">
-          {% cloudinary event.picture.public_id width=100 height=150 crop="fill"%}
+          {% cloudinary event.picture.public_id width=100 height=150 crop="fill" id="id_img_event"%}
         </div>
       </div>
       <div class="row">
@@ -233,7 +233,7 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
   }
 
 
-  function updateHelper(id_selector, id_helper, url, val){
+  function updateHelper(id_selector, id_helper, url, val, after_succes_bk = function (response){}){
     $inp=$(`#${id_selector}`);
     value=val
     if (!val){
@@ -246,6 +246,7 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     };
 
     success_func = function (response){
+      after_succes_bk(response);
       updateHelpText(id_helper, id_selector, "succesfuly updated", true);
     };
 
@@ -289,7 +290,10 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
       $helper=$(`#${id_helper}`);
       $helper.text('Saving changes...');
 
-      updateHelper(id_selector, id_helper, "{% url 'events:update-picture' %}", JSON.stringify(data.result));
+      var success_func= function(response){
+        $("#id_img_event").attr("src", data.result.url);
+      }
+      updateHelper(id_selector, id_helper, "{% url 'events:update-picture' %}", JSON.stringify(data.result), success_func);
     };//end of ready_func. Is called once upload to cloudinary is completed.
 
     bindPicListener(id_selector, progress_func, ready_func);
