@@ -14,6 +14,7 @@ from musicians.models import Band
 from users.util import getHTTP_Protocol
 from .forms import CreateEventForm, DirectUploadPic
 from .models import Event, str_to_int
+from users.templatetags.user_tags import fancy_date
 
 
 def event_details(request, event_id):
@@ -478,6 +479,14 @@ def add_comment(request):
     `is_executed`: Boolean that tells whether the request was executed succesfully.
     `reason`: contains a error message meant to inform the `user` or the `programmer`
     of the corresponding error.
+
+    Additionaly When `is_executed` is set to true, the following is also returned;
+    'comment': the comment added,
+    'commentator': the first and last_name of the commentator
+    'date': The date when the comment was added
+    'comment_id': the identifier of the comment being added.
+    'downvotes': the amount of downvotes for this comment (equal to 0)
+    'upvotes': the amount of upvotes for this comment (equal to 0)
     """
 
     failure=__contains_failure(request, keys=['val'], only_owner=False)
@@ -487,8 +496,17 @@ def add_comment(request):
     event=Event.objects.get(pk=request.POST.get('event_id'))
     msg=request.POST.get('val')
 
-    event.add_comment(msg, commentator=request.user)
-    return JsonResponse({'is_executed': True})
+    com= event.add_comment(msg, commentator=request.user)
+    jsonRes={
+        'is_executed': True,
+        'comment': com.comment,
+        'commentator': str(com.commentator),
+        'date': fancy_date(com.date),
+        'comment_id': com.pk,
+        'downvotes': com.downvotes,
+        'upvotes': com.upvotes,
+    }
+    return JsonResponse(jsonRes)
 
 @require_http_methods(["POST"])
 @login_required
@@ -505,6 +523,10 @@ def vote_comment(request):
     `is_executed`: Boolean that tells whether the request was executed succesfully.
     `reason`: contains a error message meant to inform the `user` or the `programmer`
     of the corresponding error.
+
+    Additionaly When `is_executed` is set to true, the following is also returned;
+    `upvotes`: containes the new amount of upvotes
+    `downvotes`: containes the new amount of downvotes
     """
 
     failure=__contains_failure(request, keys=['val'], allowed_operations=['upvote', 'downvote'], only_owner=False)
