@@ -124,18 +124,12 @@ var $input =$("#id_email");
 $(document).ready(function(){
   //on keyup, start the countdown
   $input.on('keyup', function () {
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(doneTyping, doneTypingInterval);
-  });
-
-  //on keydown, clear the countdown
-  $input.on('keydown', function () {
-    clearTimeout(typingTimer);
+    doneTyping();
   });
 });
 
 
-//user is "finished typing," do something
+//user is "finished typing," an AjaxRequest will be send to the backend
 function doneTyping () {
   email = $input.val();
   if(!(email.includes('@') && email.includes('.')))
