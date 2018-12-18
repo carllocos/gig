@@ -70,7 +70,7 @@
     <h2>Comments</h2>
   </div>
 
-  <div class="row comment-container">
+  <div class="row request-login-singup-container">
     {% if user.is_authenticated %}
     <textarea id="id_comment-input" name="name" rows="3" cols="50">Say somenthing</textarea>
     <button type="button" name="button" onClick="addComment('id_comment-input', 'id_helper-comment')">Save comment</button>
@@ -80,42 +80,75 @@
     {% endif %}
   </div>
 
-  {% for com in comments %}
-  <br>
-  <div class="row comment-container">
-    <div class="row">
-      <div class="col-12 col-md-3">
-        {% if user.is_authenticated %}
-        <button type="button" name="button" onClick="upvoteComment({{com.pk}}, 'id_helper-comment')">Upvote</button>
-        {% else %}
-        Upvote:
-        {% endif %}
-        {{com.upvotes}}
-      </div>
-      <div class="col-12 col-md-3">
-        {% if user.is_authenticated %}
-        <button type="button" name="button" onClick="downvoteComment({{com.pk}}, 'id_helper-comment')">Downvote</button>
-        {% else %}
-        Downvote:
-        {% endif %}
-        {{com.downvotes}}
-      </div>
-      <div class="col-12 col-md-3">
-        <h4>{{com.commentator.first_name}} {{com.commentator.last_name}}</h4>
-      </div>
-      <div class="col-12 col-md-3">
-        <p>{{com.date}}</p>
+  <div class="comments-container">
+    {% for com in comments %}
+    <div class="comment-container">
+      <br>
+      <div class="row com-container">
+        <div class="row">
+          <div class="col-12 col-md-3 upvote-container">
+            {% if user.is_authenticated %}
+            <button clas='upvote-btn' type="button" name="button" onClick="upvoteComment(this, {{com.pk}}, 'id_helper-comment')">Upvote</button>
+            {% else %}
+            Upvote:
+            {% endif %}
+            <p>{{com.upvotes}}</p>
+          </div>
+          <div class="col-12 col-md-3 downvote-container">
+            {% if user.is_authenticated %}
+            <button clas='downvote-btn' type="button" name="button" onClick="downvoteComment(this, {{com.pk}}, 'id_helper-comment')">Downvote</button>
+            {% else %}
+            Downvote:
+            {% endif %}
+            <p>{{com.downvotes}}</p>
+          </div>
+          <div class="col-12 col-md-3 commentator-container">
+            <h4>{{com.commentator.first_name}} {{com.commentator.last_name}}</h4>
+          </div>
+          <div class="col-12 col-md-3 comment-date-container">
+            <p>{{com.date |fancy_date}}</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-5 comment-text-container">
+            <p>{{com.comment}}</p>
+          </div>
+        </div>
+
       </div>
     </div>
+    {% endfor %}
 
-    <div class="row">
-      <div class="col-12 col-md-5">
-        <p>{{com.comment}}</p>
+    <div style="display:none;" id="com_example" class="comment-container">
+      <br>
+      <div class="row com-container">
+        <div class="row">
+          <div class="col-12 col-md-3 upvote-container">
+            <button clas='upvote-btn' type="button" name="button" onClick="">Upvote</button>
+            <p>0</p>
+          </div>
+          <div class="col-12 col-md-3 downvote-container">
+            <button clas='downvote-btn' type="button" name="button" onClick="">Downvote</button>
+            <p>0</p>
+          </div>
+          <div class="col-12 col-md-3 commentator-container">
+            <h4></h4>
+          </div>
+          <div class="col-12 col-md-3 comment-date-container">
+            <p></p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-5 comment-text-container">
+            <p></p>
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
-  {% endfor %}
+
   <script type="text/javascript">
 
 
@@ -142,7 +175,6 @@
       }
     }
 
-
     function addComment(id_selector, id_help_text){
       $des=$(`#${id_selector}`);
       var dict= {
@@ -152,9 +184,23 @@
         csrfmiddlewaretoken: '{{ csrf_token }}',
       };
 
+
+
       success_func = function (response){
-        $(`#${id_help_text}`).text('Comment was saved');
-      };
+        var new_cmt =$("#com_example").clone();
+        new_cmt.removeAttr("id");
+        new_cmt.css("display", 'block');
+
+        new_cmt.find('.commentator-container > h4').text(response.commentator);
+        new_cmt.find('.comment-text-container > p').text(response.comment);
+        new_cmt.find('.comment-date-container > p').text(response.date);
+
+        new_cmt.find('.downvote-container > p').text(response.downvotes);
+        new_cmt.find('.downvote-container > button').attr("onClick",`downvoteComment(this, ${response.comment_id} , 'id_helper-comment')`);
+        new_cmt.find('.upvote-container > p').text(response.upvotes);
+        new_cmt.find('.upvote-container > button').attr("onClick",`upvoteComment(this, ${response.comment_id} , 'id_helper-comment')`);
+        $(".comments-container").prepend(new_cmt);
+      }
 
       failure_func = function (response){
         $(`#${id_help_text}`).text(response.reason);
@@ -163,7 +209,7 @@
       sendAjaxRequest("{% url 'events:add-comment' %}", dict, $des.val(), success_func, failure_func);
     }
 
-    function vote(comment_id, id_help_text, operation){
+    function vote(elem, comment_id, id_help_text, operation){
 
       var dict= {
         'val': comment_id,
@@ -174,7 +220,9 @@
       };
 
       success_func = function (response){
-        $(`#${id_help_text}`).text(`New upvotes ${response.upvotes} and downvotes ${response.downvotes}`);
+        var down_up_cont = $(elem).parent().parent();
+        down_up_cont.find(".upvote-container > p").text(response.upvotes);
+        down_up_cont.find(".downvote-container > p").text(response.downvotes);
       };
 
       failure_func = function (response){
@@ -184,12 +232,12 @@
       sendAjaxRequest("{% url 'events:vote-comment' %}", dict, comment_id, success_func, failure_func);
     }
 
-    function upvoteComment(comment_id, id_help_text){
-      vote(comment_id, id_help_text, 'upvote');
+    function upvoteComment(elem, comment_id, id_help_text){
+      vote(elem, comment_id, id_help_text, 'upvote');
     }
 
-    function downvoteComment(comment_id, id_help_text){
-      vote(comment_id, id_help_text, 'downvote');
+    function downvoteComment(elem, comment_id, id_help_text){
+      vote(elem, comment_id, id_help_text, 'downvote');
     }
 
 
