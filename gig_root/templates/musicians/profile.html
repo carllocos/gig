@@ -24,25 +24,27 @@
       </h1>
     </div>
   </div>
+
   <div class="row">
-    <div class="col-12">
+    <div id="id_upvote-container" class="col-12">
       {% if user.is_authenticated %}
       <button type="button" name="button" onClick="upvoteBand('id_helper-vote-band')">Upvote</button>
       {% else %}
       Upvote:
       {% endif %}
-      {{band.upvotes}}
+      <span id="id_upvotes_txt">{{band.upvotes}}</span>
+
     </div>
   </div>
 
-  <div class="row">
+  <div id="id_downvote-container" class="row">
     <div class="col-12">
       {% if user.is_authenticated %}
       <button type="button" name="button" onClick="downvoteBand('id_helper-vote-band')">Downvote</button>
       {% else %}
       Downvote:
       {% endif %}
-      {{band.downvotes}}
+      <span id="id_downvotes_txt">{{band.downvotes}}</span>
     </div>
   </div>
 
@@ -53,14 +55,14 @@
 
   </div>
 
-  <div class="row">
+  <div id="id_follows-container" class="row">
     <div class="col-12">
-      followers: {{band.amount_followers}}
+      <span id="id_followers-txt">followers: {{band.amount_followers}}</span>
       {% if user.is_authenticated %}
       {% if user_follows %}
-      <button type="button" name="button" onClick="unfollowBand('id_helper-follow-band')">unfollow</button>
+      <button id="id_follows-btn" type="button" name="button" onClick="unfollowBand('id_helper-follow-band')">unfollow</button>
       {% else %}
-      <button type="button" name="button" onClick="followBand('id_helper-follow-band')">follow</button>
+      <button id="id_follows-btn" type="button" name="button" onClick="followBand('id_helper-follow-band')">follow</button>
       {% endif %}
       {%endif%}
     </div>
@@ -80,7 +82,7 @@
       <h2>
         Band Profile Picture
       </h2>
-      {% cloudinary band.profile_pic.public_id width=100 height=150 crop="fill"%}
+      {% cloudinary band.profile_pic.public_id width=100 height=150 crop="fill" id="id_img_profile"%}
     </div>
     {% if is_owner %}
     <div class="col-12">
@@ -186,7 +188,7 @@
       <h2>
         Background Picture
       </h2>
-      {% cloudinary band.background_pic.public_id width=100 height=150 crop="fill"%}
+      {% cloudinary band.background_pic.public_id width=100 height=150 crop="fill" id="id_img_bg"%}
     </div>
     {% if is_owner %}
     <div class="col-12">
@@ -215,6 +217,7 @@
     {% if is_owner %}
     <div class="col-12">
       <button type="button" name="button_update_description" onClick="updateDescription('id_description')">Update Description</button>
+      <span id="id_help-description" class=""></span>
     </div>
     {% endif %}
 
@@ -224,14 +227,19 @@
   {% if is_owner %}
   <div class="row">
     <h2>Band Genres</h2>
+    <div class="container">
+      <span id="id_genre-helper"></span>
+    </div>
     <div class="col-12">
       {% for genre in band.genres %}
-      <input type="text" name="genre0" id="id_genre0" value="{{genre}}">
-      <button type="button" name="" onClick="removeGenre('id_genre0')">Remove Genre</button>
+      <div class="remove-genre-container">
+        <input type="text" name="genre0" id="id_genre0" value="{{genre}}">
+        <button type="button" name="" onClick="removeGenre(this)">Remove Genre</button>
+      </div>
       {% endfor %}
-      <div class="genre-container">
+      <div class="add-genre-container">
         <input type="text" name="new_genre0" id="id_new_genre0" value="add genre">
-        <button type="button" name="" onClick="addGenre('id_new_genre0')">Add Genre</button>
+        <button type="button" name="" onClick="addGenre(this)">Add Genre</button>
       </div>
 
     </div>
@@ -256,9 +264,9 @@
   <div class="row">
     <h2>Band Genres</h2>
     {% if is_owner %}
-    <div class="genre-container">
+    <div class="add-genre-container">
       <input type="text" name="new_genre0" id="id_new_genre0" value="add genre">
-      <button type="button" name="" onClick="addGenre('id_new_genre0')">Add Genre</button>
+      <button type="button" name="" onClick="addGenre(this)">Add Genre</button>
     </div>
     {% else %}
     <div class="col-12">
@@ -267,41 +275,6 @@
     {% endif %}
   </div>
   {% endif %}
-
-
-  <div class="row">
-    <div class="col-12">
-      <h2>
-        Pictures
-      </h2>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-12">
-      {% for pic in band_pics%}
-      <div class="pic-container">
-        {% cloudinary pic.public_id width=100 height=150 crop="fill"%}
-      </div>
-      {% if is_owner %}
-      <div class="">
-        <button type="button" name="button" onClick="removeBandPic({{pic.pk}})">Delete Pic</button>
-      </div>
-      {% endif %}
-      {% endfor %}
-      {% if is_owner%}
-      <div class="">
-        {{direct_pic}}
-        <div class="helper-message-container">
-          <p id="id_helper-message-band-pic"></p>
-        </div>
-      </div>
-      {% endif %}
-    </div>
-
-  </div>
-
-
 
   <div class="row">
     <div class="col-12">
@@ -314,24 +287,8 @@
     <div class="col-12">
       {% if band.youtube_playlist_url %}
       <iframe width="560" height="315" src="{{band.youtube_playlist_url}}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      {% endif %}
-      {% for video in band_videos%}
-      <div class="video-container">
-        <video id="demo-player"controls autoplay class="cld-video-player" data-cld-source="{{video.public_id}}"></video>
-      </div>
-      {% if is_owner %}
-      <div class="">
-        <button type="button" name="button" onClick="removeBandVideo({{video.pk}})">Delete Video</button>
-      </div>
-      {% endif %}
-      {% endfor %}
-      {% if is_owner%}
-      <div class="">
-        {{direct_video}}
-        <div class="helper-message-container">
-          <p id="id_helper-message-video"></p>
-        </div>
-      </div>
+      {% else %}
+      No videos specified by the user
       {% endif %}
     </div>
 
@@ -359,29 +316,31 @@
   <div class="row">
     <div class="col-12">
       <h2>Line up</h2>
+      <span id=""></span>
       <ul>
         {% for member in line_up %}
         <li>
           <a href="{% url 'artists:artist-profile' profile_id=member.artist.pk%}">{{member.artist.stage_name}}</a>
           <br>
           {% if is_owner%}
-          <input type="text" name="role" id="id_role0" value="{{member.role}}">
-          <button type="button" name="" onClick="updateRole('id_role0', '{{member.pk}}')">Update Role</button>
-          <button type="button" name="" onClick="removeMember('id_role0', '{{member.pk}}')">Remove member</button>
+          <input type="text" name="role" value="{{member.role}}">
+          <button type="button" name="" onClick="updateRole(this, '{{member.pk}}')">Update Role</button>
+          <button type="button" name="" onClick="removeMember(this, '{{member.pk}}')">Remove member</button>
+
           {% else %}
           <p>{{member.role}}</p>
           {% endif %}
           <br>
-          (profile public_id {{member.artist.profile_pic.public_id}})
           {% cloudinary member.artist.profile_pic.public_id width=100 height=150 crop="fill"%}
         </li>
         {% endfor %}
         {% if is_owner %}
         <li>
           <input type="email" name="" id="id_new_member0" value="add member" required>
-          <p id="id_info_text">Warning text</p>
-          <button type="button" name="" onClick="addMember('id_new_member0', 'id_info_text')">Send invitation</button>
+
+          <button type="button" name="" onClick="addMember('id_new_member0', 'id_help-line-up')">Send invitation</button>
         </li>
+        <span id="id_help-line-up" class=""></span>
         {% endif %}
       </ul>
     </div>
@@ -517,11 +476,14 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     };
 
     success_func = function (response){
-      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+      var helper= $("#id_help-description");
+      helper.text('changes saved');
+      helper.removeAttr("class");
+      helper.attr("class", "text-success");
     };
 
     failure_func = function (response){
-      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+      $("id_help-description").text(response.reason).removeAttr("class").attr("class", "text-success");
     };
 
 
@@ -532,8 +494,12 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     failure_func);
   }
 
-  function operationGenre(id_selector, operation){
-    $des=$(`#${id_selector}`);
+  function operationGenre(button, operation){
+
+    var $copy_new_genre=$(button).parent().clone();
+    var $parent_element=$(button).parent().parent();
+    var $des=$(button).parent().find("input");
+
     var dict= {
       'val': $des.val(),
       'operation': operation,
@@ -542,11 +508,36 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     };
 
     success_func = function (response){
-      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+      if(operation==="add"){
+
+        var helper= $("#id_genre-helper");
+        helper.text('genre added');
+        helper.removeAttr("class");
+        helper.attr("class", "text-success");
+        //add button to add genre and change button to remove genre
+        var $btn = $(button);
+        $btn.attr("onClick", 'removeGenre(this)');
+        $btn.text("Remove Genre");
+
+        //add new add field and button
+        $copy_new_genre.find("input").val("add genre");
+        $parent_element.append($copy_new_genre)
+
+      }
+      else {
+        $(button).parent().remove();
+        var helper= $("#id_genre-helper");
+        helper.text('genre removed');
+        helper.removeAttr("class");
+        helper.attr("class", "text-success");
+      }
     };
 
     failure_func = function (response){
-      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+      var helper= $("#id_genre-helper");
+      helper.text(response.reason);
+      helper.removeAttr("class");
+      helper.attr("class", "text-danger");
     };
 
     sendAjaxRequest("{% url 'musicians:update-genre' %}",
@@ -556,50 +547,67 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     failure_func);
   }
 
-  function addGenre(id_selector){
-    operationGenre(id_selector, 'add');
+  function addGenre(button){
+    operationGenre(button, 'add');
   }
-  function removeGenre(id_selector){
-    operationGenre(id_selector, 'remove');
+  function removeGenre(button){
+    operationGenre(button, 'remove');
   }
 
-
-  function operationMember(id_selector, member_id, operation, success_func, failure_func){
-    $des=$(`#${id_selector}`);
+  function updateRole(button, member_id){
+    $input=$(button).parent().find("input");
+    console.log($input);
     var dict= {
-      'val': $des.val(),
-      'operation': operation,
+      'val': $input.val(),
+      'operation': 'update',
       'member_id': member_id,
       'band_id': {{band.pk}},
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
-    sendAjaxRequest("{% url 'musicians:update-member' %}", dict, $des.val(), success_func, failure_func);
+    success_func= function (response){
+      var helper= $("#id_help-line-up");
+      helper.text('Role updated');
+      helper.removeAttr("class");
+      helper.attr("class", "text-success");
+    }
+
+    failure_func = function (response){
+      var helper= $("#id_help-line-up");
+      helper.text(response.reason);
+      helper.removeAttr("class");
+      helper.attr("class", "text-danger");
+    }
+
+    sendAjaxRequest("{% url 'musicians:update-member' %}", dict, $input.val(), success_func, failure_func);
   }
 
-  function updateRole(id_selector, member_id){
+
+  function removeMember(button, member_id){
+    var dict= {
+      'val': 'not important',
+      'operation': 'remove',
+      'member_id': member_id,
+      'band_id': {{band.pk}},
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
     success_func = function (response){
-      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+      $(button).parent().remove();
+      var helper= $("#id_help-line-up");
+      helper.text('Member removed succesfuly');
+      helper.removeAttr("class");
+      helper.attr("class", "text-success");
     };
 
     failure_func = function (response){
-      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
+      var helper= $("#id_help-line-up");
+      helper.text(response.reason);
+      helper.removeAttr("class");
+      helper.attr("class", "text-danger");
     };
 
-    operationMember(id_selector, member_id, 'update',success_func, failure_func);
-  }
-
-
-  function removeMember(id_selector, member_id){
-    success_func = function (response){
-      alert(`backend performed the requested operation succesfuly involving ${response.val}`);
-    };
-
-    failure_func = function (response){
-      alert(`backend couldn't perform the requested operation reason: ${response.reason}`);
-    };
-
-    operationMember(id_selector, member_id, 'remove',success_func, failure_func);
+    sendAjaxRequest("{% url 'musicians:update-member' %}", dict, 'not important', success_func, failure_func);
   }
 
   function addMember(id_selector, id_help_text) {
@@ -643,7 +651,16 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
 
       success_func = function(response){
         $helper=$(`#${id_helper}`);
+        if (operation === "profile") {
+          $("#id_img_profile").attr("src", data.result.url);
+        }
+        else {
+          $("#id_img_bg").attr("src", data.result.url);
+
+        }
         $helper.text("Saved succesfuly");
+        $helper.removeAttr("class");
+        $helper.attr("class", "text-success");
       };
 
       failure_func = function(response){
@@ -657,7 +674,6 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
         'operation': operation,
         'band_id': {{band.pk}},
       };
-      console.log(success_func);
 
       sendAjaxRequest("{% url 'musicians:update-picture' %}", dict, data.result, success_func, failure_func);
     };
@@ -739,7 +755,7 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     sendAjaxRequest("{% url 'musicians:add-comment' %}", dict, $des.val(), success_func, failure_func);
   }
 
-  function vote(comment_id, id_help_text, operation, url){
+  function voteComment(comment_id, id_help_text, operation, url){
 
     var dict= {
       'val': comment_id,
@@ -759,25 +775,55 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     sendAjaxRequest(url, dict, comment_id, success_func, failure_func);
   }
 
+
+  function voteBand(comment_id, id_help_text, operation, url){
+
+    var dict= {
+      'val': comment_id,
+      'band_id': {{band.pk}},
+      'operation':operation,
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+    };
+
+    success_func = function (response){
+      $("#id_upvotes_txt").text(response.upvotes);
+      $("#id_downvotes_txt").text(response.downvotes);
+    };
+
+    failure_func = function (response){
+      $(`#${id_help_text}`).text(response.reason);
+    };
+
+    sendAjaxRequest(url, dict, comment_id, success_func, failure_func);
+  }
+
   function upvoteComment(comment_id, id_help_text){
-    vote(comment_id, id_help_text, 'upvote', "{% url 'musicians:vote-comment' %}");
+    voteComment(comment_id, id_help_text, 'upvote', "{% url 'musicians:vote-comment' %}");
   }
 
   function downvoteComment(comment_id, id_help_text){
-    vote(comment_id, id_help_text, 'downvote', "{% url 'musicians:vote-comment' %}");
+    voteComment(comment_id, id_help_text, 'downvote', "{% url 'musicians:vote-comment' %}");
   }
 
 
-  function followOperation(id_help_text, val){
+  function followOperation(id_help_text, operation){
 
     var dict= {
-      'val': val,
+      'val': operation,
       'band_id': {{band.pk}},
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
     success_func = function (response){
-      $(`#${id_help_text}`).text(`New followers ${response.followers}`);
+      $("#id_followers-txt").text("followers: "+ response.followers);
+      if(operation === "follow"){
+        var b= $("#id_follows-btn");
+        b.attr("onClick", "unfollowBand('id_help_text')").text("unfollow");
+      }
+      else {
+        var b= $("#id_follows-btn");
+        b.attr("onClick", "followBand('id_help_text')").text("follow");
+      }
     };
 
     failure_func = function (response){
@@ -785,16 +831,16 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     };
 
 
-    sendAjaxRequest("{% url 'musicians:update-follow' %}", dict, val, success_func, failure_func);
+    sendAjaxRequest("{% url 'musicians:update-follow' %}", dict, operation, success_func, failure_func);
   }
 
 
   function upvoteBand(id_help_text){
-    vote('Not important', id_help_text, 'upvote', "{% url 'musicians:vote-band' %}");
+    voteBand('Not important', id_help_text, 'upvote', "{% url 'musicians:vote-band' %}");
   }
 
   function downvoteBand(id_help_text){
-    vote('Not important', id_help_text, 'downvote', "{% url 'musicians:vote-band' %}");
+    voteBand('Not important', id_help_text, 'downvote', "{% url 'musicians:vote-band' %}");
   }
 
 
