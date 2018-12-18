@@ -33,16 +33,18 @@
     </div>
   </div>
 
+  <div id="id_participants-container" class="participants-container">
+    <h3>Participants: {{event.amount_participants}}</h3>
+    {% if user.is_authenticated %}
+    {% if is_participant %}
+    <button class= "btn btn-sm" type="button" name="button" onClick="removeParticipant('id_participateHelp')">Disengage</button>
+    {% else %}
+    <button class= "btn btn-sm" type="button" name="button" onClick="addParticipant('id_participateHelp')">Participate</button>
+    {% endif %}
+    <p id="id_participateHelp"></p>
+    {% endif %}
+  </div>
 
-  <h3>Participants: {{event.amount_participants}}</h3>
-  {% if user.is_authenticated %}
-  {% if is_participant %}
-  <button class= "btn btn-sm" type="button" name="button" onClick="removeParticipant('id_participateHelp')">Disengage</button>
-  {% else %}
-  <button class= "btn btn-sm" type="button" name="button" onClick="addParticipant('id_participateHelp')">Participate</button>
-  {% endif %}
-  <p id="id_participateHelp"></p>
-  {% endif %}
   {% if is_owner %}
   <div class="container">
     <a href="{% url 'events:edit' event_id=event.pk%}">Edit the event</a>
@@ -250,7 +252,18 @@
       };
 
       success_func = function (response){
-        $(`#${id_help_text}`).text(`New participants ${response.participants}`);
+
+        $("#id_participants-container > h3").text("Participants: "+ response.participants);
+        button=$("#id_participants-container > button");
+
+        if(operation === "participate"){
+          button.attr("onClick", "removeParticipant('id_participateHelp')");
+          button.text('Disengage');
+        }
+        else {
+          button.attr("onClick", "addParticipant('id_participateHelp')");
+          button.text('participate');
+        }
       };
 
       failure_func = function (response){
