@@ -494,6 +494,7 @@ def add_comment(request):
      'date': the date when the comment was added,
      'first_name': the first name of the commentator
      'last_name': the last name of the commentator
+     'comment_id': the identifier of the newly created comment
     """
     failure=__contains_failure(request, keys=['val'], only_owner=False)
     if failure:
@@ -507,7 +508,8 @@ def add_comment(request):
                           'val': c.comment,
                           'date': fancy_date(c.date),
                           'first_name': c.commentator.first_name,
-                          'last_name': c.commentator.last_name,})
+                          'last_name': c.commentator.last_name,
+                          'comment_id': c.pk})
 
 
 @require_http_methods(["POST"])
