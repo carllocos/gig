@@ -1,12 +1,60 @@
 {% extends "gig/base.html" %}
+{% load user_tags %}
 
 {% block title %} Confirm credetials {% endblock %}
 
 {% block body %}
-<form class="form-registration" action="" method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit"> Confirm </button>
-</form>
+<div class="container">
+  <div class="headline-container">
+    <h2>Complete signup</h2>
+  </div>
+
+  <form class="form-registration" action="" method="post">
+    {% csrf_token %}
+
+    {% for field in form.visible_fields %}
+
+    <div class="row">
+      <div class="col-12">
+        <label for="{{field.auto_id}}">{{field.label}}</label>
+      </div>
+    </div>
+    {% if  field.errors%}
+
+    <div class="row">
+      <div class="col-12">
+        {{ field|add_attr:"class:border border-danger" }}
+      </div>
+    </div>
+
+
+    {% else %}
+    <div class="row">
+      <div class="col-12">
+        {{ field}}
+      </div>
+    </div>
+    {% endif %}
+
+
+    <div class="row">
+      <div class="col-12">
+        {% if  field.errors%}
+        {% for  error in field.errors %}
+        <small id="{{field.name}}Help" class="form-text text-danger"> {{error}}</small>
+        {% endfor %}
+        {% else %}
+        <small id="{{field.name}}Help" class="form-text text-muted"> {{field.help_text}}.</small>
+        {% endif %}
+      </div>
+    </div>
+
+
+
+    {% endfor %}
+    <button type="submit"> Confirm </button>
+  </form>
+</div>
+
 
 {% endblock %}
