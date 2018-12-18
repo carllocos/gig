@@ -1,8 +1,8 @@
 :root{
-	--primary-color:#343A40;
-	--secondary-color:#FFC107;
+	--primary-color:#b3b3b3;
+	--secondary-color:#007bff;
+	--tertiary-color:#343a40;
 	--text-color-default:white;
-	
 }
 
 body{
@@ -14,3 +14,9 @@ h1, h4{
 	color: var(--secondary-color);
 	
 }
+
+.btn{
+	background-color:var(--secondary-color);
+	color:var(--text-color-default);	
+}
+

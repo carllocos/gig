@@ -30,20 +30,28 @@
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarResponsive">
-      <a class="navbar-brand" href="{% url 'home' %}">Gig</a>
-      <form action="{% url 'search' %}" class="form-navbar form-inline my-2 my-md-0 mr-md-auto ">
+    <div class="collapse navbar-collapse align-items-start" id="navbarResponsive">
+      <a class="navbar-brand text-primary bold" href="{% url 'home' %}">GIG</a>
+      <form action="{% url 'search' %}" class="form-navbar my-2 my-md-0 mr-md-auto ">
         {% csrf_token %}
-        <input name="query" id="searchInput" class="form-navbar-input form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-        <button id="searchButton" class="form-navbar-btn btn btn-outline-warning my-2 my-sm-0" type="submit">Search</button>
-      </form>
+		<div class="input-group">
+			<input name="query" id="searchInput" class="form-navbar-input form-control" type="search" placeholder="Search" aria-label="Search">
+			<div class="input-group-append">
+				<button id="searchButton" class="form-navbar-btn btn btn-outline-primary" type="submit">Search</button>	
+			</div>
+		</div>
+		<div class="results-container">
+			<ul id="resultsGroup" class="list-group" style="display:none;">
+			</ul>
+		</div>
+	  </form>
       <ul class="navbar-nav mr-auto mt-2 mt-md-0 mr-md-0">
         {% if user.is_authenticated %}
         <li class="nav-item dropdown my-auto" id="navbarDropdown">
-          <a class="nav-link dropdown-toggle text-warning pl-2" href="" id="profile_first_name" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <a class="nav-link dropdown-toggle text-primary pl-2" href="" id="profile_first_name" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{user.first_name}}
           </a>
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+          <div class="dropdown-menu dropdown-menu-right text-center" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href="{% url 'users:follows-bands' %}">Follows</a>
             <a class="dropdown-item" href="{% url 'users:participate-events' %}">Participate</a>
             <div class="dropdown-divider"></div>
@@ -76,19 +84,20 @@
 
         {% else %}
         <li class="nav-item">
-          <a class="nav-link text-warning" href="{% url 'users:login' %}">Login</a>
+          <a class="nav-link text-primary" href="{% url 'users:login' %}">Login</a>
         </li>
         <li class="nav-item ">
-          <a class="nav-link text-warning" href="{% url 'users:signup' %}">signup</a>
+          <a class="nav-link text-primary" href="{% url 'users:signup' %}">signup</a>
         </li>
         {% endif %}
       </ul>
     </div>
-
+<!--
     <div class="results-container">
       <ul id="resultsGroup" class="list-group" style="display:none;">
       </ul>
     </div>
+-->
   </nav>
 
 

@@ -9,7 +9,6 @@ Gig For Musicians
 
 {% block link %}
 <link rel="stylesheet" type="text/css" href="{% static 'gig/css/home.css' %}">
-<script type="text/javascript" src="{% static 'util/weather_util.js' %}"> </script>
 {% endblock %}
 
 {% block body %}
@@ -21,7 +20,7 @@ Gig For Musicians
     {% for band in random_bands %}
     <div class="carousel-item active">
       {# {% cloudinary band.profile_pic.public_id width=band.profile_pic.width height=band.profile_pic.height alt="{{band.profile_pic.title}}" class="d-block w-100" crop="fill"%} #}
-      {% cloudinary band.profile_pic.public_id alt="{{band.name}}" class="d-block w-100" crop="fill" %}
+      {% cloudinary band.profile_pic.public_id alt="{{band.name}}" class="d-block w-100" gravity="face" crop="fill" %}
       <div class="carousel-caption d-none d-md-block">
         <h5>{{band.name}}</h5>
       </div>
@@ -43,7 +42,7 @@ Gig For Musicians
 
 
 
-<div class="container-fluid pt-3 content">
+<div class="container-fluid content">
 	<div class="row justify-content-between">
 	
 		<div class="col-lg-8 user-specific-content">
@@ -54,7 +53,7 @@ Gig For Musicians
 					{% if  not has_artistProfile %}
 				<p class="lead"> 
 					Are you an artist? Register your band.
-					<a class="btn btn-warning btn-lg" href="{% url 'artists:register' %}" role="button">register as artist</a>
+					<a class="btn btn-lg" href="{% url 'artists:register' %}" role="button">register as artist</a>
 				</p>
 					{% endif %}
 			</div>
@@ -69,7 +68,7 @@ Gig For Musicians
 							<div class="card-header">
 								<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
 							</div>
-						{% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+						{% cloudinary event.picture.public_id alt="{{band.name}}" width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
 						</div>
 						{% endfor %}
 					{% else %}
@@ -84,11 +83,11 @@ Gig For Musicians
 				<div class="d-flex flex-row justify-content-start">
 					{% if participate_events %}
 						{% for event in participate_events %}
-					<div class="card text-center p-1">
+					<div class="card text-center">
 						<div class="card-header">
 							<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
 						</div>
-						{% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+						{% cloudinary event.picture.public_id alt="{{band.name}}" width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
 					</div>
 						{% endfor %}
 					{% else %}
@@ -101,24 +100,24 @@ Gig For Musicians
 
 				<h1 class="display-4">Hi, stranger</h1>
 				<p class="lead">
-					<a class="btn btn-warning btn-md" href="{% url 'users:login' %}" role="button">Login</a> or <a class="btn btn-warning btn-md" href="{% url 'users:signup' %}" role="button">Sign up</a> to follow bands and be up to date with upcoming events.
+					<a class="btn btn-md" href="{% url 'users:login' %}" role="button">Login</a> or <a class="btn btn-md" href="{% url 'users:signup' %}" role="button">Sign up</a> to follow bands and be up to date with upcoming events.
 				</p>
 			</div>
 			{% endif %}
 		</div>
 		
-		<div class="container col-lg-2 upcoming">
+		<div class="container col-lg-2 upcoming rounded-right">
 			<div class="upcoming-events-container">
 				<h4>Upcoming events</h4>
 				<hr class="style1 text-muted">
 				<div class="d-flex justify-content-start vertical-on-lg">
 					{% if upcoming_events %}
 						{% for event in upcoming_events %}
-					<div class="card text-center p-1">
+					<div class="card text-center">
 						<div class="card-header">
 							<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
 						</div>
-						{% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+						{% cloudinary event.picture.public_id alt="{{band.name}}" width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
 					</div>
 						{% endfor %}
 					{% else %}
@@ -128,18 +127,18 @@ Gig For Musicians
 			</div>
 		</div>
 		
-		<div class="container col-lg-2 recommended">
+		<div class="container col-lg-2 recommended rounded-left">
 			<div class="might-like-events-container">
 				<h4>recommended events</h4>
 				<hr class="style1 text-muted">
 				<div class="d-flex justify-content-start vertical-on-lg">
 					{% if might_like_events %}
 						{% for event in might_like_events %}
-					<div class="card text-center p-1">
+					<div class="card text-center">
 					  <div class="card-header">
 						<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
 					  </div>
-					  {% cloudinary event.picture.public_id width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
+					  {% cloudinary event.picture.public_id alt="{{band.name}}" width=200 height=200 crop="fill" class="card-img-bottom img-fluid"%}
 					</div>
 						{% endfor %}
 					{% else %}	
@@ -152,43 +151,7 @@ Gig For Musicians
 </div>
 
 
-<script type="text/javascript">
 
-function succes_forecast(element) {
-
-  return function(response){
-    $card_body=$(element).find('> .card-body');
-    $img= $card_body.find('> .weather_icon').first();
-    $temp=$card_body.find('> .temp').first();
-    $temp_min=$card_body.find('> .temp_min').first();
-    $temp_max=$card_body.find('> .temp_max').first();
-    $description=$card_body.find('> .weahter_description').first();
-
-    $img.attr('src', response.weather_icon);
-    $temp.text(`${response.temp}°c`);
-    $temp_min.text(`min: ${response.temp_min}°c`);
-    $temp_max.text(`max: ${response.temp_max}°c`);
-    $description.text(response.description);
-  };
-}
-
-
-$(document).ready(function(){
-
-  //Set config for openweathermap
-  weather_config = {'appid': '6f53658522d8b6344fc36d7a6122511f',
-                    'http_protocol': '{{http_protocol}}'};
-
-  $cards=$('.card');
-
-  $cards.each(function(index){
-    long=$(this).attr("long");
-    lat=$(this).attr("lat");
-    get_minimal_forecast(long, lat, succes_forecast(this));
-  });//end of each
-
-}); //end of on ready
-</script>
 
 
 {% endblock %}
