@@ -20,17 +20,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 <div class="container">
   <div class="row">
     <div class="col-12">
-      Artist profile
-    </div>
-  </div>
-  <div class="row">
-
-    <div class="col-12">
-      {% if user.is_authenticated %}
-      <p>gig user requesting this artist page {{user.first_name}} {{user.last_name}} </p>
-      {% else %}
-      <p>gig user requesting this artist page is a stranger</p>
-      {% endif %}
+      <h1>Artist profile</h1>
     </div>
   </div>
 
