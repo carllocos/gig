@@ -265,7 +265,6 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     <div class="row">
       <div class="col-6">
         <h4><a href="{% url 'musicians:band-profile' profile_id=membership.lineup.band.pk%}"> {{membership.lineup.band.name}}</a></h4>
-        <p> band_profil_pic (public_id: {{membership.lineup.band.profile_pic.public_id}})</p>
         {% cloudinary membership.lineup.band.profile_pic.public_id width=500 height=300 %}
         <p>Role: {{membership.role}}</p>
       </div>
