@@ -16,6 +16,8 @@ from users.util import getHTTP_Protocol
 
 from .forms import RegisterForm, DirectUploadProfilePicBand, DirectUploadBackgroundPicBand, DirectUploadBandPic, DirectVideoUpload, SoundCloudURL, SoundCloudPlayListURL, YoutubeURL, YoutubePlayListURL
 from .models import Band, Member, BandPic, VideoBand
+from users.templatetags.user_tags import fancy_date
+
 
 def agenda(request, band_id):
     """
@@ -485,7 +487,13 @@ def add_comment(request):
     Ajax request to add a comment.
     The post request needs to contain the following keys;
     1. `val`: the comment that needs to be added
+    And also the expected by the __contains_failure
 
+    Additionally when is_executed' is set to True, the following keys are returned;
+     'val': the comment that was recently added,
+     'date': the date when the comment was added,
+     'first_name': the first name of the commentator
+     'last_name': the last name of the commentator
     """
     failure=__contains_failure(request, keys=['val'], only_owner=False)
     if failure:
@@ -497,7 +505,7 @@ def add_comment(request):
 
     return JsonResponse({'is_executed':True,
                           'val': c.comment,
-                          'date': c.date,
+                          'date': fancy_date(c.date),
                           'first_name': c.commentator.first_name,
                           'last_name': c.commentator.last_name,})
 
