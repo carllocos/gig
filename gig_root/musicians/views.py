@@ -752,19 +752,15 @@ def delete_profile(request):
     The request is performed through Ajax.
 
     The POST request needs to contain following keys:
-    `password`: the password of the current user
     'band_id': the id of the band that needs to be deleted
 
     The view response with a JSON containing following keys:
     `is_executed`: Boolean that tells whether the request was executed succesfully.
     `reason`: a error message only provided when `is_executed` is set to false.
     """
-    failure=__contains_failure(request, keys=['password'], only_owner=True)
+    failure=__contains_failure(request, keys=[], only_owner=True)
     if failure:
         return failure
-
-    if not request.user.check_password(request.POST.get('password', '')):
-        return JsonResponse({'is_executed': False, 'reason': 'Password incorrect'})
 
     band=Band.get_band(request.POST.get('band_id'))
     band.delete()
