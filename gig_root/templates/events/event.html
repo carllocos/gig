@@ -55,14 +55,14 @@
   </div>
 
   <div class="container">
-    {% cloudinary event.picture.public_id width=100 height=150 crop="fill"%}
+    {% cloudinary event.picture.public_id width=100 height=150 class="img-fluid" crop="fill"%}
   </div>
   <div class="container">
     <p>{{event.description}}</p>
   </div>
   <br>
   <div class="container">
-    {% cloudinary band.profile_pic.public_id width=100 height=150 crop="fill"%}
+    {% cloudinary band.profile_pic.public_id width=100 height=150 class="img-fluid" crop="fill"%}
   </div>
   <div class="container">
     <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>

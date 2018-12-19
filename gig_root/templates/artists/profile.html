@@ -222,7 +222,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
         </div>
         <div class="col-12">
           {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
-          {% cloudinary bg_pic_id width=500 height=300 %}
+          {% cloudinary bg_pic_id class="img-fluid" width=500 height=300 %}
         </div>
         {% if  is_owner%}
         <div class="col-12">
