@@ -117,7 +117,7 @@
       <form class="" action="" method="post">
         <div class="form-group">
 
-          <label>SoundCloud profile</label>
+          <label  style="color:#ccc;" >SoundCloud profile</label>
           {% if  band.soundcloud_profile_url%}
           <!-- Situation where the url exists and owner can update or remove it-->
           <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" value="{{band.soundcloud_profile_url}}">
@@ -130,7 +130,7 @@
           {% endif %}
         </div>
         <div class="form-group">
-          <label>SoundCloud playlist</label>
+          <label style="color:#ccc;" >SoundCloud playlist</label>
           {% if  band.soundcloud_playlist_url%}
           <!-- Situation where the url exists and owner can update or remove it-->
           <input id="id_playlistSoundCloud" type="text" name="soundcloud_playlit" value="{{band.soundcloud_playlist_url}}">
@@ -145,7 +145,7 @@
         </div>
         <div class="form-group">
 
-          <label>Youtube Channel</label>
+          <label style="color:#ccc;" >Youtube Channel</label>
           {% if  band.youtube_profile_url%}
           <!-- Situation where the url exists and owner can update or remove it-->
           <input id="id_profileYoutube" type="text" name="youtube_profile" value="{{band.youtube_profile_url}}">
@@ -162,7 +162,7 @@
 
       <div class="form-group">
 
-        <label>Youtube Playlist</label>
+        <label style="color:#ccc;" >Youtube Playlist</label>
         {% if  band.youtube_playlist_url%}
         <!-- Situation where the url exists and owner can update or remove it-->
         <input id="id_playlistYoutube" type="text" name="youtube_playlist" value="{{band.youtube_playlist_url}}">

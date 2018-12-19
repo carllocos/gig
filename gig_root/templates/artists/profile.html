@@ -109,7 +109,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   {% if is_owner %}
   <div class="row">
     <div class="col-12">
-      <input type="text" name="instrument0" id="id_add_instrument" class="instrument" value="e.g. Piano">
+      <input type="text" name="instrument0" id="id_add_instrument" class="instrument" placeholder="e.g. Piano">
       <button type="button" name="button" onClick="addinstrument('id_add_instrument')">Add</button>
     </div>
   </div>
@@ -146,7 +146,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   {% if is_owner %}
   <div class="row">
     <div class="col-12">
-      <input type="text" name="genre-empty" id="genre-empty" class="genre" value="e.g. Blues">
+      <input type="text" name="genre-empty" id="genre-empty" class="genre" placeholder="e.g. Blues">
       <button type="button" name="button" onClick="addgenre('genre-empty')">Add</button>
     </div>
   </div>
@@ -183,7 +183,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   {% if is_owner %}
   <div class="row">
     <div class="col-12">
-      <input type="text" name="genre0" id="id_add_idol" class="genre" value="e.g. Jimi Hendrix">
+      <input type="text" name="genre0" id="id_add_idol" class="genre" placeholder="e.g. Jimi Hendrix">
       <button type="button" name="button" onClick="addidol('id_add_idol')">Add</button>
     </div>
   </div>
@@ -309,7 +309,7 @@ function sendAjaxRequest(url_l, dict, valToSend, succes_complete, failure_comple
   var input_group = $(`#${id_selector}`).parent().parent();
   var val2 = val.replace(/\s+/g, '');
   var new_element1 = "<div class=\"row\"><div id=\""+type+"-"+val2+"-group\" class=\"col-12\"><input type=\"text\" name=\""+type+"-"+val2+"\" id=\""+type+"-"+val2+"\" class=\""+type+"\" value=\""+val+"\" readonly> <button type=\"button\" name=\"button\" onClick=\"remove"+type+"('"+type+"-"+val2+"')\">Delete</button></div></div>";
-  var new_element2 = "<div class=\"row\"><div class=\"col-12\"><input type=\"text\" name=\""+type+"-empty\" id=\""+type+"-empty\" class=\""+type+"\" value=\"add another\"> <button type=\"button\" name=\"button\" onClick=\"add"+type+"('"+type+"-empty')\">Add</button></div></div>";
+  var new_element2 = "<div class=\"row\"><div class=\"col-12\"><input type=\"text\" name=\""+type+"-empty\" id=\""+type+"-empty\" class=\""+type+"\" placeholder=\"add another\"> <button type=\"button\" name=\"button\" onClick=\"add"+type+"('"+type+"-empty')\">Add</button></div></div>";
 	if(operation == "add"){
 		input_group.before(new_element1, new_element2);
 		input_group.remove();
