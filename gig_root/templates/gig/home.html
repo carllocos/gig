@@ -18,11 +18,11 @@ Gig For Musicians
   <div class="carousel-inner">
 
     {% for band in random_bands %}
-    <div class="carousel-item active">
-      {# {% cloudinary band.profile_pic.public_id width=band.profile_pic.width height=band.profile_pic.height alt="{{band.profile_pic.title}}" class="d-block w-100" crop="fill"%} #}
-      {% cloudinary band.profile_pic.public_id alt="{{band.name}}" class="d-block w-100" gravity="face" crop="fill" %}
-      <div class="carousel-caption d-none d-md-block">
-        <h5>{{band.name}}</h5>
+    <div class="carousel-item active" onclick="myFunction()">
+	  {# {% cloudinary band.profile_pic.public_id width=band.profile_pic.width height=band.profile_pic.height alt="{{band.profile_pic.title}}" class="d-block w-100" crop="fill"%} #}
+	  {% cloudinary band.profile_pic.public_id alt="{{band.name}}" class=" img-fluid d-block w-100" gravity="face" crop="fill" %}
+	  <div class="carousel-caption d-block">
+        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}" style="text-decoration:none; color:white;"><h3>{{band.name}}</h3></a>
       </div>
     </div>
     {% endfor %}

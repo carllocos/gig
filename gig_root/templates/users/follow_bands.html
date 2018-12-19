@@ -25,7 +25,7 @@ Following
       <div class="card-header">
         <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
       </div>
-      {% cloudinary band.profile_pic.public_id width=300 height=150 crop="fill"%}
+      {% cloudinary band.profile_pic.public_id width=300 height=150 class="img-fluid" crop="fill"%}
       <div class="card-body">
         <h5 class="card-title"></h5>
         <p class="card-text">{{band.description}}</p>

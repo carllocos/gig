@@ -20,26 +20,9 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 <div class="container">
   <div class="row">
     <div class="col-12">
-      Artist profile
+      <h1>Artist profile for {{user.first_name}} {{user.last_name}}<h1>
     </div>
   </div>
-  <div class="row">
-
-    <div class="col-12">
-      {% if user.is_authenticated %}
-      <p>gig user requesting this artist page {{user.first_name}} {{user.last_name}} </p>
-      {% else %}
-      <p>gig user requesting this artist page is a stranger</p>
-      {% endif %}
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-12">
-      <p>Is the gig user the owner of this artist profile? {{ is_owner }}</p>
-    </div>
-  </div>
-
 </div>
 
 <div class="container">
@@ -104,7 +87,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     <div class="col-12">
       <input type="text" name="instrument0" id="id_instrument0" class="instrument" value="{{instrument}}" readonly>
       {% if is_owner %}
-      <button type="button" name="button" onClick="removeInstrument('id_instrument0')">Delete</button>
+      <button type="button" name="button" onClick="removeinstrument('id_instrument0')">Delete</button>
       {% endif %}
     </div>
   </div>
@@ -125,25 +108,25 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   <div class="row">
     <div class="col-12">
       <input type="text" name="instrument0" id="id_add_instrument" class="instrument" value="e.g. Piano">
-      <button type="button" name="button" onClick="addInstrument('id_add_instrument')">Add</button>
+      <button type="button" name="button" onClick="addinstrument('id_add_instrument')">Add</button>
     </div>
   </div>
   {% endif %}
 
   <div class="row">
     <div class="col-12">
-      <label for="id_instruments"><h2>Genres:</h2></label>
+      <label for="id_genres"><h2>Genres:</h2></label>
     </div>
   </div>
 
   {% if artist.genres %}
   {% for genre in artist.genres %}
   <div class="row">
-    <div class="col-12">
-      <input type="text" name="genre0" id="id_genre0" class="genre" value="{{genre}}" readonly>
-      {% if is_owner %}
-      <button type="button" name="button" onClick="removeGenre('id_genre0')">Delete</button>
-      {% endif %}
+    <div id="genre-init-group" class="col-12">
+	  <input type="text" name="genre-init" id="genre-init" class="genre" value="{{genre}}" readonly>
+	  {% if is_owner %}
+	  <button type="button" name="button" onClick="removegenre('genre-init')">Delete</button>
+	  {% endif %}
     </div>
   </div>
   {% endfor %}
@@ -161,15 +144,15 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   {% if is_owner %}
   <div class="row">
     <div class="col-12">
-      <input type="text" name="genre0" id="id_add_genre" class="genre" value="e.g. Blues">
-      <button type="button" name="button" onClick="addGenre('id_add_genre')">Add</button>
+      <input type="text" name="genre-empty" id="genre-empty" class="genre" value="e.g. Blues">
+      <button type="button" name="button" onClick="addgenre('genre-empty')">Add</button>
     </div>
   </div>
   {% endif %}
 
   <div class="row">
     <div class="col-12">
-      <label for="id_instruments"><h2>Idols:</h2></label>
+      <label for="id_idols"><h2>Idols:</h2></label>
     </div>
   </div>
   {% if artist.idols%}
@@ -178,7 +161,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     <div class="col-12">
       <input type="text" name="genre0" id="id_idol0" class="genre" value="{{idol}}" readonly>
       {% if is_owner %}
-      <button type="button" name="button" onClick="removeIdol('id_idol0')">Delete</button>
+      <button type="button" name="button" onClick="removeidol('id_idol0')">Delete</button>
       {% endif %}
     </div>
   </div>
@@ -199,7 +182,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   <div class="row">
     <div class="col-12">
       <input type="text" name="genre0" id="id_add_idol" class="genre" value="e.g. Jimi Hendrix">
-      <button type="button" name="button" onClick="addIdol('id_add_idol')">Add</button>
+      <button type="button" name="button" onClick="addidol('id_add_idol')">Add</button>
     </div>
   </div>
   {% endif %}
@@ -213,7 +196,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     </div>
     <div class="col-12">
       {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
-      {% cloudinary profile_pic_id width=100 height=150 crop="fill"%}
+      {% cloudinary profile_pic_id class="img-fluid" width=100 height=150 crop="fill"%}
     </div>
     {% if  is_owner%}
     <div class="col-12">
@@ -308,9 +291,8 @@ function sendAjaxRequest(url_l, dict, valToSend, succes_complete, failure_comple
         }
 
       }});
-
     }else {
-      alert("AjaxRequest wasn't send. The value involved in the update is an empty string ");
+      alert("AjaxRequest wasn't sent. The value involved in the update is an empty string ");
     }
   }
 
@@ -323,7 +305,16 @@ function sendAjaxRequest(url_l, dict, valToSend, succes_complete, failure_comple
   };
 
   succes_complete = function (response){
-    alert(`backend performed the requested operation succesfuly involving ${response.val}`);
+  var input_group = $(`#${id_selector}`).parent().parent();
+  var val2 = val.replace(/\s+/g, '');
+  var new_element1 = "<div class=\"row\"><div id=\""+type+"-"+val2+"-group\" class=\"col-12\"><input type=\"text\" name=\""+type+"-"+val2+"\" id=\""+type+"-"+val2+"\" class=\""+type+"\" value=\""+val+"\" readonly> <button type=\"button\" name=\"button\" onClick=\"remove"+type+"('"+type+"-"+val2+"')\">Delete</button></div></div>";
+  var new_element2 = "<div class=\"row\"><div class=\"col-12\"><input type=\"text\" name=\""+type+"-empty\" id=\""+type+"-empty\" class=\""+type+"\" value=\"add another\"> <button type=\"button\" name=\"button\" onClick=\"add"+type+"('"+type+"-empty')\">Add</button></div></div>";
+	if(operation == "add"){
+		input_group.before(new_element1, new_element2);
+		input_group.remove();
+	}else if(operation == "remove"){
+		input_group.remove();
+	};
   };
   failure_complete = function (response){
     alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
@@ -333,28 +324,28 @@ function sendAjaxRequest(url_l, dict, valToSend, succes_complete, failure_comple
 
 }
 
-function removeGenre(id_selector){
+function removegenre(id_selector){
   updateGenreInstrumentIdol(id_selector, "genre", "remove");
 }
 
-function addGenre(id_selector) {
+function addgenre(id_selector) {
   updateGenreInstrumentIdol(id_selector , "genre", "add");
 }
 
 
-function removeIdol(id_selector){
+function removeidol(id_selector){
   updateGenreInstrumentIdol(id_selector , "idol", "remove");
 }
 
-function addIdol(id_selector) {
+function addidol(id_selector) {
   updateGenreInstrumentIdol(id_selector , "idol", "add");
 }
 
-function removeInstrument(id_selector){
+function removeinstrument(id_selector){
   updateGenreInstrumentIdol(id_selector , "instrument", "remove");
 }
 
-function addInstrument(id_selector) {
+function addinstrument(id_selector) {
   updateGenreInstrumentIdol(id_selector , "instrument", "add");
 }
 
@@ -363,7 +354,6 @@ function updateStageName(id_selector) {
   var dict= { 'val': val, csrfmiddlewaretoken: '{{ csrf_token }}',};
 
   succes_complete = function (response){
-    alert(`backend performed the requested operation succesfuly involving ${response.val}`);
     var val = $(`#${id_selector}`).val(response.val);
   };
   failure_complete = function (response){
@@ -378,7 +368,6 @@ function updateBiography(id_selector) {
   var val = $(`#${id_selector}`).val();
   var dict= { 'val': val, csrfmiddlewaretoken: '{{ csrf_token }}',};
   succes_complete = function (response){
-    alert(`backend performed the requested operation succesfuly involving ${response.val}`);
     $(`#${id_selector}`).val(response.val);
   };
   failure_complete = function (response){

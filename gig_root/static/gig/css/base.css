@@ -12,7 +12,6 @@ body{
 
 h1, h4{
 	color: var(--secondary-color);
-	
 }
 
 .btn{
@@ -20,3 +19,12 @@ h1, h4{
 	color:var(--text-color-default);	
 }
 
+.card{
+	background-color:var(--tertiary-color);
+	color:var(--text-color-alt);
+	border-style:solid;
+	border-width:3px;
+	border-color:var(--secondary-color);
+	font-weight:bold;
+	max-width:11rem;
+}
