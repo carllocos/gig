@@ -26,10 +26,6 @@
 
   <div class="gig-container">
 
-    <div class="form-group">
-      <label for="">Password to test delete ajax requests</label>
-      <input id="passwordField" type="password" name="" value="">
-    </div>
     <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseGig" aria-expanded="false" aria-controls="collapseGig">
       <i class="fas fa-caret-down"></i>
       Gig Profile
@@ -97,13 +93,12 @@
   <div class="artist-container">
     <button class="btn-container text-left" type="button" data-toggle="collapse" data-target="#collapseArtist" aria-expanded="false" aria-controls="collapseArtist">
       <i class="fas fa-caret-down"></i>
-      Artist Profile
+      Artist Profile <span id="id_help-artist"></span>
     </button>
 
     <div class="collapse" id="collapseArtist">
       {% if has_artistProfile %}
-      <p class="text-center">Here comes your artistprofile</p>
-      <p>Link to your artist profile <a href="{% url 'artists:artist-profile' profile_id=artis_profile.pk%}">{{artis_profile.stage_name}}</a> </p>
+      <a href="{% url 'artists:artist-profile' profile_id=artis_profile.pk%}">{{artis_profile.stage_name}}</a>
       <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteArtistProfile()">Delete profile</button>
       {% else %}
       <p class="text-center">You don't have currently a registered artist profile.
@@ -123,10 +118,12 @@
     </button>
     <div class="collapse" id="collapseBands">
       {% if associated_to_bands %}
-      <p class="text-center">Here comes your bands</p>
       {% for band in bands %}
-      <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>{% if band|is_the_band_owner:user %} (owner) <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteBand({{band.pk}})">Delete</button>{% endif %}
-      <br>
+      <div class="band-container">
+        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>{% if band|is_the_band_owner:user %} (owner) <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteBand(this, {{band.pk}})">Delete</button>{% endif %} <span></span>
+        <br>
+        <br>
+      </div>
       {% endfor %}
       {% else %}
       {% if  has_artistProfile %}
@@ -149,13 +146,16 @@
     </button>
     <div class="collapse" id="collapseVenu">
       {% if has_events %}
-      <p class="text-center">Here comes your events</p>
       <br>
       {% for event in events %}
-      <a href="{% url 'events:profile' event_id=event.pk%}">{{event.name}}</a>
-      <a href="{% url 'events:edit' event_id=event.pk%}">edit</a>
-      <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteEvent({{event.pk}})">Delete Event</button>
-      <br>
+      <div class="event-container">
+        <a href="{% url 'events:profile' event_id=event.pk%}">{{event.name}}</a>
+        <a href="{% url 'events:edit' event_id=event.pk%}">edit</a>
+        <button class="btn btn-sm btn-outline-danger" type="button" name="button" onclick="deleteEvent(this, {{event.pk}})">Delete Event</button>
+        <span></span>
+        <br>
+        <br>
+      </div>
       {% endfor %}
       {% else %}
       <p class="text-center">You currently didn't create any event for a band</p>
@@ -184,34 +184,33 @@ function sendAjaxRequest(url_l, dict, success_func, failure_func){
 
   function deleteArtistProfile(){
     success_func= function(response){
-      console.log(response);
+      $('#collapseArtist').remove();
     }
 
     failure_func= function(response){
-      console.log(response);
+      $("#id_help-artist").text(response.reason);
+      $("#id_help-artist").attr("class", "text-danger");
     }
 
-    $inp=$(`#passwordField`);
     var dict= {
-      'password': $inp.val(),
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
 
     sendAjaxRequest("{% url 'artists:artist-delete' %}", dict, success_func, failure_func);
   }
 
-  function deleteBand(band_id){
+  function deleteBand(band_button, band_id){
     success_func= function(response){
-      console.log(response);
+      $(band_button).parent().remove();
     }
 
     failure_func= function(response){
-      console.log(response);
+      var $help_span=$(band_button).parent().find("span");
+      $help_span.text(response.reason);
+      $help_span.attr("class", "text-danger");
     }
 
-    $inp=$(`#passwordField`);
     var dict= {
-      'password': $inp.val(),
       'band_id': band_id,
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
@@ -219,18 +218,18 @@ function sendAjaxRequest(url_l, dict, success_func, failure_func){
     sendAjaxRequest("{% url 'musicians:band-delete' %}", dict, success_func, failure_func);
   }
 
-  function deleteEvent(event_id){
+  function deleteEvent(button_delete, event_id){
     success_func= function(response){
-      console.log(response);
+      $(button_delete).parent().remove();
     }
 
     failure_func= function(response){
-      console.log(response);
+      var $help_span=$(button_delete).parent().find("span");
+      $help_span.text(response.reason);
+      $help_span.attr("class", "text-danger");
     }
 
-    $inp=$(`#passwordField`);
     var dict= {
-      'password': $inp.val(),
       'event_id': event_id,
       csrfmiddlewaretoken: '{{ csrf_token }}',
     };
@@ -267,8 +266,6 @@ function sendAjaxRequest(url_l, dict, success_func, failure_func){
             updateHelpMessage(selectors, "text-success", "text-danger", msgs);
           }}});
         });
-
-
 
 
       });

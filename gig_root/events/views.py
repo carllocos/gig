@@ -153,6 +153,7 @@ def __contains_failure(request, keys, allowed_operations=None, only_owner=True):
     operation, and that the event exists
     4. IF allowed_operations is not None, a key `operation` is expected in the POST request and checks whether the associated value
     is contained in the list of allowed operations
+    5. If only_owner is set to true, the request is only allowed for the owner of the event.
 
     If no failure occurs the function returns False
     """
@@ -675,7 +676,6 @@ def delete_event(request):
     The request is performed through Ajax.
 
     The POST request needs to contain following keys:
-    `password`: the password of the current user
     `event_id`: the id of the event that needs to be deleted
 
     The view response with a JSON containing following keys:
@@ -683,12 +683,9 @@ def delete_event(request):
     `reason`: contains a error message meant to inform the `user` or the `programmer`
     of the corresponding error.
     """
-    failure=__contains_failure(request, keys=['password'])
+    failure=__contains_failure(request, keys=[], only_owner=True)
     if failure:
         return failure
-
-    if not request.user.check_password(request.POST.get('password')):
-        return JsonResponse({'is_executed': False, 'reason': 'Password incorrect'})
 
     event=Event.objects.get(pk=request.POST.get('event_id'))
     event.delete()
