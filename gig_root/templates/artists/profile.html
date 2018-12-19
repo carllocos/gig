@@ -41,6 +41,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     </div>
     <div class="col-12">
       <button type="button" name="button" onClick="updateStageName('id_stage_name')">Save</button>
+      <span id ="id_helper-stage-name"></span>
     </div>
     {% else %}
     <div class="col-12">
@@ -71,6 +72,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
   <div class="row">
     <div class="col-12">
       <button type="button" name="button" onClick="updateBiography('id_biography')">Save</button>
+      <span id ="id_helper-biography"></span>
     </div>
   </div>
   {% endif %}
@@ -196,7 +198,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     </div>
     <div class="col-12">
       {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
-      {% cloudinary profile_pic_id class="img-fluid" width=100 height=150 crop="fill"%}
+      {% cloudinary profile_pic_id class="img-fluid" width=100 height=150 crop="fill" id="id_image_profile"%}
     </div>
     {% if  is_owner%}
     <div class="col-12">
@@ -222,7 +224,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
         </div>
         <div class="col-12">
           {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
-          {% cloudinary bg_pic_id width=500 height=300 %}
+          {% cloudinary bg_pic_id width=500 height=300 id="id_image_background"%}
         </div>
         {% if  is_owner%}
         <div class="col-12">
@@ -354,9 +356,16 @@ function updateStageName(id_selector) {
 
   succes_complete = function (response){
     var val = $(`#${id_selector}`).val(response.val);
+    var span_helper=$("#id_helper-stage-name");
+    span_helper.text('Artist name succesfuly updated');
+    span_helper.removeAttr('class');
+    span_helper.attr('class', 'text-success');
   };
   failure_complete = function (response){
-    alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+    var span_helper=$("#id_helper-stage-name");
+    span_helper.text(response.reason);
+    span_helper.removeAttr('class');
+    span_helper.attr('class', 'text-danger');
   };
 
   sendAjaxRequest("{% url 'artists:update-stage-name' %}", dict, val, succes_complete, failure_complete);
@@ -368,9 +377,17 @@ function updateBiography(id_selector) {
   var dict= { 'val': val, csrfmiddlewaretoken: '{{ csrf_token }}',};
   succes_complete = function (response){
     $(`#${id_selector}`).val(response.val);
+
+    var span_helper=$("#id_helper-biography");
+    span_helper.text('Briography succesfuly updated');
+    span_helper.removeAttr('class');
+    span_helper.attr('class', 'text-success');
   };
   failure_complete = function (response){
-    alert(`backend couldn't perform the requested operation reason: ${response.reason}`)
+    var span_helper=$("#id_helper-biography");
+    span_helper.text(response.reason);
+    span_helper.removeAttr('class');
+    span_helper.attr('class', 'text-daner');
   };
   sendAjaxRequest("{% url 'artists:update-biography' %}", dict, val, succes_complete, failure_complete);
 }
@@ -394,15 +411,24 @@ $(function (){
   .on('cloudinarydone', function (e, data) {
     $('#id_progress_profile').text('Updating backend...');
 
-    val='profile'
-    dict=data.result
-    dict['csrfmiddlewaretoken']= '{{ csrf_token }}'
-    dict['val']=val
-    sendAjaxRequest("{% url 'artists:update-pic' %}",
-    dict,
-    val,
-    function(response){$('#id_progress_profile').text('Picture saved');},
-    function(response){alert(response.reason);});
+    var val='profile';
+    var dict=data.result;
+    dict['csrfmiddlewaretoken']= '{{ csrf_token }}';
+    dict['val']=val;
+
+    sendAjaxRequest("{% url 'artists:update-pic' %}", dict, val, function(response){
+      $("#id_image_profile").attr("src", data.result.url);
+      var helper=$('#id_progress_profile');
+      helper.text('Profile Picture updated');
+      helper.removeAttr('class');
+      helper.attr('class', 'text-success');
+
+    }, function(response){
+      var helper=$('#id_progress_profile');
+      helper.text(response.reason);
+      helper.removeAttr('class');
+      helper.attr('class', 'text-danger');
+    });
   });
 
 
@@ -420,15 +446,24 @@ $(function (){
   .on('cloudinarydone', function (e, data) {
     $('#id_progress_background').text('Updating backend...');
 
-    val='background_pic'
-    dict=data.result
-    dict['csrfmiddlewaretoken']= '{{ csrf_token }}'
-    dict['val']=val
-    sendAjaxRequest("{% url 'artists:update-pic' %}",
-    dict,
-    val,
-    function(response){$('#id_progress_background').text('Picture saved');},
-    function(response){alert(response.reason);});
+    var val='background_pic';
+    var dict=data.result;
+    dict['csrfmiddlewaretoken']= '{{ csrf_token }}';
+    dict['val']=val;
+
+    sendAjaxRequest("{% url 'artists:update-pic' %}", dict, val, function(response){
+      $("#id_image_background").attr("src", data.result.url);
+      var helper=$('#id_progress_background');
+      helper.text('Background Picture updated');
+      helper.removeAttr('class');
+      helper.attr('class', 'text-success');
+
+    },function(response){
+      var helper=$('#id_progress_background');
+      helper.text(response.reason);
+      helper.removeAttr('class');
+      helper.attr('class', 'text-danger');
+    });
   });
 
 });
