@@ -15,7 +15,7 @@
 {% block body %}
 
 <div class="container">
-  <h1>{{band.name}} @{{event.name}} {% if user.is_authenticated %}<span class="badge badge-secondary">{{event.date| fancy_date}}</span> <button id="myBtn"> <i class="fas fa-share-square"></i></button>{% endif %}</h1>
+  <h1>{{band.name}} @{{event.name}}{% if user.is_authenticated %}<span class="badge badge-secondary">{{event.date| fancy_date}}</span> <button id="myBtn"> <i class="fas fa-share-square"></i></button>{% endif %}</h1>
 
   <div id="myModal" class="modal">
 
@@ -24,9 +24,9 @@
       <span class="close">&times;</span>
       <form class="" action="" method="post">
         <div class="form-group">
-          <label style="color:#ccc;">Enter an email</label>
+          <label style="color:#000000;">Enter an email</label>
           <input id="id_emailShare" type="email" name="email" value="">
-          <p style="color:#ccc;" id="id_modal-helper"></p>
+          <p style="color:#000000;" id="id_modal-helper"></p>
         </div>
         <button type="button" name="button" onclick="shareEvent('id_emailShare', 'id_modal-helper')">Share event</button>
       </form>
