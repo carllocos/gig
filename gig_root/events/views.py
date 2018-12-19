@@ -35,6 +35,7 @@ def event_details(request, event_id):
 
     context={
             'event': event,
+            'http_protocol': getHTTP_Protocol(),
             }
 
     return render(request, 'events/event_details.html', context=context)

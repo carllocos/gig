@@ -20,9 +20,22 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 <div class="container">
   <div class="row">
     <div class="col-12">
+<<<<<<< HEAD
       <h1>Artist profile for {{user.first_name}} {{user.last_name}}<h1>
     </div>
   </div>
+=======
+      <h1>Artist profile</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <p>Is the gig user the owner of this artist profile? {{ is_owner }}</p>
+    </div>
+  </div>
+
+>>>>>>> ce43a07865434047e59d793819eefd53dfacce98
 </div>
 
 <div class="container">
@@ -192,7 +205,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
   <div class="row">
     <div class="col-12">
-      <p><h2>profile pic</h2> (public_id: {{profile_pic_id}})</p>
+      <p><h2>profile pic</h2></p>
     </div>
     <div class="col-12">
       {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
@@ -218,7 +231,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 
       <div class="row">
         <div class="col-12">
-          <p><h2>Background pic</h2> public_id: {{bg_pic_id}}</p>
+          <p><h2>Background pic</h2></p>
         </div>
         <div class="col-12">
           {# retrieve picture from cloudinary {% cloudinary profile_pic_id %} #}
@@ -248,7 +261,6 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
     <div class="row">
       <div class="col-6">
         <h4><a href="{% url 'musicians:band-profile' profile_id=membership.lineup.band.pk%}"> {{membership.lineup.band.name}}</a></h4>
-        <p> band_profil_pic (public_id: {{membership.lineup.band.profile_pic.public_id}})</p>
         {% cloudinary membership.lineup.band.profile_pic.public_id width=500 height=300 %}
         <p>Role: {{membership.role}}</p>
       </div>
