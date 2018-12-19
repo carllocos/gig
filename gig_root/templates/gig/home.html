@@ -18,7 +18,7 @@ Gig For Musicians
   <div class="carousel-inner">
 
     {% for band in random_bands %}
-    <div class="carousel-item active" onclick="myFunction()">
+    <div class="carousel-item">
 	  {# {% cloudinary band.profile_pic.public_id width=band.profile_pic.width height=band.profile_pic.height alt="{{band.profile_pic.title}}" class="d-block w-100" crop="fill"%} #}
 	  {% cloudinary band.profile_pic.public_id alt="{{band.name}}" class=" img-fluid d-block w-100" gravity="face" crop="fill" %}
 	  <div class="carousel-caption d-block">
@@ -150,7 +150,13 @@ Gig For Musicians
 	</div>
 </div>
 
+<script>
 
+	$(document).ready(function(){
+		$("div.carousel-item:first-child").addClass("active");
+	});
+
+</script>
 
 
 
