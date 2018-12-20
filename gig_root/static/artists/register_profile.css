@@ -9,27 +9,31 @@ h1{
 
 #container-artist-form{
   width: 100%;
-
 }
 
 .dropzone{
-	width: 300px;
+	width: 75%;
+    margin-left: auto;
+    margin-right: auto;
 	height: 300px;
 	border:2px dashed #ccc;
 	color:#ccc;
 	text-align: center;
+	display: block;
 }
 
-.dropzone.dragover{
-	border-color: #000;
-	color: #000;
-}
 
 .list-group{
 	width:75%;
-	color:#ccc;
+	color:#000000;
 	text-align: center;
 	
+}
+
+#holder { 
+	border: 10px dashed #ccc; 
+	width: 300px; min-height: 300px; 
+	margin: 20px auto;
 }
 
 
@@ -52,17 +56,9 @@ h1{
 	}
 }
 
-#profile_pic_section{
-	float: center;
-	width: 100px;
-	height: 100px;
-	border: 3px solid blue;
-}
 
 input[type=file]{
 	width: 75%;
-	height: 300px;
-	border:2px dashed #ccc;
 	color:#ccc;
 	text-align: center;
 	margin: 0 auto;
@@ -73,7 +69,6 @@ input[type=file]{
 
 label[type=file]{
 	width: 75%;
-	height: 300px;
 	border:2px dashed #ccc;
 	color:#ccc;
 	text-align: center;
@@ -84,7 +79,6 @@ label[type=file]{
 input, textarea{
 	padding: 7px;
 	width: 75%;
-	font-size: inherit;
 	border-radius: 5px;
 	
 }

@@ -6,6 +6,7 @@ Band Registration
 
 {% block link %}
 <script type="text/javascript" src="{% static 'util/utils.js' %}"> </script>
+<link rel="stylesheet" href="{% static 'artists/register_profile.css' %}">
 {% endblock %}
 
 
@@ -51,12 +52,18 @@ Band Registration
         <input type="text" name="genre0" required="" id="id_genre0">
       </div>
     </div>
+                    <!-- Basic Container to populate search suggestions -->
+    <div>
+      <ul id="genre_suggestions"class="list-group">
+      </ul>
+    </div>
 
     <div class="row">
       <div class="col-12">
         <label for="">Band Profile Pic:</label>
       </div>
       <div class="col-12" id="id_profile-pic-input">
+        <div class="dropzone" id="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"> Drop Here !</div>
         <input type="file" name="profile_pic" accept="image/*" id="id_profile_pic">
       </div>
     </div>
@@ -65,6 +72,7 @@ Band Registration
         <label for="">Background Pic:</label>
       </div>
       <div class="col-12" id="id_background-pic-input">
+        <div class="dropzone" id="dropzone_2" ondrop="drop(event)" ondragover="allowDrop(event)"> Drop Here !</div>
         <input type="file" name="background_pic" accept="image/*" id="id_background_pic">
       </div>
     </div>
@@ -98,6 +106,57 @@ function addInputField(inp_select, parent_select, name, id_prefix, class_name){
   });
 }
 
+          function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+
+
+function drop(ev) {
+  var id;
+  if (ev.target.id == 'dropzone')
+    {id = id_profile_pic}
+  else {id = id_background_pic}
+  ev.preventDefault();
+  console.log(ev.target.id)
+  id.files = ev.dataTransfer.files;
+}
+
+
+
+    function populateSuggestions(response,selector){
+      var suggests_container;
+      var what;
+      if ("genre" == selector.match(/genre/g)){
+        suggests_container = $('#genre_suggestions');
+        what = "genre"
+      }
+      else{
+         suggests_container = $('#instrument_suggestions');
+         what = "instrument"
+      }
+  
+
+    suggests_container.empty();
+    for(idx=0;idx < 5; idx++){
+      var feature = response.suggestions[idx];
+      var name=false;
+        name=feature;
+
+      if(name){
+        var id= "suggest_id_"+ what + idx;
+        var onc= "onclick=populateFromSuggestion('" + id + "','"+selector+"')";
+        var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + name + "</li>";
+        suggests_container.append(el);
+      }
+    }
+  }
+
+    function populateFromSuggestion(id_element,selector){
+    var suggestion= $(`#${id_element}`).text();
+    $(selector).val(suggestion);
+  }
+
 
 /**
 ajax to get suggestions for genres or instruments.
@@ -125,6 +184,7 @@ function activeSuggestions(selector, delay_time, key){
           //Next lines are temporary to test the suggestions results
           console.log(`suggestions : ${response.suggestions}`);
           $("#id_ajax").val(response.suggestions);
+           $("#id_genre0").keyup(populateSuggestions(response ,selector));
         }}});
       },//end of first argument
       250);//the second argument for delay

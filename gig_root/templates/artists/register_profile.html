@@ -31,9 +31,8 @@
         </div>
 
          <div class="">
-          <div id="uploads"> </div>
-          <div class="dropzone" id="dropzone"></div>
           <label for="id_profile_pic">Profile pic:</label>
+          <div class="dropzone" id="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"> Drop Here !</div>
           <input class="test" type="file" name="pic" accept="image/*" id="id_pic">
           <img id="output" width="200" /> 
         </div>
@@ -41,6 +40,7 @@
 
         <div class="">
           <label for="id_background_pic">Background pic:</label>
+          <div class="dropzone" id="dropzone_2" ondrop="drop(event)" ondragover="allowDrop(event)">Drop Here !</div>
           <input class="background_pic" type="file" name="background_pic" accept="image/*" id="id_background_pic">
         </div>
 
@@ -76,6 +76,7 @@
             <input type="text" name="idol0" id="id_idol0" class="idol" placeholder="Enter your idol">
           </div>
         </div>
+
 
         <div class="">
           <button type="submit" name="button"> Save profile</button>
@@ -125,29 +126,22 @@
   }
 
 
-          (function(){
-            var dropzone = document.getElementById('dropzone');
 
-            var upload = function(files){
-              document.getElementById('output').setAttribute('value',files);
-            }
+          function allowDrop(ev) {
+  ev.preventDefault();
+}
 
-            dropzone.ondrop = function(event){
-              event.preventDefault();
-              this.className = 'dropzone';
-              console.log(event.dataTransfer.files[0]);
-            }
 
-            dropzone.ondragover = function(){
-              this.className = 'dropzone dragover';
-              return false;
-            }
 
-            dropzone.ondragleave = function(){
-              this.className = 'dropzone';
-              return false;
-            }
-          }())
+function drop(ev) {
+  var id;
+  if (ev.target.id == 'dropzone')
+    {id = id_pic}
+  else {id = id_background_pic}
+  ev.preventDefault();
+  console.log(ev.target.id)
+  id.files = ev.dataTransfer.files;
+}
 
 
 
