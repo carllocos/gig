@@ -17,6 +17,8 @@ Create an event
 
 <!-- Links to local files-->
 <script src='{% static "events/js/geocoder_util.js" %}'></script>
+
+  <link rel="stylesheet" href="{% static 'events/css/create_event.css' %}">
 {% endblock %}
 
 
@@ -34,6 +36,8 @@ Create an event
       <ul id="address_suggestions" class="list-group" style="color:black;">
       </ul>
     </div>
+       <div class="dropzone" id="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"> Drop Here !</div>
+
 
     {% for field in form.visible_fields %}
 
@@ -82,6 +86,24 @@ Create an event
 </div>
 
 <script type="text/javascript">
+
+
+          function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+
+
+function drop(ev) {
+  var id;
+  if (ev.target.id == 'dropzone')
+    {id = id_picture}
+  else {id = id_background_pic}
+  ev.preventDefault();
+  console.log(ev.target.id)
+  id.files = ev.dataTransfer.files;
+}
+
 
 createGeocoder()
 
