@@ -14,17 +14,17 @@ Band Registration
 
 <div class="container">
   {% if form.errors %}
-      {% for field in form %}
+  {% for field in form %}
 
-      <div class="row info">
-        <div class="col-12">
-          {{field.erros}}
-        </div>
-      </div>
-      {% endfor %}
+  <div class="row info">
+    <div class="col-12">
+      {{field.erros}}
+    </div>
+  </div>
+  {% endfor %}
   {%endif %}
 
-  <form class="" id="band_form" action="{% url 'musicians:band-register' %}" method="post" enctype="multipart/form-data">
+  <form class="" id="band_form" action="{% url 'musicians:band-register' %}" method="post" enctype="multipart/form-data" onsubmit="return validateFields(event)">
     {% csrf_token %}
 
     <div class="row">
@@ -32,7 +32,10 @@ Band Registration
         <label for="id_name">Band Name</label>
       </div>
       <div class="col-12">
-        <input type="text" name="name" value="your band's name">
+        <input id="id_band_name" type="text" name="name" placeholder="your band's name" value="{{form.name.value|default_if_none:'' }}">
+      </div>
+      <div class="col-12">
+        <small id="id_helper_band_name"></small>
       </div>
     </div>
 
@@ -41,10 +44,16 @@ Band Registration
         <label for="id_name">description</label>
       </div>
       <div class="col-12">
-        <textarea name="description" cols="40" rows="10" required="" id="id_description"></textarea>
+        <textarea name="description" cols="40" rows="10" required="" id="id_description">{{form.description.value|default_if_none:'' }}</textarea>
+      </div>
+      <div class="col-12">
+        <small id="id_helper_band_description"></small>
       </div>
     </div>
     <div class="row">
+      <div class="col-12">
+        <small id="id_helper_genres"></small>
+      </div>
       <div class="col-12">
         <label for="">Genres:</label>
       </div>
@@ -52,7 +61,7 @@ Band Registration
         <input type="text" name="genre0" required="" id="id_genre0">
       </div>
     </div>
-                    <!-- Basic Container to populate search suggestions -->
+    <!-- Basic Container to populate search suggestions -->
     <div>
       <ul id="genre_suggestions"class="list-group">
       </ul>
@@ -66,6 +75,11 @@ Band Registration
         <div class="dropzone" id="dropzone" ondrop="drop(event)" ondragover="allowDrop(event)"> Drop Here !</div>
         <input type="file" name="profile_pic" accept="image/*" id="id_profile_pic">
       </div>
+    {% for  error in form.profile_pic.errors %}
+    <div class="col-12">
+      <small class="helper-text text-danger text-center text-left-sm"> {{error}}</small>
+    </div>
+    {% endfor %}
     </div>
     <div class="row">
       <div class="col-12">
@@ -74,6 +88,15 @@ Band Registration
       <div class="col-12" id="id_background-pic-input">
         <div class="dropzone" id="dropzone_2" ondrop="drop(event)" ondragover="allowDrop(event)"> Drop Here !</div>
         <input type="file" name="background_pic" accept="image/*" id="id_background_pic">
+      </div>
+
+      {% for  error in form.background_pic.errors %}
+      <div class="col-12">
+        <small class="helper-text text-danger text-center text-left-sm"> {{error}}</small>
+      </div>
+      {% endfor %}
+      <div class="col-12">
+        <small id="id_helper_background_pic"></small>
       </div>
     </div>
 
@@ -106,7 +129,7 @@ function addInputField(inp_select, parent_select, name, id_prefix, class_name){
   });
 }
 
-          function allowDrop(ev) {
+function allowDrop(ev) {
   ev.preventDefault();
 }
 
@@ -115,7 +138,7 @@ function addInputField(inp_select, parent_select, name, id_prefix, class_name){
 function drop(ev) {
   var id;
   if (ev.target.id == 'dropzone')
-    {id = id_profile_pic}
+  {id = id_profile_pic}
   else {id = id_background_pic}
   ev.preventDefault();
   console.log(ev.target.id)
@@ -124,38 +147,38 @@ function drop(ev) {
 
 
 
-    function populateSuggestions(response,selector){
-      var suggests_container;
-      var what;
-      if ("genre" == selector.match(/genre/g)){
-        suggests_container = $('#genre_suggestions');
-        what = "genre"
-      }
-      else{
-         suggests_container = $('#instrument_suggestions');
-         what = "instrument"
-      }
-  
+function populateSuggestions(response,selector){
+  var suggests_container;
+  var what;
+  if ("genre" == selector.match(/genre/g)){
+    suggests_container = $('#genre_suggestions');
+    what = "genre"
+  }
+  else{
+    suggests_container = $('#instrument_suggestions');
+    what = "instrument"
+  }
 
-    suggests_container.empty();
-    for(idx=0;idx < 5; idx++){
-      var feature = response.suggestions[idx];
-      var name=false;
-        name=feature;
 
-      if(name){
-        var id= "suggest_id_"+ what + idx;
-        var onc= "onclick=populateFromSuggestion('" + id + "','"+selector+"')";
-        var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + name + "</li>";
-        suggests_container.append(el);
-      }
+  suggests_container.empty();
+  for(idx=0;idx < 5; idx++){
+    var feature = response.suggestions[idx];
+    var name=false;
+    name=feature;
+
+    if(name){
+      var id= "suggest_id_"+ what + idx;
+      var onc= "onclick=populateFromSuggestion('" + id + "','"+selector+"')";
+      var el= "<li class='list-group-item' id=" + id+" "+onc+ ">" + name + "</li>";
+      suggests_container.append(el);
     }
   }
+}
 
-    function populateFromSuggestion(id_element,selector){
-    var suggestion= $(`#${id_element}`).text();
-    $(selector).val(suggestion);
-  }
+function populateFromSuggestion(id_element,selector){
+  var suggestion= $(`#${id_element}`).text();
+  $(selector).val(suggestion);
+}
 
 
 /**
@@ -184,7 +207,7 @@ function activeSuggestions(selector, delay_time, key){
           //Next lines are temporary to test the suggestions results
           console.log(`suggestions : ${response.suggestions}`);
           $("#id_ajax").val(response.suggestions);
-           $("#id_genre0").keyup(populateSuggestions(response ,selector));
+          $("#id_genre0").keyup(populateSuggestions(response ,selector));
         }}});
       },//end of first argument
       250);//the second argument for delay
@@ -211,14 +234,54 @@ function activeSuggestions(selector, delay_time, key){
 
     //Counts the amount of genres submitted
     $("#band_form").submit(function(event){
-      var amount_genres=$("#id_genres-input-container").children().length;
-      $("#band_form").append(`<input type="hidden" name="amount_genres" value="${amount_genres}"/>`);
-    });
-
+      if(valid_band_name() && valid_profile_pic() && valid_background_pic() && valid_genre()){
+        var amount_genres=$("#id_genres-input-container").children().length;
+        $("#band_form").append(`<input type="hidden" name="amount_genres" value="${amount_genres}"/>`);
+      }
+      else {
+        event.preventDefault();
+      }});
 
   });
 
 
+
+function valid_band_name(){
+  var name=$("#id_band_name").val();
+  var valid=true;
+  if(!name){
+    var valid=false;
+    $("#id_helper_band_name").attr("class", "text-danger");
+    $("#id_helper_band_name").text("This field is required");
+  }
+  else{
+    $("#id_helper_band_name").text("");
+  }
+  return valid;
+}
+
+function valid_band_description(){
+  var description=$("#id_description").val();
+  var valid=true;
+  if(!description){
+    var valid=false;
+    $("#id_helper_band_description").attr("class", "text-danger");
+    $("#id_helper_band_description").text("This field is required");
+  }
+  else{
+    $("#id_helper_band_description").text("");
+  }
+  return valid;
+}
+
+
+
+
+function validateFields(event){
+  var v1=valid_band_name();
+  var v2=valid_band_description();
+  return v1 && v2;
+}
 
 </script>
 
