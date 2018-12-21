@@ -87,7 +87,7 @@ def get_bands_might_like(user):
         return []
 
     genres=__band_genres(liked_bands)
-    owns_bands= user.artistmodel.owns.all() if user.artistmodel else []
+    owns_bands= user.artistmodel.owns.all() if user.has_artistProfile() else []
     for b in owns_bands:
         follows_bands.add(b)
     similar_bands= __search_similar_bands(genres, exclude_bands=follows_bands)
