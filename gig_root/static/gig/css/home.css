@@ -1,15 +1,11 @@
-.carousel{
-	max-height:500px;
-}
-
 .carousel-item img{
 	min-width:100%;
-	height:auto;
+	min-height:100%;
 }
 
 .carousel-inner{
 	width:100%;
-	max-height: 400px;
+	max-height:400px; /* potentially change to max-height */
 }
 
 .carousel-caption {
@@ -24,26 +20,11 @@
 	border-color:var(--secondary-color);
 	background-color:var(--tertiary-color);
 	color: var(--text-color-default);
+	overflow:hidden;
 }
 
-div > h4{
+div > h3{
 	color:var(--secondary-color);
-}
-
-/* scrollbar width */
-div::-webkit-scrollbar {
-	width: 5px;
-	height: 5px;
-}
- 
-/* scrollbar Handle */
-div::-webkit-scrollbar-thumb {
-	background: var(--primary-color); 
-	border-radius: 2px;
-}
-
-div.d-flex{
-	overflow-x: scroll; 
 }
 
 /*event cards*/
@@ -54,12 +35,23 @@ div.d-flex{
 	border-width:3px;
 	border-color:var(--secondary-color);
 	font-weight:bold;
-	max-width:11rem;
 }
 
-@media only screen and (min-width: 992px){
+hr{
+	display: block;
+	margin-top: 0.5em;
+	margin-bottom: 1em;
+	margin-left: auto;
+	margin-right: auto;
+	border-style: inset;
+	border-width: 1px;
+	color:tertiary;
+}
 
-	.row > .col-lg-2{
+/*
+@media only screen and (min-width: 767px){
+
+	.row > .col-md-2{
 		background-color:var(--tertiary-color);
 		border-style:solid;
 		border-width:3px;
@@ -73,7 +65,7 @@ div.d-flex{
 		order:-1;
 	}
 	
-	.col-lg-2 .vertical-on-lg{
+	.col-lg-2 .vertical-on-md{
 		flex-direction:column;
 	}
 	
@@ -84,4 +76,14 @@ div.d-flex{
 	.row > .recommended{
 		order:1;
 	}
+	
+	.card-row{
+		display:-ms-flexbox;
+		display:flex;
+		-ms-flex-direction:row;
+		flex-direction:row;
+		overflow-x:scroll;
+		}
+		.card-group>.card{-ms-flex:1 0 0%;flex:1 0 0%;margin-bottom:0}
 }
+*/

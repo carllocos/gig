@@ -37,7 +37,7 @@
 		<div class="input-group">
 			<input name="query" id="searchInput" class="form-navbar-input form-control" type="search" placeholder="Search" aria-label="Search">
 			<div class="input-group-append">
-				<button id="searchButton" class="form-navbar-btn btn btn-outline-primary" type="submit">Search</button>	
+				<button id="searchButton" class="form-navbar-btn btn btn-outline-primary" type="submit">Search</button>
 			</div>
 		</div>
 		<div class="results-container">
@@ -54,11 +54,13 @@
           <div class="dropdown-menu dropdown-menu-right text-center" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href="{% url 'users:follows-bands' %}">Follows</a>
             <a class="dropdown-item" href="{% url 'users:participate-events' %}">Participate</a>
+            <a class="dropdown-item" href="{% url 'users:suggested-events' %}">Suggestions</a>
             <div class="dropdown-divider"></div>
             {% if user.owns_band %}
             <a class="dropdown-item" href="{% url 'events:create' %}">create event</a>
+            <a class="dropdown-item" href="{% url 'musicians:band-register' %}">register another band</a>
             {% elif user.has_artist_profile%}
-            <a href="{% url 'musicians:band-register' %}">register a band</a>
+            <a class="dropdown-item" href="{% url 'musicians:band-register' %}">register a band</a>
             {% else %}
             <a class="dropdown-item" href="{% url 'artists:register' %}">register an artist profile</a>
             {% endif %}

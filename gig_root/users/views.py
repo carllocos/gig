@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from social_django.utils import load_strategy
 
+from gig import search as dbSearch
 from .forms import RegistrationForm, UserProfileForm, EmailChangeForm
 from .models import User
 from .tokens import account_activation_token
@@ -50,6 +51,19 @@ def participate_events(request):
     }
     return render(request, 'users/participate_events.html', context=context)
 
+
+@login_required
+def suggested_events(request):
+    """
+    View that is called when a user desires to get a list of suggested events.
+    """
+    might_like_evs= dbSearch.get_might_like_events(request.user) if request.user.is_authenticated else False
+    context={
+        'might_like_events': might_like_evs,
+        'user': request.user,
+        'http_protocol': getHTTP_Protocol()
+    }
+    return render(request, 'users/suggested_events.html', context=context)
 @login_required
 def update_email(request):
     """
