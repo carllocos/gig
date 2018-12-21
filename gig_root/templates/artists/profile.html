@@ -11,6 +11,7 @@ Profile {{artist.user.first_name}} {{artist.user.last_name}}
 {% endblock %}
 
 {% block link %}
+  <link rel="stylesheet" href="{% static 'artist/profile.css' %}">
 {% cloudinary_includes %}
 {% cloudinary_js_config %}
 {% endblock %}

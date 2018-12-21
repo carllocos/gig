@@ -110,13 +110,9 @@ Band Registration
 </div>
 
 <script type="text/javascript">
-
-
 //Function meant to add an input field as soos as the user types somenthing on the inputfield with selector inp_select
 function addInputField(inp_select, parent_select, name, id_prefix, class_name){
-
   $(inp_select).on('keyup', function(){
-
     if(!($(inp_select).next().is('input'))){
       number= $(parent_select).children().length;
       new_id=`${id_prefix}${number}`;
@@ -128,13 +124,9 @@ function addInputField(inp_select, parent_select, name, id_prefix, class_name){
     }
   });
 }
-
 function allowDrop(ev) {
   ev.preventDefault();
 }
-
-
-
 function drop(ev) {
   var id;
   if (ev.target.id == 'dropzone')
@@ -144,9 +136,6 @@ function drop(ev) {
   console.log(ev.target.id)
   id.files = ev.dataTransfer.files;
 }
-
-
-
 function populateSuggestions(response,selector){
   var suggests_container;
   var what;
@@ -158,14 +147,11 @@ function populateSuggestions(response,selector){
     suggests_container = $('#instrument_suggestions');
     what = "instrument"
   }
-
-
   suggests_container.empty();
   for(idx=0;idx < 5; idx++){
     var feature = response.suggestions[idx];
     var name=false;
     name=feature;
-
     if(name){
       var id= "suggest_id_"+ what + idx;
       var onc= "onclick=populateFromSuggestion('" + id + "','"+selector+"')";
@@ -174,20 +160,16 @@ function populateSuggestions(response,selector){
     }
   }
 }
-
 function populateFromSuggestion(id_element,selector){
   var suggestion= $(`#${id_element}`).text();
   $(selector).val(suggestion);
 }
-
-
 /**
 ajax to get suggestions for genres or instruments.
 -Key is either 'genre' or 'instrument'. Otherwise the backend will not be able to provide suggestions!!!
 -selector is the selector for the inputfield that needs suggestions
 **/
 function activeSuggestions(selector, delay_time, key){
-
   //delay is an importend function.Takes two argument: callback and time to wait before calling the callback event 'keyup' takes place. x Time is waited before the callback is called.
   //// TODO: maybe on key up whitout delay??
   $(selector).keyup(function(){
@@ -197,7 +179,6 @@ function activeSuggestions(selector, delay_time, key){
         console.log("empty not send to backend");
         return;
       }
-
       $.ajax({type: "GET",
       url: "{% url 'artists:suggest-ajax' %}",
       data: { kind : key, value: val , csrfmiddlewaretoken: '{{csrf_token}}' },
@@ -213,25 +194,19 @@ function activeSuggestions(selector, delay_time, key){
       250);//the second argument for delay
     });
   }
-
   //A parent element that applies 'addInputField' and 'activeSuggestions' to th newly added inputfield
   function addListenerParent(parent_selector, first_child_selector, name, id_prefix, class_name){
-
     $(parent_selector).bind("DOMNodeInserted",function(){
       number= $(parent_selector).children().length - 1;
       id_input=`#${id_prefix}${number}`;
       addInputField(id_input, parent_selector, name, id_prefix, class_name);
       activeSuggestions(id_input, 1000, class_name);
     });
-
     addInputField(first_child_selector, parent_selector, name, id_prefix, class_name);
     activeSuggestions(first_child_selector, 1000, class_name);
-
   }
-
   $(function(){
     addListenerParent("#id_genres-input-container", "#id_genre0", "genre", "id_genre", "genre");
-
     //Counts the amount of genres submitted
     $("#band_form").submit(function(event){
       if(valid_band_name() && valid_profile_pic() && valid_background_pic() && valid_genre()){
@@ -241,11 +216,7 @@ function activeSuggestions(selector, delay_time, key){
       else {
         event.preventDefault();
       }});
-
   });
-
-
-
 function valid_band_name(){
   var name=$("#id_band_name").val();
   var valid=true;
@@ -259,7 +230,6 @@ function valid_band_name(){
   }
   return valid;
 }
-
 function valid_band_description(){
   var description=$("#id_description").val();
   var valid=true;
@@ -273,16 +243,11 @@ function valid_band_description(){
   }
   return valid;
 }
-
-
-
-
 function validateFields(event){
   var v1=valid_band_name();
   var v2=valid_band_description();
   return v1 && v2;
 }
-
 </script>
 
 {% endblock %}

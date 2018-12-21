@@ -2,13 +2,15 @@ h1{
 	text-align: center;
 }
 
-#id_artists-container{
-  width: 100%;
-
+#container{
+	  width: 100%;
 }
-
-#container-artist-form{
-  width: 100%;
+.list-group{
+	width:75%;
+	color:#000000;
+	text-align: center;
+	margin:20px auto;
+	
 }
 
 .dropzone{
@@ -22,31 +24,14 @@ h1{
 	display: block;
 }
 
-
-.list-group{
-	width:75%;
-	color:#000000;
-	text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-	
-}
-
-#holder { 
-	border: 10px dashed #ccc; 
-	width: 300px; min-height: 300px; 
-	margin: 20px auto;
-}
-
-
-#artist_form{
+#band_form{
 	text-align: center;
 	margin-top: 10px;
 	background-color: #343A40;
 	padding: 7px;
 	line-height:120%;
 	margin:20px auto;
-	width: 50%;
+	width: 75%;
 	-moz-border-radius: 2px;
     -webkit-border-radius: 2px;
     border-radius: 2px;
@@ -58,6 +43,12 @@ h1{
 	}
 }
 
+#profile_pic_section{
+	float: center;
+	width: 100px;
+	height: 100px;
+	border: 3px solid blue;
+}
 
 input[type=file]{
 	width: 75%;
@@ -71,6 +62,7 @@ input[type=file]{
 
 label[type=file]{
 	width: 75%;
+	height: 300px;
 	border:2px dashed #ccc;
 	color:#ccc;
 	text-align: center;
@@ -81,6 +73,7 @@ label[type=file]{
 input, textarea{
 	padding: 7px;
 	width: 75%;
+	font-size: inherit;
 	border-radius: 5px;
 	
 }
