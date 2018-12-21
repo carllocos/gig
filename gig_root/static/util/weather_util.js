@@ -66,27 +66,6 @@ function sendRequest(url_l, success_func, failure_func  = default_failure){
   });
 }
 
-
-// function sendRequestTest(url_l, success_func, failure_func = default_failure){
-//  var response = {'description': "mist",
-//                   'weather_icon': get_weahter_icon_url('50d'),
-//                   'temp_min': 15,
-//                   'temp_max': 15,
-//                   'temp': 15};
-//
-//   success_func(response);
-// }
-
-//
-// function forecastTest(long, lat, success_func, failure_func = default_failure){
-//   url= make_url(long, lat);
-//   sendRequestTest(url, success_func, failure_func);
-// }
-//
-
-
-
-
 function default_failure(response) {
   alert(response['message']);
 }
