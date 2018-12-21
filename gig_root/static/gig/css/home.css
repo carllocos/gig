@@ -35,6 +35,7 @@ div > h3{
 	border-width:3px;
 	border-color:var(--secondary-color);
 	font-weight:bold;
+	min-width:200px;
 }
 
 hr{

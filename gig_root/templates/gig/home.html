@@ -67,13 +67,13 @@ Gig For Musicians
 	</div>
 	<div class="row upcoming d-flex justify-content-center">
 		{% if upcoming_events %}
-		<div class="card-deck">
+		<div class="card-columns">
 			{% for event in upcoming_events %}
 			<div class="card text-center">
 				<div class="card-header">
 					<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
 				</div>
-				{% cloudinary event.picture.public_id alt="{{band.name}}" width=400 height=400 crop="thumb" gravity="faces:auto" class="card-img-bottom img-fluid"%}
+				{% cloudinary event.picture.public_id alt="{{band.name}}" width=300 height=300 crop="thumb" gravity="faces:auto" class="card-img-bottom img-fluid"%}
 			</div>
 			{% endfor %}
 		</div>

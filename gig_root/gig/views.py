@@ -20,7 +20,7 @@ def home(request):
     part_evs= dbSearch.get_participate_events(user) if user.is_authenticated else False
     might_like_evs= dbSearch.get_might_like_events(user) if user.is_authenticated else False
 
-    random_bands= dbSearch.get_randomBands()
+    random_bands= dbSearch.get_randomBands(amount=1)
 
     context= {
         'user': user,
