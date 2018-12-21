@@ -14,6 +14,7 @@ urlpatterns = [
     path('update_email/', views.update_email, name='update-email'),
     path('follows_bands/', views.follows_bands, name='follows-bands'),
     path('participate_events/', views.participate_events, name='participate-events'),
+    path('suggested_events/', views.suggested_events, name='suggested-events'),
     re_path(r'^update_email/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/(?P<eid64>[0-9A-Za-z_\-]+)$', views.update_email_confirm, name='update-email-confirm'),
     path('signup/request_password/', views.request_password, name='request-password'),
     #URL register/confirm corresponds with the html that tells you to confirm your registration
