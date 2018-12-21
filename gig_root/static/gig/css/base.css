@@ -26,5 +26,24 @@ h1, h4{
 	border-width:3px;
 	border-color:var(--secondary-color);
 	font-weight:bold;
-	max-width:11rem;
 }
+
+.row{
+	margin: auto;
+	max-width: 100%;
+}
+    
+/* scrollbar width */
+/*
+div::-webkit-scrollbar {
+	width: 5px;
+	height: 5px;
+}
+ */
+/* scrollbar Handle */
+/*
+div::-webkit-scrollbar-thumb {
+	background: var(--primary-color); 
+	border-radius: 2px;
+}
+*/
