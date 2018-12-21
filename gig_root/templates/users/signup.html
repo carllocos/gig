@@ -21,7 +21,7 @@ Signup
       <h2>Register</h2>
     </div>
 
-    <form class="form-i" action="{% url 'users:signup' %}" method="post">
+    <form id="id_signup_form "class="form-i" action="{% url 'users:signup' %}" method="post" onsubmit="return validateFields(event)">
       {% csrf_token %}
 
       <div class="row form-group">
@@ -30,6 +30,10 @@ Signup
         </div>
         <div class="col-12">
           <input type="text" name="first_name" maxlength="30" required="" id="id_first_name" value="{{ form.first_name.value|default_if_none:'' }}">
+
+        </div>
+        <div class="col-12">
+          <small id="id_helper_first_name" class="helper-text text-center text-left-sm"></small>
         </div>
         {% if  form.first_name.errors%}
         {% for  error in form.first_name.errors %}
@@ -43,6 +47,9 @@ Signup
       <div class="form-group">
         <label for="id_last_name">Last name:</label>
         <input type="text" name="last_name" maxlength="30" required="" id="id_last_name" value="{{ form.last_name.value|default_if_none:'' }}">
+        <div class="col-12">
+          <small id="id_helper_last_name" class="helper-text text-center text-left-sm"></small>
+        </div>
         {% if  form.last_name.errors%}
         {% for  error in form.last_name.errors %}
         <div class="col-12">
@@ -55,9 +62,10 @@ Signup
       <div class="form-group">
         <label for="id_email">Email:</label>
         <input type="email" name="email" maxlength="254" required="" id="id_email" value="{{ form.email.value|default_if_none:'' }}">
-        <small id="id_emailHelper" class="helper-text text-center text-left-sm">
-          Changes Saved
-        </small>
+        <div class="col-12">
+          <small id="id_emailHelper" class="helper-text text-center text-left-sm">
+          </small>
+        </div>
       </div>
 
       <div class="form-group">
@@ -66,6 +74,9 @@ Signup
         </div>
         <div class="col-12">
           <input type="password" name="password" required="" id="id_password">
+        </div>
+        <div class="col-12">
+          <small id="id_helper_password" class="helper-text text-center text-left-sm"></small>
         </div>
         {% if  form.password.errors%}
         {% for  error in form.password.errors %}
@@ -79,6 +90,9 @@ Signup
       <div class="form-group">
         <label for="id_confirm_password">Confirm password:</label>
         <input type="password" name="confirm_password" required="" id="id_confirm_password">
+        <div class="col-12">
+          <small id="id_helper_confirm_password" class="helper-text text-center text-left-sm"></small>
+        </div>
         {% if  form.confirm_password.errors%}
         {% for  error in form.confirm_password.errors %}
         <div class="col-12">
@@ -185,6 +199,89 @@ function doneTyping () {
       updateHelpMessage(["#id_emailHelper"], rem_cls, new_cls, [msg]);
     }});
   }
+}
+
+
+function valid_names(){
+  var first_name=$("#id_first_name").val();
+  var last_name=$("#id_last_name").val();
+
+  var valid=true;
+  if (!first_name) {
+    valid=false;
+    $("#id_helper_first_name").attr("class", "text-danger");
+    $("#id_helper_first_name").text("This Field is required");
+  }
+  else {
+    $("#id_helper_first_name").text("");
+  }
+  if(!last_name){
+    valid=false;
+    $("#id_helper_last_name").attr("class", "text-danger");
+    $("#id_helper_last_name").text("This Field is required");
+  }
+  else {
+    $("#id_helper_last_name").text("");
+  }
+  return valid;
+}
+
+function valid_password(){
+  var pass1=$("#id_password").val();
+  var pass2=$("#id_confirm_password").val();
+  var error_msg_psw="";
+  var error_msg_confirm="";
+  var valid=true;
+
+  if (!pass1) {
+    valid=false;
+    $("#id_helper_password").attr("class", "text-danger");
+    $("#id_helper_password").text("This Field is required");
+  }
+  else{
+    $("#id_helper_password").text("");
+  }
+  if (!pass2) {
+    valid=false;
+    $("#id_helper_confirm_password").attr("class", "text-danger");
+    $("#id_helper_confirm_password").text("This Field is required");
+  }
+  else{
+    $("#id_helper_confirm_password").text("");
+  }
+
+  if (valid) {
+    if( pass1 != pass2){
+      valid=false;
+      $("#id_helper_password").attr("class", "text-danger");
+      $("#id_helper_password").text("Password don't match");
+      $("#id_helper_confirm_password").attr("class", "text-danger");
+      $("#id_helper_confirm_password").text("Password don't match");
+    }
+    else{
+      $("#id_helper_confirm_password").text("");
+      $("#id_helper_password").text("");
+    }
+  }
+  return valid;
+}
+
+
+function valid_email(){
+  if(!validateEmail($input.val())){
+    $("#id_emailHelper").attr("class", "text-danger");
+    $("#id_emailHelper").text("invalid email");
+    return false;
+  }
+  $("#id_emailHelper").text("");
+  return true;
+}
+
+function validateFields(event){
+  var v1=valid_email();
+  var v2=valid_names();
+  var v3=valid_password();
+  return v1 && v2 && v3;
 }
 
 
