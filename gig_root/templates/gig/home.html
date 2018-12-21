@@ -18,13 +18,14 @@ Gig For Musicians
   <div class="carousel-inner">
     {% for band in random_bands %}
     <div class="carousel-item">
-	{% cloudinary band.profile_pic.public_id height=400 alt="{{band.name}}" crop="fill_pad" gravity="auto" class="img-fluid"%}
+	{% cloudinary band.profile_pic.public_id height=600 alt="{{band.name}}" crop="fill_pad" gravity="auto" class="img-fluid"%}
 	  <div class="carousel-caption d-block">
         <a href="{% url 'musicians:band-profile' profile_id=band.pk%}" style="text-decoration:none; color:white;"><h3>{{band.name}}</h3></a>
       </div>
     </div>
     {% endfor %}
   </div>
+<!-- Disabled since we momentarily choose to only show one slide
 
     <a class="carousel-control-prev" href="#carouselExampleSlidesOnly" role="button" data-slide="prev">
       <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -34,6 +35,7 @@ Gig For Musicians
       <span class="carousel-control-next-icon" aria-hidden="true"></span>
       <span class="sr-only">Next</span>
     </a>
+-->
   </div>
 {% endif %}
 
@@ -52,7 +54,7 @@ Gig For Musicians
 			{% endif %}
 		</div>
 		{% else %}
-			<h1 class="display-4">Hi, stranger</h1>
+			<p class="display-4">Hi, stranger</p>
 			<p class="lead">
 				<a class="btn btn-md" href="{% url 'users:login' %}" role="button">Login</a> or <a class="btn btn-md" href="{% url 'users:signup' %}" role="button">Sign up</a> to follow bands and be up to date with upcoming events.
 			</p>
@@ -61,9 +63,8 @@ Gig For Musicians
 	</div>
 
 		
-	<div class="row upcoming mb-2 mx-auto">
+	<div class="row upcoming mb-4 mx-auto">
 		<h3>Upcoming events</h3>
-		<hr>
 	</div>
 	<div class="row upcoming d-flex justify-content-center">
 		{% if upcoming_events %}
@@ -73,7 +74,7 @@ Gig For Musicians
 				<div class="card-header">
 					<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
 				</div>
-				{% cloudinary event.picture.public_id alt="{{band.name}}" width=300 height=300 crop="thumb" gravity="faces:auto" class="card-img-bottom img-fluid"%}
+				{% cloudinary event.picture.public_id alt="{{band.name}}" width=350 height=350 crop="thumb" gravity="faces:auto" class="card-img-bottom img-fluid"%}
 			</div>
 			{% endfor %}
 		</div>

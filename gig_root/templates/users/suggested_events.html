@@ -19,23 +19,29 @@ suggestions
 
 {% block body %}
 <div class="container">
-  <h1>Suggested Events</h1>
-  {% if  not suggested_events%}
-  <p>You need to upvote or follow bands to get suggestions</p>
-  {% else %}
-  {% for event in suggested_events %}
-  <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
-    <div class="card-header">
-      <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-    </div>
-    {% cloudinary event.picture.public_id width=300 height=150 class="img-fluid" crop="fill"%}
-    <div class="card-body">
-      <h5 class="card-title"></h5>
-      <p class="card-text">{{event.description}}</p>
-    </div>
-  </div>
-  {% endfor %}
-  {% endif %}
+	<div class="row suggested mb-4 mx-auto">
+		<h1>Suggested Events</h1>
+	</div>
+	<div class="row suggested d-flex justify-content-center">
+		{% if  not suggested_events%}
+		<p>You need to upvote or follow bands to get suggestions</p>
+		{% else %}
+		<div class="card-columns">
+			{% for event in suggested_events %}
+			<div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
+				<div class="card-header">
+					<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+				</div>
+				{% cloudinary event.picture.public_id width=300 height=300 class="img-fluid" gravity="faces:auto" crop="thumb"%}
+				<div class="card-body">
+					<h5 class="card-title"></h5>
+					<p class="card-text">{{event.description}}</p>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
 </div>
 
 

@@ -26,6 +26,14 @@ h1, h4{
 	border-width:3px;
 	border-color:var(--secondary-color);
 	font-weight:bold;
+	min-width:200px;
+	max-width:350px;
+}
+
+@media only screen and (min-width: 576px) and (max-width: 660px){ 
+	.card-columns {	
+		column-count: 2;
+	}
 }
 
 .row{

@@ -19,51 +19,62 @@ Agenda of {{band.name}}
 
 {% block body %}
 <div class="container">
-  <h1>Participate</h1>
-  {% if  not upcoming_events and not past_events%}
-  <p>You currently don't participate at any event.</p>
-  {% else %}
-
-  {% if upcoming_events %}
-  <h2>Upcoming events</h2>
-  <hr class="style1 text-muted">
-  {% for event in upcoming_events %}
-  <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
-    <div class="card-header">
-      <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-    </div>
-    {% cloudinary event.picture.public_id width=300 height=150 class="img-fluid" crop="fill"%}
-    <div class="card-body">
-      <h5 class="card-title"></h5>
-      <p class="card-text">{{event.description}}</p>
-      <p class="temp"></p>
-      <p class="temp_max"></p>
-      <p class="temp_min"></p>
-      <p class="weahter_description"></p>
-      <img class="weather_icon" src="" alt="">
-    </div>
-  </div>
-  {% endfor %}
-  {% endif %}
-
-  {% if past_events %}
-  <h2>Past events</h2>
-  <hr class="style1 text-muted">
-  {% for event in past_events %}
-  <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
-    <div class="card-header">
-      <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-    </div>
-    {% cloudinary event.picture.public_id width=300 height=150 class="img-fluid" crop="fill"%}
-    <div class="card-body">
-      <h5 class="card-title"></h5>
-      <p class="card-text">{{event.description}}</p>
-    </div>
-  </div>
-  {% endfor %}
-  {% endif %}
-
-  {% endif %}
+	<div class="row upcoming mb-4 mx-auto">
+		<h1>Events you participate in</h1>
+	</div>
+	<div class="row mb-4 mx-auto">
+	{% if  not upcoming_events and not past_events%}
+		<p>You currently don't participate in any event.</p>
+	</div>
+	{% else %}
+		{% if upcoming_events %}
+	<div class="row mb-4 mx-auto">
+		<h2>Upcoming events</h2>
+	</div>
+	<div class="row upcoming d-flex justify-content-center">
+		<div class="card-columns">
+			{% for event in upcoming_events %}
+			<div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
+				<div class="card-header">
+					<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+				</div>
+				{% cloudinary event.picture.public_id width=300 height=300 class="img-fluid" gravity="faces:auto" crop="thumb"%}
+				<div class="card-body">
+					<h5 class="card-title"></h5>
+					<p class="card-text">{{event.description}}</p>
+					<p class="temp"></p>
+					<p class="temp_max"></p>
+					<p class="temp_min"></p>
+					<p class="weahter_description"></p>
+					<img class="weather_icon" src="" alt="">
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+		{% endif %}
+		{% if past_events %}
+	<div class="row mb-4 mx-auto">
+		<h2>Past events</h2>
+	</div>
+	<div class="row past d-flex justify-content-center">
+		<div class="card-columns">
+			{% for event in past_events %}
+			<div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
+				<div class="card-header">
+					<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+				</div>
+				{% cloudinary event.picture.public_id width=300 height=300 class="img-fluid" gravity="faces:auto" crop="thumb"%}
+				<div class="card-body">
+					<h5 class="card-title"></h5>
+					<p class="card-text">{{event.description}}</p>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+		{% endif %}
+	{% endif %}
 </div>
 
 

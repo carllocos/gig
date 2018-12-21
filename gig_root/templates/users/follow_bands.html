@@ -15,28 +15,34 @@ Following
 
 
 <div class="container">
-
-  <div class="following-container">
-    <h1>Following</h1>
-    <hr class="style1 text-muted">
-    {% if bands %}
-    {% for band in bands %}
-    <div class="card text-center" id='band_card_{{band.pk}}'>
-      <div class="card-header">
-        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
-      </div>
-      {% cloudinary band.profile_pic.public_id width=300 height=150 class="img-fluid" crop="fill"%}
-      <div class="card-body">
-        <h5 class="card-title"></h5>
-        <p class="card-text">{{band.description}}</p>
-      </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <p>You currently don't follow any musician.</p>
-    {% endif %}
-  </div>
-
+	<div class="row following mb-4 mx-auto">
+		<h1>Bands you follow</h1>
+	</div>
+	{% if not bands%}
+	<div class="row following mb-4 mx-auto">
+		<p>You currently don't follow any bands</p>
+	</div>
+	{% else %}
+	<div class="row following mb-4 mx-auto">
+		<h1>Bands you follow</h1>
+	</div>
+	<div class="row suggested d-flex justify-content-center">
+		<div class="card-columns">
+			{% for band in bands %}
+			<div class="card text-center" id='band_card_{{band.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
+				<div class="card-header">
+					<a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
+				</div>
+				{% cloudinary band.profile_pic.public_id width=300 height=300 class="img-fluid" gravity="faces:auto" crop="thumb"%}
+				<div class="card-body">
+					<h5 class="card-title"></h5>
+					<p class="card-text">{{band.description}}</p>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+	</div>
 </div>
 
 
