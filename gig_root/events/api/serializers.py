@@ -31,7 +31,7 @@ class EventSerializer(serializers.ModelSerializer):
             'address'
         ]
 
-        read_only_fields=['pk', 'picture']
+        read_only_fields=['pk', 'picture', 'latitude', 'longitude', 'address']
 
 
     def validate_band(self, band):
