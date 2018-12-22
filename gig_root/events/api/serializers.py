@@ -27,7 +27,8 @@ class EventSerializer(serializers.ModelSerializer):
             'band',
             'description',
             'latitude',
-            'longitude'
+            'longitude',
+            'address'
         ]
 
         read_only_fields=['pk', 'picture']
