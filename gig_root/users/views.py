@@ -59,7 +59,7 @@ def suggested_events(request):
     """
     might_like_evs= dbSearch.get_might_like_events(request.user) if request.user.is_authenticated else False
     context={
-        'might_like_events': might_like_evs,
+        'suggested_events': might_like_evs,
         'user': request.user,
         'http_protocol': getHTTP_Protocol()
     }
