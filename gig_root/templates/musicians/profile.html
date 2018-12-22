@@ -120,12 +120,12 @@
           <label  style="color:#000000;" >SoundCloud profile</label>
           {% if  band.soundcloud_profile_url%}
           <!-- Situation where the url exists and owner can update or remove it-->
-          <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" value="{{band.soundcloud_profile_url}}">
+          <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" placeholder="https://soundcloud.com/your-profile-name" value="{{band.soundcloud_profile_url}}">
           <button type="button" name="button" onclick="updateProfileSoundCloud('id_profileSoundcloud', 'id_modalHelper')">Save Update</button>
           <button type="button" name="button" onclick="deleteProfileSoundCloud('id_profileSoundcloud', 'id_modalHelper')">Delete URL</button>
           {% else %}
           <!-- Situation where the does not exists and owner can add an url-->
-          <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" value="e.g. https://soundcloud.com/your-profile-name">
+          <input id="id_profileSoundcloud" type="text" name="soundcloud_profile" placeholder="https://soundcloud.com/your-profile-name">
           <button type="button" name="button" onclick="addProfileSoundCloud('id_profileSoundcloud', 'id_modalHelper')">Save Profile</button>
           {% endif %}
         </div>
@@ -133,12 +133,12 @@
           <label style="color:#000000;" >SoundCloud playlist</label>
           {% if  band.soundcloud_playlist_url%}
           <!-- Situation where the url exists and owner can update or remove it-->
-          <input id="id_playlistSoundCloud" type="text" name="soundcloud_playlit" value="{{band.soundcloud_playlist_url}}">
+          <input id="id_playlistSoundCloud" type="text" name="soundcloud_playlit" placeholder="<iframe ....> </iframe>" value="{{band.soundcloud_playlist_url}}">
           <button type="button" name="button" onclick="updatePlayListSoundCloud('id_playlistSoundCloud', 'id_modalHelper')">Save Update</button>
           <button type="button" name="button" onclick="deletePlayListSoundCloud('id_playlistSoundCloud', 'id_modalHelper')">Delete URL</button>
           {% else %}
           <!-- Situation where the does not exists and owner can add an url-->
-          <input id="id_playlistSoundCloud" type="text" name="soundcloud_profile" value="e.g. <iframe ....> </iframe>">
+          <input id="id_playlistSoundCloud" type="text" name="soundcloud_profile" placeholder="embedded <iframe ....> </iframe>">
           <button type="button" name="button" onclick="addPlayListSoundCloud('id_playlistSoundCloud', 'id_modalHelper')">Save Playlist</button>
           {% endif %}
 
@@ -148,12 +148,12 @@
           <label style="color:#000000;" >Youtube Channel</label>
           {% if  band.youtube_profile_url%}
           <!-- Situation where the url exists and owner can update or remove it-->
-          <input id="id_profileYoutube" type="text" name="youtube_profile" value="{{band.youtube_profile_url}}">
+          <input id="id_profileYoutube" type="text" name="youtube_profile" placeholder="https://www.youtube.com/channel/your-id" value="{{band.youtube_profile_url}}">
           <button type="button" name="button" onclick="updateProfileYoutube('id_profileYoutube', 'id_modalHelper')">Save Update</button>
           <button type="button" name="button" onclick="deleteProfileYoutube('id_profileYoutube', 'id_modalHelper')">Delete URL</button>
           {% else %}
           <!-- Situation where the url does not exists and owner can add an url-->
-          <input id="id_profileYoutube" type="text" name="youtube_profile" value="e.g. https://www.youtube.com/channel/your-id">
+          <input id="id_profileYoutube" type="text" name="youtube_profile" placeholder="https://www.youtube.com/channel/your-id">
           <button type="button" name="button" onclick="addProfileYoutube('id_profileYoutube', 'id_modalHelper')">Save Profile</button>
           {% endif %}
         </div>
@@ -165,12 +165,12 @@
         <label style="color:#000000;" >Youtube Playlist</label>
         {% if  band.youtube_playlist_url%}
         <!-- Situation where the url exists and owner can update or remove it-->
-        <input id="id_playlistYoutube" type="text" name="youtube_playlist" value="{{band.youtube_playlist_url}}">
+        <input id="id_playlistYoutube" type="text" name="youtube_playlist" placeholder="embedded <iframe ....> </iframe>" value="{{band.youtube_playlist_url}}">
         <button type="button" name="button" onclick="updatePlaylistYoutube('id_playlistYoutube', 'id_modalHelper')">Save Update</button>
         <button type="button" name="button" onclick="deletePlaylistYoutube('id_playlistYoutube', 'id_modalHelper')">Delete URL</button>
         {% else %}
         <!-- Situation where the url does not exists and owner can add an url-->
-        <input id="id_playlistYoutube" type="text" name="youtube_playlist" value="e.g <iframe ....> </iframe>">
+        <input id="id_playlistYoutube" type="text" name="youtube_playlist" placeholder="embedded <iframe ....> </iframe>">
         <button type="button" name="button" onclick="addPlaylistYoutube('id_playlistYoutube', 'id_modalHelper')">Save Playlist</button>
         {% endif %}
 
@@ -179,256 +179,256 @@
 
     </form>
 
-    </div>
   </div>
-  {% endif %}
+</div>
+{% endif %}
 
 
-  <div class="row">
-    <div class="col-12">
-      <h2>
-        Background Picture
-      </h2>
-      {% cloudinary band.background_pic.public_id width=100 height=150 class="img-fluid" crop="fill" id="id_img_bg"%}
-    </div>
-    {% if is_owner %}
-    <div class="col-12">
-      {{direct_bp}}
-      <div class="helper-message-container">
-        <p id="id_helper-message-band-background-pic"></p>
-      </div>
-    </div>
-    {% endif %}
+<div class="row">
+  <div class="col-12">
+    <h2>
+      Background Picture
+    </h2>
+    {% cloudinary band.background_pic.public_id width=100 height=150 class="img-fluid" crop="fill" id="id_img_bg"%}
   </div>
-
-
-  <div class="row">
-    <div class="col-12">
-      <h2>
-        Band description
-      </h2>
-      {% if is_owner %}
-      <textarea name="description"id='id_description' rows="8" cols="80">{{band.description}}</textarea>
-      {% else %}
-      <p>
-        {{band.description}}
-      </p>
-      {% endif %}
-    </div>
-    {% if is_owner %}
-    <div class="col-12">
-      <button type="button" name="button_update_description" onClick="updateDescription('id_description')">Update Description</button>
-      <span id="id_help-description" class=""></span>
-    </div>
-    {% endif %}
-
-  </div>
-
-  {% if band.genres %}
   {% if is_owner %}
-  <div class="row">
-    <h2>Band Genres</h2>
-    <div class="container">
-      <span id="id_genre-helper"></span>
-    </div>
-    <div class="col-12">
-      {% for genre in band.genres %}
-      <div class="remove-genre-container">
-        <input type="text" name="genre0" id="id_genre0" value="{{genre}}">
-        <button type="button" name="" onClick="removeGenre(this)">Remove Genre</button>
-      </div>
-      {% endfor %}
-      <div class="add-genre-container">
-        <input type="text" name="new_genre0" id="id_new_genre0" value="add genre">
-        <button type="button" name="" onClick="addGenre(this)">Add Genre</button>
-      </div>
-
-    </div>
-  </div>
-  {% else %}
-
-  <div class="row">
-    <div class="col-12">
-      <h2>Band Genres</h2>
-      <ul>
-        {% for genre in band.genres %}
-        <li>
-          {{genre}}
-        </li>
-        {% endfor %}
-      </ul>
+  <div class="col-12">
+    {{direct_bp}}
+    <div class="helper-message-container">
+      <p id="id_helper-message-band-background-pic"></p>
     </div>
   </div>
   {% endif %}
+</div>
 
-  {% else %}
-  <div class="row">
-    <h2>Band Genres</h2>
+
+<div class="row">
+  <div class="col-12">
+    <h2>
+      Band description
+    </h2>
     {% if is_owner %}
+    <textarea name="description"id='id_description' rows="8" cols="80">{{band.description}}</textarea>
+    {% else %}
+    <p>
+      {{band.description}}
+    </p>
+    {% endif %}
+  </div>
+  {% if is_owner %}
+  <div class="col-12">
+    <button type="button" name="button_update_description" onClick="updateDescription('id_description')">Update Description</button>
+    <span id="id_help-description" class=""></span>
+  </div>
+  {% endif %}
+
+</div>
+
+{% if band.genres %}
+{% if is_owner %}
+<div class="row">
+  <h2>Band Genres</h2>
+  <div class="container">
+    <span id="id_genre-helper"></span>
+  </div>
+  <div class="col-12">
+    {% for genre in band.genres %}
+    <div class="remove-genre-container">
+      <input type="text" name="genre0" id="id_genre0" value="{{genre}}">
+      <button type="button" name="" onClick="removeGenre(this)">Remove Genre</button>
+    </div>
+    {% endfor %}
     <div class="add-genre-container">
       <input type="text" name="new_genre0" id="id_new_genre0" value="add genre">
       <button type="button" name="" onClick="addGenre(this)">Add Genre</button>
     </div>
-    {% else %}
-    <div class="col-12">
-      Band didn't specify any genre
-    </div>
-    {% endif %}
+
+  </div>
+</div>
+{% else %}
+
+<div class="row">
+  <div class="col-12">
+    <h2>Band Genres</h2>
+    <ul>
+      {% for genre in band.genres %}
+      <li>
+        {{genre}}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="row">
+  <h2>Band Genres</h2>
+  {% if is_owner %}
+  <div class="add-genre-container">
+    <input type="text" name="new_genre0" id="id_new_genre0" value="add genre">
+    <button type="button" name="" onClick="addGenre(this)">Add Genre</button>
+  </div>
+  {% else %}
+  <div class="col-12">
+    Band didn't specify any genre
   </div>
   {% endif %}
+</div>
+{% endif %}
 
-  <div class="row">
-    <div class="col-12">
-      <h2>
-        videos
-      </h2>
-    </div>
+<div class="row">
+  <div class="col-12">
+    <h2>
+      videos
+    </h2>
   </div>
-  <div class="row">
-    <div class="col-12">
-      {% if band.youtube_playlist_url %}
-      <iframe width="560" height="315" src="{{band.youtube_playlist_url}}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      {% else %}
-      No videos specified by the user
-      {% endif %}
-    </div>
-
-  </div>
-
-  <div class="row">
-    <div class="col-12">
-      <h2>
-        Music
-      </h2>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-12">
-      {% if band.soundcloud_playlist_url %}
-      <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="{{band.soundcloud_playlist_url}}"></iframe>
-      {% else %}
-      No Music specified by the user
-      {% endif %}
-    </div>
-  </div>
-
-
-  <div class="row">
-    <div class="col-12">
-      <h2>Line up</h2>
-      <span id=""></span>
-      <ul>
-        {% for member in line_up %}
-        <li>
-          <a href="{% url 'artists:artist-profile' profile_id=member.artist.pk%}">{{member.artist.stage_name}}</a>
-          <br>
-          {% if is_owner%}
-          <input type="text" name="role" value="{{member.role}}">
-          <button type="button" name="" onClick="updateRole(this, '{{member.pk}}')">Update Role</button>
-          <button type="button" name="" onClick="removeMember(this, '{{member.pk}}')">Remove member</button>
-
-          {% else %}
-          <p>{{member.role}}</p>
-          {% endif %}
-          <br>
-          {% cloudinary member.artist.profile_pic.public_id width=100 height=150 class="img-fluid" crop="fill"%}
-        </li>
-        {% endfor %}
-        {% if is_owner %}
-        <li>
-          <input type="email" name="" id="id_new_member0" value="add member" required>
-
-          <button type="button" name="" onClick="addMember('id_new_member0', 'id_help-line-up')">Send invitation</button>
-        </li>
-        <span id="id_help-line-up" class=""></span>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-
-  <div class="row">
-    <h2>Comments</h2>
-  </div>
-
-  <div class="row request-login-singup-container">
-    {% if user.is_authenticated %}
-    <textarea id="id_comment-input" name="name" rows="3" cols="50">Say somenthing</textarea>
-    <button type="button" name="button" onClick="addComment('id_comment-input', 'id_helper-comment')">Save comment</button>
-    <p id="id_helper-comment"></p>
+</div>
+<div class="row">
+  <div class="col-12">
+    {% if band.youtube_playlist_url %}
+    <iframe width="560" height="315" src="{{band.youtube_playlist_url}}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     {% else %}
-    <p><a href="{% url 'users:login' %}">Login</a> or <a href="{% url 'users:signup' %}">sign up</a> to comment</p>
+    No videos specified by the user
     {% endif %}
   </div>
 
-  <div class="comments-container">
-    {% for com in comments %}
-    <div class="comment-container">
-      <br>
-      <div class="row com-container">
-        <div class="row">
-          <div class="col-12 col-md-3 upvote-container">
-            {% if user.is_authenticated %}
-            <button clas='upvote-btn' type="button" name="button" onClick="upvoteComment(this, {{com.pk}}, 'id_helper-comment')">Upvote</button>
-            {% else %}
-            Upvote:
-            {% endif %}
-            <p>{{com.upvotes}}</p>
-          </div>
-          <div class="col-12 col-md-3 downvote-container">
-            {% if user.is_authenticated %}
-            <button clas='downvote-btn' type="button" name="button" onClick="downvoteComment(this, {{com.pk}}, 'id_helper-comment')">Downvote</button>
-            {% else %}
-            Downvote:
-            {% endif %}
-            <p>{{com.downvotes}}</p>
-          </div>
-          <div class="col-12 col-md-3 commentator-container">
-            <h4>{{com.commentator.first_name}} {{com.commentator.last_name}}</h4>
-          </div>
-          <div class="col-12 col-md-3 comment-date-container">
-            <p>{{com.date |fancy_date}}</p>
-          </div>
-        </div>
+</div>
 
-        <div class="row">
-          <div class="col-12 col-md-5 comment-text-container">
-            <p>{{com.comment}}</p>
-          </div>
-        </div>
+<div class="row">
+  <div class="col-12">
+    <h2>
+      Music
+    </h2>
+  </div>
+</div>
 
+<div class="row">
+  <div class="col-12">
+    {% if band.soundcloud_playlist_url %}
+    <iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="{{band.soundcloud_playlist_url}}"></iframe>
+    {% else %}
+    No Music specified by the user
+    {% endif %}
+  </div>
+</div>
+
+
+<div class="row">
+  <div class="col-12">
+    <h2>Line up</h2>
+    <span id=""></span>
+    <ul>
+      {% for member in line_up %}
+      <li>
+        <a href="{% url 'artists:artist-profile' profile_id=member.artist.pk%}">{{member.artist.stage_name}}</a>
+        <br>
+        {% if is_owner%}
+        <input type="text" name="role" value="{{member.role}}">
+        <button type="button" name="" onClick="updateRole(this, '{{member.pk}}')">Update Role</button>
+        <button type="button" name="" onClick="removeMember(this, '{{member.pk}}')">Remove member</button>
+
+        {% else %}
+        <p>{{member.role}}</p>
+        {% endif %}
+        <br>
+        {% cloudinary member.artist.profile_pic.public_id width=100 height=150 class="img-fluid" crop="fill"%}
+      </li>
+      {% endfor %}
+      {% if is_owner %}
+      <li>
+        <input type="email" name="" id="id_new_member0" value="add member" required>
+
+        <button type="button" name="" onClick="addMember('id_new_member0', 'id_help-line-up')">Send invitation</button>
+      </li>
+      <span id="id_help-line-up" class=""></span>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+<div class="row">
+  <h2>Comments</h2>
+</div>
+
+<div class="row request-login-singup-container">
+  {% if user.is_authenticated %}
+  <textarea id="id_comment-input" name="name" rows="3" cols="50">Say somenthing</textarea>
+  <button type="button" name="button" onClick="addComment('id_comment-input', 'id_helper-comment')">Save comment</button>
+  <p id="id_helper-comment"></p>
+  {% else %}
+  <p><a href="{% url 'users:login' %}">Login</a> or <a href="{% url 'users:signup' %}">sign up</a> to comment</p>
+  {% endif %}
+</div>
+
+<div class="comments-container">
+  {% for com in comments %}
+  <div class="comment-container">
+    <br>
+    <div class="row com-container">
+      <div class="row">
+        <div class="col-12 col-md-3 upvote-container">
+          {% if user.is_authenticated %}
+          <button clas='upvote-btn' type="button" name="button" onClick="upvoteComment(this, {{com.pk}}, 'id_helper-comment')">Upvote</button>
+          {% else %}
+          Upvote:
+          {% endif %}
+          <p>{{com.upvotes}}</p>
+        </div>
+        <div class="col-12 col-md-3 downvote-container">
+          {% if user.is_authenticated %}
+          <button clas='downvote-btn' type="button" name="button" onClick="downvoteComment(this, {{com.pk}}, 'id_helper-comment')">Downvote</button>
+          {% else %}
+          Downvote:
+          {% endif %}
+          <p>{{com.downvotes}}</p>
+        </div>
+        <div class="col-12 col-md-3 commentator-container">
+          <h4>{{com.commentator.first_name}} {{com.commentator.last_name}}</h4>
+        </div>
+        <div class="col-12 col-md-3 comment-date-container">
+          <p>{{com.date |fancy_date}}</p>
+        </div>
       </div>
-    </div>
-    {% endfor %}
 
-    <div style="display:none;" id="com_example" class="comment-container">
-      <br>
-      <div class="row com-container">
-        <div class="row">
-          <div class="col-12 col-md-3 upvote-container">
-            <button clas='upvote-btn' type="button" name="button" onClick="">Upvote</button>
-            <p>0</p>
-          </div>
-          <div class="col-12 col-md-3 downvote-container">
-            <button clas='downvote-btn' type="button" name="button" onClick="">Downvote</button>
-            <p>0</p>
-          </div>
-          <div class="col-12 col-md-3 commentator-container">
-            <h4></h4>
-          </div>
-          <div class="col-12 col-md-3 comment-date-container">
-            <p></p>
-          </div>
+      <div class="row">
+        <div class="col-12 col-md-5 comment-text-container">
+          <p>{{com.comment}}</p>
         </div>
+      </div>
 
-        <div class="row">
-          <div class="col-12 col-md-5 comment-text-container">
-            <p></p>
-          </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div style="display:none;" id="com_example" class="comment-container">
+    <br>
+    <div class="row com-container">
+      <div class="row">
+        <div class="col-12 col-md-3 upvote-container">
+          <button clas='upvote-btn' type="button" name="button" onClick="">Upvote</button>
+          <p>0</p>
+        </div>
+        <div class="col-12 col-md-3 downvote-container">
+          <button clas='downvote-btn' type="button" name="button" onClick="">Downvote</button>
+          <p>0</p>
+        </div>
+        <div class="col-12 col-md-3 commentator-container">
+          <h4></h4>
+        </div>
+        <div class="col-12 col-md-3 comment-date-container">
+          <p></p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 col-md-5 comment-text-container">
+          <p></p>
         </div>
       </div>
     </div>
   </div>
+</div>
 
 </div>
 
@@ -897,11 +897,10 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
     followOperation(id_help_text, 'unfollow');
   }
 
-  function updateUrl(id_selector, id_help_text, kind_url, operation, url) {
-    $select=$(`#${id_selector}`);
+  function updateUrl(val, id_help_text, kind_url, operation, url) {
 
     var dict= {
-      'val': $select.val(),
+      'val': val,
       'operation': operation,
       'band_id': {{band.pk}},
       'kind_url': kind_url,
@@ -910,76 +909,149 @@ function sendAjaxRequest(url_l, dict, valToSend, success_func, failure_func){
 
     success_func = function (response){
       $(`#${id_help_text}`).text(response.value);
+      $(`#${id_help_text}`).attr("class", "text-success");
     };
 
     failure_func = function (response){
       $(`#${id_help_text}`).text(response.reason);
+      $(`#${id_help_text}`).attr("class", "text-danger");
     };
 
 
-    sendAjaxRequest(url, dict, $select.val(), success_func, failure_func);
-  }
-
-
-  function profileSoundCloud(id_selector, id_help_text, operation) {
-    updateUrl(id_selector, id_help_text, 'profile', operation, "{% url 'musicians:update-soundcloud' %}");
+    sendAjaxRequest(url, dict, val, success_func, failure_func);
   }
 
   function addProfileSoundCloud(id_selector, id_help_text) {
-    profileSoundCloud(id_selector, id_help_text, 'add')
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'profile', 'add', "{% url 'musicians:update-soundcloud' %}");
   }
 
   function updateProfileSoundCloud(id_selector, id_help_text) {
-    profileSoundCloud(id_selector, id_help_text, 'update')
-  }
-  function deleteProfileSoundCloud(id_selector, id_help_text) {
-    profileSoundCloud(id_selector, id_help_text, 'delete')
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'profile', 'update', "{% url 'musicians:update-soundcloud' %}");
   }
 
-  function playListSoundCloud(id_selector, id_help_text, operation) {
-    updateUrl(id_selector, id_help_text, 'playlist', operation, "{% url 'musicians:update-soundcloud' %}");
+  function deleteProfileSoundCloud(id_selector, id_help_text) {
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'profile', 'delete', "{% url 'musicians:update-soundcloud' %}");
+  }
+
+  function retrieveURL(id_selector, prefix, suffix) {
+    var embed_str = $("#"+id_selector).val();
+    if(embed_str){
+      var lst = $.parseHTML(embed_str);
+      if(lst.length === 1){
+        var embed=lst[0];
+
+        if(embed.tagName != "IFRAME"){
+          return false;
+        }
+        var src_url=$(embed).attr('src');
+        if(!src_url.startsWith(prefix)){
+          return false;
+        }
+
+        if(suffix && !src_url.includes(suffix)){
+          return false;
+        }
+
+        if (suffix) {
+          var offset =src_url.indexOf(suffix)+ suffix.length;
+          for (var i = offset; i < src_url.length; i++) {
+            var c=src_url.charAt(i);
+            offset=i;
+            if(!c || c==='&'){
+              break;
+            }
+          }
+          return src_url.substring(0, offset);
+        }
+
+        return src_url;
+
+
+      }
+      else {
+        return false;
+      }
+    }
+    else{
+      return false;
+    }
   }
 
   function addPlayListSoundCloud(id_selector, id_help_text) {
-    playListSoundCloud(id_selector, id_help_text, 'add')
+    var url=retrieveURL(id_selector, "https://w.soundcloud.com/player/?url=", "https://w.soundcloud.com/player/?url=");
+    if (url){
+      updateUrl(url, id_help_text, 'playlist', 'add', "{% url 'musicians:update-soundcloud' %}");
+    }
+    else {
+      var helper=$("#id_modalHelper");
+      helper.text("Wrong embedded tag");
+      helper.attr("class", "text-danger");
+    }
   }
 
   function updatePlayListSoundCloud(id_selector, id_help_text) {
-    playListSoundCloud(id_selector, id_help_text, 'update')
+    var url=retrieveURL(id_selector, "https://w.soundcloud.com/player/?url=", "https://w.soundcloud.com/player/?url=");
+    if (url){
+      updateUrl(url, id_help_text, 'playlist', 'update', "{% url 'musicians:update-soundcloud' %}");
+    }
+    else {
+      var helper=$("#id_modalHelper");
+      helper.text("Wrong embedded tag");
+      helper.attr("class", "text-danger");
+    }
   }
+
   function deletePlayListSoundCloud(id_selector, id_help_text) {
-    playListSoundCloud(id_selector, id_help_text, 'delete')
-  }
-
-  function profileYoutube(id_selector, id_help_text, operation) {
-    updateUrl(id_selector, id_help_text, 'channel', operation, "{% url 'musicians:update-youtube' %}");
-  }
-
-  function playListYoutube(id_selector, id_help_text, operation) {
-    updateUrl(id_selector, id_help_text, 'playlist', operation, "{% url 'musicians:update-youtube' %}");
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'playlist', 'delete', "{% url 'musicians:update-soundcloud' %}");
   }
 
   function addProfileYoutube(id_selector, id_help_text) {
-    profileYoutube(id_selector, id_help_text, 'add')
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'channel', 'add', "{% url 'musicians:update-youtube' %}");
   }
 
   function updateProfileYoutube(id_selector, id_help_text) {
-    profileYoutube(id_selector, id_help_text, 'update')
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'channel', 'update', "{% url 'musicians:update-youtube' %}");
   }
+
   function deleteProfileYoutube(id_selector, id_help_text) {
-    profileYoutube(id_selector, id_help_text, 'delete')
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'channel', 'delete', "{% url 'musicians:update-youtube' %}");
   }
 
 
   function addPlaylistYoutube(id_selector, id_help_text) {
-    playListYoutube(id_selector, id_help_text, 'add')
+    var url=retrieveURL(id_selector, "https://www.youtube.com/embed/videoseries?list=", false);
+    if (url){
+      updateUrl(url, id_help_text, 'playlist', 'add', "{% url 'musicians:update-youtube' %}");
+    }
+    else {
+      var helper=$("#id_modalHelper");
+      helper.text("Wrong embedded tag");
+      helper.attr("class", "text-danger");
+    }
   }
 
   function updatePlaylistYoutube(id_selector, id_help_text) {
-    playListYoutube(id_selector, id_help_text, 'update')
+    var url=retrieveURL(id_selector, "https://www.youtube.com/embed/videoseries?list=", false);
+    if (url){
+      updateUrl(url, id_help_text, 'playlist', 'update', "{% url 'musicians:update-youtube' %}");
+    }
+    else {
+      var helper=$("#id_modalHelper");
+      helper.text("Wrong embedded tag");
+      helper.attr("class", "text-danger");
+    }
   }
+
   function deletePlaylistYoutube(id_selector, id_help_text) {
-    playListYoutube(id_selector, id_help_text, 'delete')
+    var val = $("#"+id_selector).val();
+    updateUrl(val, id_help_text, 'playlist', 'delete', "{% url 'musicians:update-youtube' %}");
   }
 
 
