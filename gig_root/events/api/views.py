@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 
 from rest_framework import generics
 
@@ -18,7 +19,8 @@ class EventRUDView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         pk=self.kwargs.get('pk')
-        return Event.objects.get(pk=pk)
+        obj=get_object_or_404(Event, **{'pk': pk})
+        return obj
 
 
 class EventsListView(generics.ListAPIView):
