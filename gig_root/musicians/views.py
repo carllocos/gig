@@ -273,6 +273,10 @@ def update_member(request):
         mem.role=val
         mem.save()
     else: #remove a member
+        band_id=request.POST.get('band_id')
+        band=Band.get_band(band_id)
+        if band.is_owner(mem.artist.user):
+            return JsonResponse({'is_executed': False, 'reason': "Band owner can't be removed from members."})
         mem.delete()
 
     return JsonResponse({'is_executed': True, 'val': val})
