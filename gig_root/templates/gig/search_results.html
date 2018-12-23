@@ -20,49 +20,53 @@ Results for {{query}}
   <p>No bands or events found that matches query '{{query}}'</p>
 
   {% else %}
-  {% if bands %}
-  <div class="bands-container">
-    <h1>Bands</h1>
+	{% if bands %}
+	<div class="row mb-4 mx-auto">
+		<h1>Bands</h1>
+	</div>
+	<div class="row bands mb-4 mx-auto">
+		<div class="card-columns">
+			{% for band in bands %}
+			<div class="card-header">
+				<a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
+			</div>
+			{% cloudinary band.profile_pic.public_id width=300 height=300 crop="thumb" gravity="faces:auto" class="img-fluid"%}
+			<div class="card-body">
+				<h5 class="card-title"></h5>
+				<p class="card-text">{{band.description}}</p>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+	{% endif %}
 
-    {% for band in bands %}
-    <div class="card text-center" id='band_card_{{band.pk}}'>
-      <div class="card-header">
-        <a href="{% url 'musicians:band-profile' profile_id=band.pk%}">{{band.name}}</a>
-      </div>
-      {% cloudinary band.profile_pic.public_id width=300 height=150 crop="fill"%}
-      <div class="card-body">
-        <h5 class="card-title"></h5>
-        <p class="card-text">{{band.description}}</p>
-      </div>
-    </div>
-    {% endfor %}
+
+	{% if events %}
+	<div class="row mb-4 mx-auto">
+		<h1>Events</h1>
+	</div>
+	<div class="row events mb-4 mx-auto">
+		<div class="card-columns">
+			{% for event in events %}
+			<div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
+			  <div class="card-header">
+				<a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
+			  </div>
+			  {% cloudinary event.picture.public_id width=300 height=300 crop="thumb" gravity="faces:auto" class="img-fluid"%}
+			  <div class="card-body">
+				<h5 class="card-title"></h5>
+				<p class="card-text">{{event.description}}</p>
+				<p class="temp"></p>
+				<p class="temp_max"></p>
+				<p class="temp_min"></p>
+				<p class="weahter_description"></p>
+				<img class="weather_icon" src="" alt="">
+			  </div>
+			</div>
+			{% endfor %}
+		</div>
   </div>
-  {% endif %}
-
-
-  {% if events %}
-  <div class="bands-container">
-    <h1>Events</h1>
-
-    {% for event in events %}
-    <div class="card text-center" id='event_card_{{event.pk}}' long='{{event.longitude}}' lat='{{event.latitude}}'>
-      <div class="card-header">
-        <a href="{% url 'musicians:band-profile' profile_id=event.band.pk%}">{{event.band.name}}</a> live <a href="{% url 'events:profile' event_id=event.pk%}">@{{event.name}}</a> {{event.date | fancy_date}}
-      </div>
-      {% cloudinary event.picture.public_id width=300 height=150 crop="fill"%}
-      <div class="card-body">
-        <h5 class="card-title"></h5>
-        <p class="card-text">{{event.description}}</p>
-        <p class="temp"></p>
-        <p class="temp_max"></p>
-        <p class="temp_min"></p>
-        <p class="weahter_description"></p>
-        <img class="weather_icon" src="" alt="">
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-  {% endif %}
+	{% endif %}
 
   {% endif %}
 
